@@ -2,7 +2,7 @@
 
 A free web app for playing the Pokémon Trading Card Game cooperatively with friends. Team up against a Raid Boss Pokémon, online or on one screen.
 
-**Play:** https://YOUR-USERNAME.github.io/raid-table/
+**Play:** https://bportland.github.io/raid-table/
 
 ## Features
 - Import your deck from a Pokémon TCG Live or Limitless deck list
