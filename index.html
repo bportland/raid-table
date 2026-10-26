@@ -358,6 +358,9 @@ body.hub-open { overflow: hidden; }
 .npc { --cw: 120px; padding: 0; border: 0; background: none; display: grid; justify-items: center; gap: 8px; cursor: pointer; }
 .npc .card { transition: transform .15s ease, box-shadow .15s ease; }
 .npc:hover .card, .npc:focus-visible .card { transform: translateY(-6px) rotate(-1.5deg); box-shadow: 0 0 0 2px var(--amber), 0 12px 24px rgba(0,0,0,.45); }
+.npc .card.loading { animation: hubPulse 1.2s ease-in-out infinite; }
+@keyframes hubPulse { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .npc .card.loading { animation: none; } }
 .npc-name { font: 700 14px var(--display); letter-spacing: .04em; padding: 3px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); }
 .hub-talk { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(820px, calc(100vw - 32px)); z-index: 81; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; background: var(--panel); border: 2px solid var(--amber); border-radius: 16px; padding: 14px 18px; box-shadow: 0 16px 40px rgba(0,0,0,.55); }
 .hub-talk-card .card { --cw: 96px; }
@@ -1200,7 +1203,12 @@ function cardEl(uid, opts = {}) {
   const src = opts.large ? (d.imgLg || d.img) : d.img;
   if (src) {
     const img = new Image(); img.src = src; img.alt = d.name; img.draggable = false; img.decoding = "async";
-    img.onerror = () => { img.remove(); c.classList.add("noimg"); };
+    // Card image hosts sometimes drop a request: retry twice, a moment apart, before showing the text card.
+    let tries = 0;
+    img.onerror = () => {
+      if (tries++ < 2 && /^https?:/.test(src)) { setTimeout(() => { img.src = src + (src.includes("?") ? "&" : "?") + "retry=" + tries; }, 1200 * tries); return; }
+      img.remove(); c.classList.add("noimg");
+    };
     c.append(img);
   } else c.classList.add("noimg");
   c.append(el("span", "cap", d.name));
@@ -2435,12 +2443,22 @@ const hubKeys = {};      // who -> card key
 const hubStep = {};      // who -> next line index
 let hubTyping = null, brandClicks = [];
 
+let hubLoading = false;
 async function openHub() {
   $("hub").hidden = false; document.body.classList.add("hub-open");
   $("hubClose").focus();
-  renderHub();
   const entries = HUB_NPCS.map(n => { const e = parseDeck("1 " + n.card)[0]; e.section = "Trainer"; hubKeys[n.who] = entryKey(e); return e; });
-  if (entries.some(e => !CARDS[entryKey(e)] || !CARDS[entryKey(e)].img)) { await resolveEntries(entries, () => {}); renderHub(); }
+  const missing = () => entries.filter(e => !CARDS[entryKey(e)] || !CARDS[entryKey(e)].img);
+  hubLoading = missing().length > 0;
+  renderHub();
+  if (!hubLoading) return;
+  // Card lookups can time out or be throttled, so try up to three times, waiting a little longer each time.
+  for (let attempt = 0; attempt < 3 && missing().length && !$("hub").hidden; attempt++) {
+    if (attempt) await new Promise(r => setTimeout(r, 2500 * attempt));
+    await resolveEntries(missing(), () => { if (!$("hub").hidden) renderHub(); });
+  }
+  hubLoading = false;
+  if (!$("hub").hidden) renderHub();
 }
 function closeHub() { $("hub").hidden = true; $("hubTalk").hidden = true; document.body.classList.remove("hub-open"); clearInterval(hubTyping); }
 function renderHub() {
@@ -2449,7 +2467,11 @@ function renderHub() {
     const b = el("button", "npc"); b.type = "button"; b.setAttribute("aria-label", `Talk to ${n.who}`);
     const k = hubKeys[n.who];
     const c = k ? cardEl(null, { key: k }) : el("div", "card");
-    if (!k || !(CARDS[k] || {}).img) { c.classList.add("noimg"); c.dataset.type = "Trainer"; if (!c.querySelector(".cap")) c.append(el("span", "cap", n.who)); }
+    if (!k || !(CARDS[k] || {}).img) {
+      c.classList.add("noimg"); c.dataset.type = hubLoading ? "Looking up…" : "Trainer";
+      if (hubLoading) c.classList.add("loading");
+      if (!c.querySelector(".cap")) c.append(el("span", "cap", n.who));
+    }
     b.append(c, el("span", "npc-name", n.who));
     b.addEventListener("click", () => talk(n));
     mat.append(b);
