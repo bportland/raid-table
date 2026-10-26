@@ -346,6 +346,25 @@ body.stage-open { padding-bottom: calc(50vh + 16px); }
 .room-players { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 #roomMsg:empty { display: none; }
 @media (max-width: 560px) { .room-choices { grid-template-columns: minmax(0, 1fr); } }
+/* Raid Camp hub */
+#brandTitle { cursor: default; }
+.hub { position: fixed; inset: 0; z-index: 80; overflow-y: auto; background: radial-gradient(120% 90% at 50% 20%, #24505a, var(--felt) 55%, var(--felt-deep)); padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+body.hub-open { overflow: hidden; }
+.hub-inner { max-width: 1100px; margin: 0 auto; display: grid; gap: 18px; padding-bottom: 230px; }
+.hub-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.hub-head h2 { font: 700 clamp(28px, 4vw, 44px)/1 var(--display); letter-spacing: .04em; text-transform: uppercase; margin: 4px 0 6px; }
+.hub-head p { margin: 0; color: var(--muted); max-width: 60ch; }
+.hub-mat { border: 1.5px solid var(--line); border-radius: 22px; padding: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 22px 16px; background: linear-gradient(transparent, rgba(0,0,0,.12)); }
+.npc { --cw: 120px; padding: 0; border: 0; background: none; display: grid; justify-items: center; gap: 8px; cursor: pointer; }
+.npc .card { transition: transform .15s ease, box-shadow .15s ease; }
+.npc:hover .card, .npc:focus-visible .card { transform: translateY(-6px) rotate(-1.5deg); box-shadow: 0 0 0 2px var(--amber), 0 12px 24px rgba(0,0,0,.45); }
+.npc-name { font: 700 14px var(--display); letter-spacing: .04em; padding: 3px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); }
+.hub-talk { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(820px, calc(100vw - 32px)); z-index: 81; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; background: var(--panel); border: 2px solid var(--amber); border-radius: 16px; padding: 14px 18px; box-shadow: 0 16px 40px rgba(0,0,0,.55); }
+.hub-talk-card .card { --cw: 96px; }
+.hub-who { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+.hub-talk-body p { margin: 6px 0 6px; font-size: 17px; line-height: 1.45; min-height: 3em; -webkit-user-select: text; user-select: text; }
+.hub-more { font: 500 12px var(--mono); color: var(--muted); }
+@media (max-width: 560px) { .hub-mat { padding: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 8px; } .npc { --cw: 92px; } .hub-talk-card .card { --cw: 64px; } .hub-talk-body p { font-size: 15px; } }
 @media (max-width: 1180px) {
   .app { grid-template-columns: minmax(0, 1fr); }
   .side { position: static; max-height: none; overflow: visible; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
@@ -375,7 +394,7 @@ body.stage-open { padding-bottom: calc(50vh + 16px); }
 </head>
 <body>
 <header class="bar">
-  <div class="brand"><h1>Raid Table</h1><span id="deckName">No deck loaded</span></div>
+  <div class="brand"><h1 id="brandTitle">Raid Table</h1><span id="deckName">No deck loaded</span></div>
   <div class="tools">
     <label class="turn" for="players">Players
       <select id="players" class="pick"><option>1</option><option>2</option><option>3</option><option>4</option></select>
@@ -682,6 +701,28 @@ body.stage-open { padding-bottom: calc(50vh + 16px); }
     </div>
   </div>
 </div>
+
+<section class="hub" id="hub" hidden aria-label="Raid Camp">
+  <div class="hub-inner">
+    <header class="hub-head">
+      <div>
+        <span class="zone-label">You found a secret area</span>
+        <h2>Raid Camp</h2>
+        <p>Trainers from all over Kanto have gathered here. Click someone to hear what they know, and click again for more.</p>
+      </div>
+      <button id="hubClose">Back to the table</button>
+    </header>
+    <div class="hub-mat" id="hubMat"></div>
+  </div>
+  <div class="hub-talk" id="hubTalk" hidden aria-live="polite">
+    <div class="hub-talk-card" id="hubTalkCard"></div>
+    <div class="hub-talk-body">
+      <span class="hub-who" id="hubWho"></span>
+      <p id="hubLine"></p>
+      <span class="hub-more" id="hubMore"></span>
+    </div>
+  </div>
+</section>
 
 <div class="toast" id="toast" hidden></div>
 
@@ -2349,6 +2390,92 @@ async function copyText(text, okMsg) {
   catch { toast("Couldn't copy automatically. Select the text and copy it."); }
 }
 
+/* ---------- Raid Camp: the secret hub ---------- */
+// Open it by clicking the "Raid Table" title five times in a row.
+// The dialog is original, written for this app; each line also teaches a Raid Format rule.
+const HUB_NPCS = [
+  { who: "Professor Oak", card: "Professor Oak's Setup CEC 201", lines: [
+    "Ah, a new Raid Trainer! Giant Pokémon have been appearing all over the region, far bigger than anything I've recorded in fifty years of research.",
+    "No Trainer can stand against one alone. That's why raids are fought as a team, with everyone taking their turn at the same time.",
+    "Each boss draws on a deck of tricks and Energy. Hit it hard enough and those cards are lost for good. Empty that deck, and the boss is beaten!" ] },
+  { who: "Misty", card: "Misty's Determination", lines: [
+    "You're here for the raid? Good, we need all the help we can get. Just don't dive in without a plan.",
+    "The boss attacks every Active Pokémon at once, so put a sturdy one up front. My Pokémon learned that the hard way.",
+    "If your deck runs dry, you keep battling and just skip your draw. Water always finds a way!" ] },
+  { who: "Brock", card: "Brock's Grit", lines: [
+    "Rock-solid defense wins raids. Always keep a healthy Pokémon on your Bench, ready to step in.",
+    "Your team shares its Supporters each turn, one per player. Talk it over before somebody spends them all on drawing cards.",
+    "A good raid team eats together after the battle. Leave the cooking to me!" ] },
+  { who: "Erika", card: "Erika's Hospitality", lines: [
+    "Oh, hello... I must have dozed off. Raids are exhausting, aren't they?",
+    "A Poisoned boss takes 10 extra damage, and a Burned one takes 20. But it shakes off its conditions after a single turn.",
+    "Patience is like tending a garden. The boss cards you knock away this turn only reach the Lost Zone at the end of its next turn." ] },
+  { who: "Lt. Surge", card: "Lt. Surge's Strategy HIF 60", lines: [
+    "Listen up, recruit! A raid is a squad operation. Nobody charges in alone!",
+    "Add up the whole squad's damage, then divide by ten times the number of players. That's how many boss cards get blasted away!",
+    "Weakness and Resistance? Forget them in a raid. Raw power is all that counts!" ] },
+  { who: "Sabrina", card: "Sabrina's Suggestion HIF 65", lines: [
+    "I foresaw your arrival. I also foresee the boss drawing one card for each of you, plus one more.",
+    "It plays every card the moment it draws it. It never holds a hand, so it can't hide its intentions from me.",
+    "When a card affects each player, all of you feel it at once. Warn your allies before you play one." ] },
+  { who: "Koga", card: "Koga's Trap", lines: [
+    "A ninja strikes from the shadows. But a raid boss sees every Active Pokémon at once. There is nowhere to hide.",
+    "When your Pokémon falls, you take Prize cards. Take your last one and you're out of the raid. Guard them well.",
+    "They say these giants don't appear by chance. I've heard whispers of someone pulling the strings. Stay watchful." ] },
+  { who: "Blaine", card: "Blaine's Quiz Show", lines: [
+    "Quiz time! What makes a raid boss stronger every turn? Energy! Every Energy card it draws goes straight onto it.",
+    "Bonus question! How does it pay for attacks? By discarding Energy, any type at all. Strip its Energy and it can't attack!",
+    "The rest you'll learn in the heat of battle. Hah!" ] },
+  { who: "Giovanni", card: "Giovanni's Exile", lines: [
+    "So. You're the ones who keep interfering with my experiments.",
+    "Giant Pokémon, overflowing with power. And you think a handful of Trainers working together can stop that?",
+    "Go on, defeat the boss if you can. I'll be watching how you fight." ] }
+];
+const hubKeys = {};      // who -> card key
+const hubStep = {};      // who -> next line index
+let hubTyping = null, brandClicks = [];
+
+async function openHub() {
+  $("hub").hidden = false; document.body.classList.add("hub-open");
+  $("hubClose").focus();
+  renderHub();
+  const entries = HUB_NPCS.map(n => { const e = parseDeck("1 " + n.card)[0]; e.section = "Trainer"; hubKeys[n.who] = entryKey(e); return e; });
+  if (entries.some(e => !CARDS[entryKey(e)] || !CARDS[entryKey(e)].img)) { await resolveEntries(entries, () => {}); renderHub(); }
+}
+function closeHub() { $("hub").hidden = true; $("hubTalk").hidden = true; document.body.classList.remove("hub-open"); clearInterval(hubTyping); }
+function renderHub() {
+  const mat = $("hubMat"); mat.replaceChildren();
+  for (const n of HUB_NPCS) {
+    const b = el("button", "npc"); b.type = "button"; b.setAttribute("aria-label", `Talk to ${n.who}`);
+    const k = hubKeys[n.who];
+    const c = k ? cardEl(null, { key: k }) : el("div", "card");
+    if (!k || !(CARDS[k] || {}).img) { c.classList.add("noimg"); c.dataset.type = "Trainer"; if (!c.querySelector(".cap")) c.append(el("span", "cap", n.who)); }
+    b.append(c, el("span", "npc-name", n.who));
+    b.addEventListener("click", () => talk(n));
+    mat.append(b);
+  }
+}
+function talk(n) {
+  const i = hubStep[n.who] || 0;
+  hubStep[n.who] = (i + 1) % n.lines.length;
+  const box = $("hubTalk"); box.hidden = false;
+  const k = hubKeys[n.who];
+  $("hubTalkCard").replaceChildren(k ? cardEl(null, { key: k, large: true }) : el("div", "card"));
+  $("hubWho").textContent = n.who;
+  $("hubMore").textContent = `${i + 1} of ${n.lines.length} · click ${n.who} again for more`;
+  const line = n.lines[i], p = $("hubLine");
+  clearInterval(hubTyping);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { p.textContent = line; return; }
+  let shown = 0; p.textContent = "";
+  hubTyping = setInterval(() => { shown += 2; p.textContent = line.slice(0, shown); if (shown >= line.length) clearInterval(hubTyping); }, 18);
+}
+// Five clicks on the title within three seconds
+function brandClick() {
+  const now = Date.now();
+  brandClicks = brandClicks.filter(t => now - t < 3000); brandClicks.push(now);
+  if (brandClicks.length >= 5) { brandClicks = []; openHub(); }
+}
+
 /* ---------- toast ---------- */
 let toastTimer;
 /* ---------- custom card back ---------- */
@@ -2435,7 +2562,7 @@ document.addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
   else if (e.key === "d" || e.key === "D") draw();
   else if (e.key === "?") openGuide();
-  else if (e.key === "Escape") { if (!$("zoom").hidden) closeZoom(); else if (!$("guideBack").hidden) closeGuide(); else if (!$("backBack").hidden) closeBack(); else if (!$("importBack").hidden) closeImport(); else if (!$("bossSetupBack").hidden) closeBossSetup(); else if (!$("roomBack").hidden) closeRoomDialog(); else if (viewerZone) closeViewer(); else select(null); }
+  else if (e.key === "Escape") { if (!$("hub").hidden) closeHub(); else if (!$("zoom").hidden) closeZoom(); else if (!$("guideBack").hidden) closeGuide(); else if (!$("backBack").hidden) closeBack(); else if (!$("importBack").hidden) closeImport(); else if (!$("bossSetupBack").hidden) closeBossSetup(); else if (!$("roomBack").hidden) closeRoomDialog(); else if (viewerZone) closeViewer(); else select(null); }
 });
 
 if (S && S.keys) {   // fill in fields added since this game was saved
@@ -2474,6 +2601,8 @@ function refreshBoss() {
   }
 }
 $("zoom").addEventListener("click", closeZoom);
+$("brandTitle").addEventListener("click", brandClick);
+$("hubClose").onclick = closeHub;
 claimTab().then(resumeRoom).then(() => { if (!MP && /[?&]room=[A-Za-z]{5}/.test(location.search)) openRoomDialog(); });
 try { applyBack(localStorage.getItem(STORE_BACK) || ""); } catch {}
 $("btnBack").onclick = openBack;
