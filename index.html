@@ -1973,16 +1973,28 @@ async function firebaseTransport(code) {
     watch(path, cb) { root.child(path).on("value", snap => cb(snap.val())); },
     get: async path => (await root.child(path).get()).val(),
     set: (path, v) => root.child(path).set(v),
-    async transact(path, fn) {
-      const r = await root.child(path).transaction(cur => fn(cur), undefined, false);
-      return { committed: r.committed, value: r.snapshot.val() };
-    },
+    async transact(path, fn) { return firebaseTransact(root.child(path), fn); },
     presence(seat) {
       const ref = root.child("presence/" + seat);
       firebase.database().ref(".info/connected").on("value", s => { if (s.val()) { ref.onDisconnect().remove(); ref.set(true); } });
     },
     close() { root.off(); firebase.database().ref(".info/connected").off(); root.child("presence/" + (MP && MP.seat)).remove(); }
   };
+}
+// Firebase runs a transaction first against this browser's local copy, which is empty (null) until the
+// data has been loaded. Returning "abort" then would stop it for good, so an empty first look is passed
+// through and Firebase retries with the real value. Only a real "no" from fn aborts.
+async function firebaseTransact(ref, fn) {
+  let aborted = false, passedThrough = false;
+  const r = await ref.transaction(cur => {
+    aborted = false; passedThrough = false;
+    const nv = fn(cur);
+    if (nv !== undefined) return nv;
+    if (cur === null) { passedThrough = true; return null; }
+    aborted = true; return undefined;
+  }, undefined, false);
+  if (aborted || passedThrough) return { committed: false, value: r.snapshot.val() };
+  return { committed: r.committed, value: r.snapshot.val() };
 }
 function localTransport(code) {
   const KEY = "raidtable.localroom." + code;
