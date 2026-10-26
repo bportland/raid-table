@@ -152,8 +152,13 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .insp-art:hover .card { box-shadow: 0 0 0 2px var(--amber), 0 6px 18px rgba(0,0,0,.45); }
 
 .zoom { position: fixed; inset: 0; z-index: 90; background: rgba(5,15,17,.86); display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 10px; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); cursor: zoom-out; }
-.zoom-card { min-height: 0; display: grid; place-items: center; }
-.zoom-card img { max-height: 100%; max-width: 100%; height: min(100%, 1024px); width: auto; aspect-ratio: 63 / 88; object-fit: contain; border-radius: 3%; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+/* Fit: the whole card always fits on screen with room to spare. Magnified: full resolution, scroll to look around. */
+.zoom-card { min-height: 0; width: 100%; display: grid; place-items: center; overflow: auto; overscroll-behavior: contain; }
+.zoom-card img { height: min(78vh, 78dvh, 760px); width: auto; max-width: 92vw; aspect-ratio: 63 / 88; object-fit: contain; border-radius: 3%; box-shadow: 0 20px 50px rgba(0,0,0,.6); cursor: zoom-in; }
+.zoom.magnified .zoom-card { display: block; text-align: center; }
+.zoom.magnified .zoom-card img { display: inline-block; height: auto; width: 734px; max-width: none; cursor: zoom-out; }
+.zoom-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
+.zoom-hint { font-size: 12.5px; color: var(--muted); }
 .zoom-card .zoom-text { --cw: min(420px, 80vw); }
 .insp-name { font: 700 17px/1.2 var(--display); margin: 0 0 2px; overflow-wrap: anywhere; }
 .insp-sub { color: var(--muted); font-size: 13px; }
@@ -544,7 +549,7 @@ body.hub-open { overflow: hidden; }
 
 <div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="Card, full size">
   <div class="zoom-card" id="zoomCard"></div>
-  <button id="zoomClose" class="mini">Close</button>
+  <div class="zoom-bar"><span class="zoom-hint" id="zoomHint">Click the card to magnify it</span><button id="zoomClose" class="mini">Close</button></div>
 </div>
 
 <div class="modal-back" id="backBack" hidden>
@@ -1419,9 +1424,14 @@ function openZoom(uid) {
   const src = d.imgLg || d.img;
   if (src) { const img = new Image(); img.src = src; img.alt = d.name; img.draggable = false; box.append(img); }
   else { const c = cardEl(uid); c.classList.add("zoom-text"); box.append(c); }
-  z.hidden = false; $("zoomClose").focus();
+  setMagnified(false); z.hidden = false; $("zoomClose").focus();
 }
-function closeZoom() { $("zoom").hidden = true; }
+function closeZoom() { $("zoom").hidden = true; setMagnified(false); }
+function setMagnified(on) {
+  $("zoom").classList.toggle("magnified", on);
+  $("zoomHint").textContent = on ? "Scroll to look around · click the card to fit it on screen" : "Click the card to magnify it";
+  $("zoomCard").scrollTop = 0;
+}
 
 /* ---------- viewer drawer ---------- */
 function openViewer(zone) { viewerZone = zone; $("drawer").hidden = false; renderViewer(); }
@@ -2357,7 +2367,7 @@ function openZoomKey(k) {
   const d = CARDS[k] || {}; const box = $("zoomCard"); box.replaceChildren();
   const src = d.imgLg || d.img;
   if (src) { const img = new Image(); img.src = src; img.alt = d.name || ""; box.append(img); } else box.append(cardEl(null, { key: k }));
-  $("zoom").hidden = false; $("zoomClose").focus();
+  setMagnified(false); $("zoom").hidden = false; $("zoomClose").focus();
 }
 
 function openRoomDialog() {
@@ -2626,7 +2636,12 @@ function refreshBoss() {
     resolveEntries([be, ...parseDeck(S.bossCfg.list)].filter(Boolean), () => {}).then(render);
   }
 }
-$("zoom").addEventListener("click", closeZoom);
+// Clicking the card toggles magnify; clicking anywhere else closes the zoom.
+$("zoom").addEventListener("click", e => {
+  if (e.target.closest("#zoomCard img")) { setMagnified(!$("zoom").classList.contains("magnified")); return; }
+  if (e.target.closest(".zoom-card") && $("zoom").classList.contains("magnified")) return;   // scrolling around, not closing
+  closeZoom();
+});
 $("brandTitle").addEventListener("click", brandClick);
 $("hubClose").onclick = closeHub;
 claimTab().then(resumeRoom).then(() => { if (!MP && /[?&]room=[A-Za-z]{5}/.test(location.search)) openRoomDialog(); });
