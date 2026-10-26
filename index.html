@@ -1923,7 +1923,15 @@ function calc() {
 /* ---------- multiplayer ---------- */
 // Paste your Firebase web app config here before publishing, so friends don't have to:
 // const FIREBASE_CONFIG = { apiKey: "…", authDomain: "…", databaseURL: "https://….firebasedatabase.app", projectId: "…", appId: "…" };
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC6U2vMpiJFiCpLJWNVvIjbjR7HVsrfblU",
+  authDomain: "raid-table.firebaseapp.com",
+  databaseURL: "https://raid-table-default-rtdb.firebaseio.com",
+  projectId: "raid-table",
+  storageBucket: "raid-table.firebasestorage.app",
+  messagingSenderId: "450101523174",
+  appId: "1:450101523174:web:092d9c4de46ef7f350c127"
+};
 const FIREBASE_VERSION = "10.12.2";
 const storeRoom = () => "raidtable.room.v1" + TAB;   // { code, seat, name } to rejoin after a reload
 const STORE_FBCFG = "raidtable.firebase.v1";  // a config pasted in the app instead of the file
