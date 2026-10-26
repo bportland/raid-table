@@ -363,7 +363,9 @@ body.hub-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .npc .card.loading { animation: none; } }
 .npc-name { font: 700 14px var(--display); letter-spacing: .04em; padding: 3px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); }
 .hub-talk { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(820px, calc(100vw - 32px)); z-index: 81; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; background: var(--panel); border: 2px solid var(--amber); border-radius: 16px; padding: 14px 18px; box-shadow: 0 16px 40px rgba(0,0,0,.55); }
-.hub-talk-card .card { --cw: 96px; }
+.hub-talk-card { padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: 8px; }
+.hub-talk-card .card { --cw: 96px; transition: transform .15s ease, box-shadow .15s ease; }
+.hub-talk-card:hover .card, .hub-talk-card:focus-visible .card { transform: scale(1.04); box-shadow: 0 0 0 2px var(--amber), 0 8px 18px rgba(0,0,0,.45); }
 .hub-who { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
 .hub-talk-body p { margin: 6px 0 6px; font-size: 17px; line-height: 1.45; min-height: 3em; -webkit-user-select: text; user-select: text; }
 .hub-more { font: 500 12px var(--mono); color: var(--muted); }
@@ -718,7 +720,7 @@ body.hub-open { overflow: hidden; }
     <div class="hub-mat" id="hubMat"></div>
   </div>
   <div class="hub-talk" id="hubTalk" hidden aria-live="polite">
-    <div class="hub-talk-card" id="hubTalkCard"></div>
+    <button type="button" class="hub-talk-card" id="hubTalkCard" title="Show the card full size"></button>
     <div class="hub-talk-body">
       <span class="hub-who" id="hubWho"></span>
       <p id="hubLine"></p>
@@ -2483,6 +2485,8 @@ function talk(n) {
   const box = $("hubTalk"); box.hidden = false;
   const k = hubKeys[n.who];
   $("hubTalkCard").replaceChildren(k ? cardEl(null, { key: k, large: true }) : el("div", "card"));
+  $("hubTalkCard").setAttribute("aria-label", `Show ${n.who}'s card full size`);
+  $("hubTalkCard").onclick = () => { if (k) openZoomKey(k); };
   $("hubWho").textContent = n.who;
   $("hubMore").textContent = `${i + 1} of ${n.lines.length} · click ${n.who} again for more`;
   const line = n.lines[i], p = $("hubLine");
@@ -2584,7 +2588,7 @@ document.addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
   else if (e.key === "d" || e.key === "D") draw();
   else if (e.key === "?") openGuide();
-  else if (e.key === "Escape") { if (!$("hub").hidden) closeHub(); else if (!$("zoom").hidden) closeZoom(); else if (!$("guideBack").hidden) closeGuide(); else if (!$("backBack").hidden) closeBack(); else if (!$("importBack").hidden) closeImport(); else if (!$("bossSetupBack").hidden) closeBossSetup(); else if (!$("roomBack").hidden) closeRoomDialog(); else if (viewerZone) closeViewer(); else select(null); }
+  else if (e.key === "Escape") { if (!$("zoom").hidden) closeZoom(); else if (!$("hub").hidden) closeHub(); else if (!$("guideBack").hidden) closeGuide(); else if (!$("backBack").hidden) closeBack(); else if (!$("importBack").hidden) closeImport(); else if (!$("bossSetupBack").hidden) closeBossSetup(); else if (!$("roomBack").hidden) closeRoomDialog(); else if (viewerZone) closeViewer(); else select(null); }
 });
 
 if (S && S.keys) {   // fill in fields added since this game was saved
