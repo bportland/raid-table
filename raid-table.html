@@ -1,0 +1,2465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Raid Table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a printed playmat. Prizes left, Active + Bench centre, Deck / Discard / Lost Zone right,
+   hand along the bottom edge, an inspector + Raid tools column on the right. One deliberate dark felt look. */
+:root {
+  color-scheme: dark;
+  --felt: #17363b;
+  --felt-2: #1d434a;
+  --felt-deep: #0f2629;
+  --line: rgba(236, 228, 205, .26);
+  --line-strong: rgba(236, 228, 205, .55);
+  --ink: #ede6d1;
+  --muted: #9fb3ae;
+  --amber: #f0a43c;
+  --amber-ink: #2a1a05;
+  --dmg: #e0574b;
+  --ok: #7ccf8a;
+  --panel: #102a2e;
+  --panel-2: #163338;
+  --back-1: #122c33;
+  --default-back: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 630 880%22%3E %3Cdefs%3E %3ClinearGradient id=%22bg%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%231b3d45%22/%3E%3Cstop offset=%22.55%22 stop-color=%22%23122c33%22/%3E%3Cstop offset=%221%22 stop-color=%22%230a1c21%22/%3E%3C/linearGradient%3E %3CradialGradient id=%22glow%22 cx=%22.5%22 cy=%22.5%22 r=%22.5%22%3E%3Cstop offset=%220%22 stop-color=%22%23f0a43c%22 stop-opacity=%22.38%22/%3E%3Cstop offset=%22.6%22 stop-color=%22%23f0a43c%22 stop-opacity=%22.08%22/%3E%3Cstop offset=%221%22 stop-color=%22%23f0a43c%22 stop-opacity=%220%22/%3E%3C/radialGradient%3E %3ClinearGradient id=%22shardL%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23ffd27a%22/%3E%3Cstop offset=%221%22 stop-color=%22%23e08a1e%22/%3E%3C/linearGradient%3E %3ClinearGradient id=%22shardR%22 x1=%221%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23f6b44a%22/%3E%3Cstop offset=%221%22 stop-color=%22%23b8650f%22/%3E%3C/linearGradient%3E %3Cpattern id=%22lat%22 width=%2256%22 height=%2256%22 patternUnits=%22userSpaceOnUse%22 patternTransform=%22rotate%2845 315 440%29%22%3E%3Cpath d=%22M0 0H56M0 0V56%22 stroke=%22%23ede6d1%22 stroke-opacity=%22.07%22 stroke-width=%222%22 fill=%22none%22/%3E%3C/pattern%3E %3CclipPath id=%22inner%22%3E%3Crect x=%2226%22 y=%2226%22 width=%22578%22 height=%22828%22 rx=%2220%22/%3E%3C/clipPath%3E %3C/defs%3E %3Crect width=%22630%22 height=%22880%22 rx=%2234%22 fill=%22%23d9cfb6%22/%3E %3Crect x=%2214%22 y=%2214%22 width=%22602%22 height=%22852%22 rx=%2226%22 fill=%22%237a6a45%22/%3E %3Crect x=%2226%22 y=%2226%22 width=%22578%22 height=%22828%22 rx=%2220%22 fill=%22url%28%23bg%29%22/%3E %3Cg clip-path=%22url%28%23inner%29%22%3E %3Crect x=%2226%22 y=%2226%22 width=%22578%22 height=%22828%22 fill=%22url%28%23lat%29%22/%3E %3Cg stroke=%22%23f0a43c%22 stroke-opacity=%22.16%22 stroke-width=%223%22%3E %3Cpath d=%22M315 440L315 0M315 440L315 880M315 440L0 440M315 440L630 440M315 440L0 0M315 440L630 0M315 440L0 880M315 440L630 880M315 440L120 0M315 440L510 0M315 440L120 880M315 440L510 880M315 440L0 220M315 440L630 220M315 440L0 660M315 440L630 660%22/%3E %3C/g%3E %3Ccircle cx=%22315%22 cy=%22440%22 r=%22300%22 fill=%22url%28%23glow%29%22/%3E %3C/g%3E %3Crect x=%2244%22 y=%2244%22 width=%22542%22 height=%22792%22 rx=%2212%22 fill=%22none%22 stroke=%22%23ede6d1%22 stroke-opacity=%22.35%22 stroke-width=%223%22/%3E %3Cg fill=%22%23f0a43c%22%3E %3Cpath d=%22M315 58l14 16-14 16-14-16z%22/%3E%3Cpath d=%22M315 790l14 16-14 16-14-16z%22/%3E %3Cpath d=%22M58 440l16-14 16 14-16 14z%22/%3E%3Cpath d=%22M572 440l-16-14-16 14 16 14z%22/%3E %3C/g%3E %3Cg fill=%22none%22 stroke=%22%23ede6d1%22 stroke-opacity=%22.5%22 stroke-width=%223%22%3E %3Cpath d=%22M66 100V66H100M564 100V66H530M66 780V814H100M564 780V814H530%22/%3E %3C/g%3E %3Cpolygon points=%22315,248 481,344 481,536 315,632 149,536 149,344%22 fill=%22%230d2327%22 stroke=%22%23f0a43c%22 stroke-width=%2210%22/%3E %3Cpolygon points=%22315,280 453,360 453,520 315,600 177,520 177,360%22 fill=%22none%22 stroke=%22%23ede6d1%22 stroke-opacity=%22.45%22 stroke-width=%223%22/%3E %3Cpolygon points=%22315,316 380,440 315,568 250,440%22 fill=%22url%28%23shardL%29%22/%3E %3Cpolygon points=%22315,316 380,440 315,440%22 fill=%22url%28%23shardR%29%22/%3E %3Cpolygon points=%22250,440 315,440 315,568%22 fill=%22%23c06d14%22/%3E %3Cpolygon points=%22315,440 380,440 315,568%22 fill=%22%239c5410%22/%3E %3Cpolygon points=%22236,404 262,440 236,476 220,440%22 fill=%22%23f0a43c%22 opacity=%22.85%22/%3E %3Cpolygon points=%22394,404 410,440 394,476 368,440%22 fill=%22%23f0a43c%22 opacity=%22.85%22/%3E %3Cpath d=%22M315 316L315 568M250 440H380%22 stroke=%22%23fff3d6%22 stroke-opacity=%22.35%22 stroke-width=%222%22/%3E %3C/svg%3E");
+  --display: "Chakra Petch", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --cw: clamp(56px, 6.1vw, 104px);
+  --ch: calc(var(--cw) * 1.397);
+  --r: calc(var(--cw) * .055);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: radial-gradient(120% 90% at 40% 30%, var(--felt-2), var(--felt) 55%, var(--felt-deep));
+  background-attachment: fixed;
+  color: var(--ink);
+  font: 15px/1.45 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+  -webkit-user-select: none; user-select: none;
+}
+[hidden] { display: none !important; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button {
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+  padding: 6px 11px; cursor: pointer; line-height: 1.2;
+}
+button:hover { border-color: var(--line-strong); }
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+button.primary { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); font-weight: 700; }
+button:disabled { opacity: .45; cursor: default; }
+
+/* Header */
+header.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
+.brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }
+.brand h1 { font: 700 22px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; margin: 0; }
+.brand span { color: var(--muted); font-size: 13px; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.turn { font: 600 13px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0 4px; }
+.turn b { color: var(--ink); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+label.turn { display: inline-flex; align-items: center; gap: 6px; }
+.pick { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 3px 4px; font: 700 13px var(--mono); color: var(--ink); }
+.sup { display: inline-flex; align-items: center; gap: 4px; padding: 2px 3px 2px 8px; border: 1px solid var(--line); border-radius: 8px; }
+.sup .mini { padding: 2px 8px; font: 700 13px var(--mono); }
+.sup.full { border-color: var(--amber); }
+.sup.full b#supUsed { color: var(--amber); }
+.sup.over { border-color: var(--dmg); background: rgba(224,87,75,.14); }
+.sup.over b#supUsed { color: var(--dmg); }
+
+/* App frame */
+.app { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.table-col { min-width: 0; display: grid; gap: 12px; }
+
+/* Mat */
+.mat {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px;
+  border: 1.5px solid var(--line); border-radius: 18px; padding: 14px;
+  background: linear-gradient(transparent, rgba(0,0,0,.08));
+}
+.zone-label { font: 600 10.5px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.frame { border: 1px solid var(--line); border-radius: calc(var(--r) * 2.2); padding: 7px; display: grid; gap: 6px; align-content: start; justify-items: center; position: relative; }
+.frame.over, .hand.over, .slot.over { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(240,164,60,.35) inset; }
+
+.prizes .grid { display: grid; grid-template-columns: repeat(2, var(--cw)); gap: 6px; min-height: calc(calc(var(--cw) * 1.397) * .6); }
+.prizes .count { font: 700 12px var(--mono); }
+
+.field { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.front { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 14px; }
+.front .stadium { justify-self: end; }
+.bench { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.bench .slot { justify-self: stretch; }
+.piles { display: grid; gap: 10px; align-content: start; }
+
+/* Slots */
+.slot { border: 1px dashed var(--line); border-radius: calc(var(--r) * 2.2); padding: 6px; display: grid; gap: 5px; justify-items: center; align-content: start; min-height: calc(calc(var(--cw) * 1.397) + 30px); min-width: calc(var(--cw) + 14px); position: relative; }
+.slot.filled { border-style: solid; }
+.slot.active { --cw: clamp(68px, 7.6vw, 128px); }
+.slot .zone-label { justify-self: start; }
+.pkm { position: relative; touch-action: none; cursor: grab; }
+.pkm .under { position: absolute; left: 4px; top: -5px; width: 100%; height: 100%; border-radius: var(--r); background: rgba(0,0,0,.35); border: 1px solid var(--line); z-index: -1; }
+.badge { position: absolute; right: -7px; top: -7px; background: var(--dmg); color: #fff; font: 700 12px/1 var(--mono); padding: 4px 6px; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,.4); font-variant-numeric: tabular-nums; }
+.hpline { font: 500 11px/1.2 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.hpline.low { color: var(--dmg); }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; max-width: 100%; min-width: 0; }
+.chip { font: 600 10px/1 var(--body); padding: 3px 5px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; touch-action: none; cursor: grab; }
+.chip i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: 0; background: var(--muted); }
+.status { font: 700 9.5px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; background: var(--amber); color: var(--amber-ink); }
+
+/* Cards */
+.card { width: var(--cw); height: calc(var(--cw) * 1.397); border-radius: var(--r); position: relative; overflow: hidden; flex: none; background: var(--panel); box-shadow: 0 2px 5px rgba(0,0,0,.35); }
+.card img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; pointer-events: none; }
+.card .cap { display: none; }
+.card.noimg { border: 1px solid var(--line-strong); padding: 6px 5px; display: grid; align-content: start; gap: 3px; }
+.card.noimg::before { content: attr(data-type); font: 700 8px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+.card.noimg .cap { display: block; font: 700 calc(var(--cw) * .12)/1.15 var(--body); overflow-wrap: anywhere; }
+/* Raid Table's own card back: crest with a crystal shard (original design) */
+.card.back { background: var(--default-back) center / 100% 100% no-repeat; box-shadow: 0 2px 5px rgba(0,0,0,.35); }
+.card.empty { background: transparent; box-shadow: none; border: 1px dashed var(--line); }
+.selected > .card, .card.selected { outline: 2px solid var(--amber); outline-offset: 2px; }
+[data-drag] { cursor: grab; }
+
+.pile { display: grid; gap: 5px; justify-items: center; }
+.pile .stack { position: relative; touch-action: none; }
+.pile .stack .card + .card { position: absolute; inset: 0; }
+.pile .meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; align-items: center; max-width: calc(var(--cw) + 44px); }
+.count { font: 700 13px var(--mono); font-variant-numeric: tabular-nums; }
+.mini { padding: 3px 7px; font-size: 12px; }
+
+/* Hand */
+.hand { border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px 12px; display: grid; gap: 8px; background: rgba(0,0,0,.12); min-width: 0; }
+.hand .row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; min-height: calc(calc(var(--cw) * 1.397) + 10px); scrollbar-color: var(--line) transparent; }
+.hand .row .card { touch-action: pan-x; transition: transform .12s ease; }
+.hand .row .card:hover { transform: translateY(-4px); }
+.hand .head { display: flex; align-items: center; gap: 10px; }
+.hand .hint { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+
+/* Side column */
+.side { display: grid; gap: 12px; position: sticky; top: 12px; min-width: 0; max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain; scrollbar-color: var(--line) transparent; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 10px; min-width: 0; }
+.panel h2 { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; margin: 0; color: var(--muted); }
+.insp-top { display: grid; gap: 10px; }
+.insp-art { display: block; padding: 0; border: 0; background: none; border-radius: 12px; cursor: zoom-in; justify-self: center; width: 100%; max-width: 340px; }
+.insp-art .card { width: 100%; height: auto; aspect-ratio: 63 / 88; border-radius: 4.5% / 3.3%; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+.insp-art .card.noimg .cap { font-size: 18px; }
+.insp-art:hover .card { box-shadow: 0 0 0 2px var(--amber), 0 6px 18px rgba(0,0,0,.45); }
+
+.zoom { position: fixed; inset: 0; z-index: 90; background: rgba(5,15,17,.86); display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 10px; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); cursor: zoom-out; }
+.zoom-card { min-height: 0; display: grid; place-items: center; }
+.zoom-card img { max-height: 100%; max-width: 100%; height: min(100%, 1024px); width: auto; aspect-ratio: 63 / 88; object-fit: contain; border-radius: 3%; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+.zoom-card .zoom-text { --cw: min(420px, 80vw); }
+.insp-name { font: 700 17px/1.2 var(--display); margin: 0 0 2px; overflow-wrap: anywhere; }
+.insp-sub { color: var(--muted); font-size: 13px; }
+.acts { display: flex; flex-wrap: wrap; gap: 5px; }
+.acts-label { font: 600 10.5px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+.acts button { font-size: 12.5px; padding: 5px 8px; }
+.acts button.on { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); }
+.insp-warn { margin-top: 6px; font-size: 12.5px; color: var(--amber); }
+.empty-note { color: var(--muted); font-size: 13.5px; margin: 0; }
+.insp-close { display: none; }
+
+.calc label { display: grid; gap: 3px; font-size: 12.5px; color: var(--muted); }
+.calc .row2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+.calc input, .calc select { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; width: 100%; color: var(--ink); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.calc-fixed { font: 700 15px var(--mono); color: var(--ink); padding: 5px 0; }
+.calc .result { background: var(--felt-deep); border-radius: 8px; padding: 10px; display: grid; gap: 2px; }
+.calc .result b { font: 700 28px/1 var(--mono); color: var(--amber); font-variant-numeric: tabular-nums; }
+.calc .result small { color: var(--muted); font: 500 12px var(--mono); }
+
+.log { max-height: 170px; overflow-y: auto; margin: 0; padding: 0; list-style: none; font-size: 12.5px; display: grid; gap: 3px; -webkit-user-select: text; user-select: text; }
+.log li { color: var(--muted); }
+.log li b { color: var(--ink); font-weight: 400; }
+
+/* Viewer drawer */
+.drawer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--panel); border-top: 1.5px solid var(--line-strong); box-shadow: 0 -10px 30px rgba(0,0,0,.45); max-height: 48vh; display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 10px max(16px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transition: opacity .12s; }
+.drawer .head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+.drawer .head h2 { font: 700 15px var(--display); letter-spacing: .08em; text-transform: uppercase; margin: 0 auto 0 0; }
+.drawer .grid { overflow-y: auto; display: flex; flex-wrap: wrap; gap: 8px; align-content: start; padding: 2px; }
+.drawer .grid .card { touch-action: pan-y; }
+body.dragging .drawer { opacity: .18; pointer-events: none; }
+
+/* Import dialog */
+.modal-back { position: fixed; inset: 0; z-index: 50; background: rgba(5,15,17,.7); display: grid; place-items: center; padding: 16px; }
+.modal { background: var(--panel); border: 1px solid var(--line-strong); border-radius: 14px; padding: 16px; width: min(560px, 100%); display: grid; gap: 10px; max-height: 92vh; overflow-y: auto; }
+.modal h2 { font: 700 18px var(--display); margin: 0; }
+.modal p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.modal textarea { width: 100%; min-height: 280px; background: var(--felt-deep); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font: 13px/1.5 var(--mono); resize: vertical; -webkit-user-select: text; user-select: text; }
+.back-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: start; }
+.back-row .card { --cw: 120px; }
+.back-opts { display: grid; gap: 12px; min-width: 0; }
+.field-label { display: grid; gap: 5px; font-size: 13px; color: var(--muted); }
+.field-label input[type=url] { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; color: var(--ink); width: 100%; -webkit-user-select: text; user-select: text; }
+.field-label input[type=file] { color: var(--ink); max-width: 100%; }
+body.custom-back .card.back { background: var(--back-img) center / cover no-repeat, var(--back-1); border: 0; }
+.back-row .card.back.preview-custom { background: var(--preview-img) center / cover no-repeat, var(--back-1); border: 0; }
+@media (max-width: 480px) { .back-row { grid-template-columns: minmax(0, 1fr); } .back-row .card { justify-self: center; } }
+.modal.guide { width: min(940px, 100%); gap: 14px; -webkit-user-select: text; user-select: text; }
+.guide-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.guide-head h2 { font: 700 22px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; margin-right: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; }
+.guide-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.guide-cols section { min-width: 0; }
+.guide h3 { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--amber); margin: 16px 0 8px; }
+.guide h3:first-child { margin-top: 0; }
+.guide p, .guide li { font-size: 14px; line-height: 1.5; color: var(--ink); }
+.guide-note { color: var(--muted) !important; margin: 0 0 10px !important; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: step; }
+.steps > li { counter-increment: step; display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 10px; }
+.steps > li::before { content: counter(step); grid-row: span 3; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--amber); color: var(--amber); font: 700 14px/22px var(--mono); text-align: center; }
+.steps > li > div, .steps > li > p, .steps > li > ul { grid-column: 2; }
+.steps > li > p { margin: 3px 0 0; color: var(--muted); }
+.acts-list, .facts { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.acts-list li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.facts li { padding-left: 14px; position: relative; }
+.facts li::before { content: ""; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; transform: rotate(45deg); background: var(--amber); opacity: .75; }
+.tag { display: inline-block; font: 700 9.5px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; text-align: center; white-space: nowrap; }
+.tag.must { background: var(--dmg); color: #fff; }
+.tag.once { background: var(--amber); color: var(--amber-ink); }
+.tag.any { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); padding: 3px 5px; }
+.tag.team { background: #6fb7a7; color: #0c2226; }
+.callout { margin-top: 14px; padding: 10px 12px; border-left: 3px solid var(--amber); background: var(--felt-deep); border-radius: 0 8px 8px 0; font-size: 13.5px; }
+.guide kbd { font: 700 11.5px var(--mono); background: var(--felt-deep); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; }
+.guide-src { margin: 0; font-size: 12.5px !important; color: var(--muted) !important; }
+@media (max-width: 760px) { .guide-cols { grid-template-columns: minmax(0, 1fr); gap: 4px; } .guide-cols section + section h3:first-child { margin-top: 16px; } }
+.modal .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.modal .progress { margin-right: auto; font: 500 12.5px var(--mono); color: var(--muted); }
+.modal a { color: var(--amber); }
+
+/* Drag ghost + toast */
+.ghost { position: fixed; z-index: 100; pointer-events: none; opacity: .92; transform: translate(-50%, -50%) rotate(-3deg); filter: drop-shadow(0 10px 18px rgba(0,0,0,.5)); }
+.toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 120; background: var(--ink); color: var(--felt-deep); padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 13.5px; box-shadow: 0 6px 18px rgba(0,0,0,.4); max-width: calc(100vw - 32px); }
+
+/* Raid boss zone */
+.boss { border: 1.5px solid var(--line); border-radius: 18px; padding: 14px; background: linear-gradient(180deg, rgba(240,164,60,.07), rgba(0,0,0,.12)); display: grid; gap: 10px; }
+.boss-empty { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.boss-empty p { margin: 4px 0 0; color: var(--muted); }
+.boss-main { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: start; }
+.boss-card { padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: 10px; }
+.boss-card .card { --cw: clamp(110px, 11vw, 168px); }
+.boss-card.over .card, .boss-card:hover .card { box-shadow: 0 0 0 2px var(--amber), 0 6px 18px rgba(0,0,0,.45); }
+.boss-body { display: grid; gap: 8px; min-width: 0; }
+.boss-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.boss-title .mini { margin-left: auto; }
+.boss-name { font: 700 clamp(20px, 2.2vw, 28px)/1.05 var(--display); margin: 0; letter-spacing: .01em; overflow-wrap: anywhere; }
+.pill { font: 700 10.5px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; padding: 4px 7px; border-radius: 999px; background: var(--amber); color: var(--amber-ink); }
+.track { display: grid; gap: 4px; }
+.track-bar { height: 10px; border-radius: 999px; background: var(--felt-deep); border: 1px solid var(--line); overflow: hidden; }
+.track-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--dmg), var(--amber)); border-radius: inherit; transition: width .35s ease; }
+.track-label { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.boss-attacks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.boss-attacks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; column-gap: 8px; padding: 6px 8px; border-radius: 8px; background: rgba(0,0,0,.18); border: 1px solid transparent; }
+.boss-attacks li.ready { border-color: rgba(240,164,60,.55); }
+.boss-attacks li p, .atk-card p { grid-column: 1 / -1; margin: 3px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.boss-attacks b, .atk-card b { font-family: var(--display); font-size: 15px; }
+.atk-dmg { font: 700 15px var(--mono); color: var(--ink); }
+.atk-kind { font: 700 9.5px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--dmg); }
+.pips { display: inline-flex; gap: 3px; align-items: center; }
+.pips i { width: 12px; height: 12px; border-radius: 50%; background: var(--ink); box-shadow: inset 0 0 0 2px rgba(0,0,0,.25); }
+.pips em { font: 600 10px var(--display); color: var(--muted); font-style: normal; text-transform: uppercase; letter-spacing: .08em; }
+.boss-row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.boss-att { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+.boss-att .chips { justify-content: flex-start; }
+.muted { color: var(--muted); font-size: 12.5px; }
+.acts .mini.on, .boss-row .mini.on { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); }
+.boss-piles { display: grid; gap: 8px; min-width: 110px; }
+.bpile { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; justify-items: start; }
+.bpile .mini { grid-column: 1 / -1; justify-self: stretch; }
+.banner { padding: 10px 14px; border-radius: 10px; font-weight: 700; }
+.banner.win { background: var(--ok); color: #0b2a14; }
+.banner.out { background: rgba(224,87,75,.18); border: 1px solid var(--dmg); }
+
+/* Boss turn stage */
+.stage { position: fixed; left: 0; right: 0; bottom: 0; z-index: 35; background: var(--panel); border-top: 2px solid var(--amber); box-shadow: 0 -12px 34px rgba(0,0,0,.5); max-height: 50vh; overflow-y: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: start; padding: 14px max(16px, env(safe-area-inset-right, 0px)) max(14px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+body.stage-open { padding-bottom: calc(50vh + 16px); }
+.stage-card { padding: 0; border: 0; background: none; cursor: zoom-in; position: sticky; top: 0; }
+.stage-card .card { --cw: clamp(130px, 14vw, 210px); }
+.stage-body { display: grid; gap: 9px; min-width: 0; max-width: 760px; }
+.stage-head h3 { font: 700 21px/1.1 var(--display); margin: 3px 0 0; }
+.stage-note { margin: 0; font-weight: 700; }
+.stage-note.auto { color: var(--ok); }
+.stage-text { white-space: pre-line; font-size: 14px; line-height: 1.5; background: var(--felt-deep); border-radius: 8px; padding: 10px 12px; -webkit-user-select: text; user-select: text; }
+.stage-guide { margin: 0; color: var(--muted); font-size: 13.5px; }
+.stage-warn { margin: 0; padding: 8px 10px; border-radius: 8px; background: rgba(224,87,75,.16); border: 1px solid var(--dmg); font-weight: 700; }
+.stage-acts { padding-top: 4px; }
+.stage-acts .primary { font-size: 14px; padding: 8px 14px; }
+.atk-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; column-gap: 8px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--amber); background: rgba(240,164,60,.08); }
+.rolls { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.rolls li { font: 700 12.5px var(--mono); background: var(--felt-deep); border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 8px; }
+.stage-math { display: flex; flex-wrap: wrap; gap: 6px 10px; font: 500 13px var(--mono); color: var(--muted); }
+.heal-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.heal-row input { width: 90px; background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; color: var(--ink); font-family: var(--mono); }
+.calc-hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+.calc input:disabled { opacity: .55; }
+.text-in { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; color: var(--ink); width: 100%; font: 14px var(--body); -webkit-user-select: text; user-select: text; }
+.row-2 { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+.check { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); padding-bottom: 8px; }
+@media (max-width: 720px) {
+  .boss { padding: 10px; }
+  .boss-main { grid-template-columns: auto minmax(0, 1fr); }
+  .boss-card .card { --cw: 96px; }
+  .boss-piles { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stage { grid-template-columns: minmax(0, 1fr); max-height: 58vh; }
+  body.stage-open { padding-bottom: calc(58vh + 16px); }
+  .stage-card { position: static; justify-self: center; }
+  .stage-card .card { --cw: 120px; }
+  .row-2 { grid-template-columns: minmax(0, 1fr); }
+}
+/* Teammates strip */
+.team { border: 1.5px solid var(--line); border-radius: 16px; padding: 12px 14px; display: grid; gap: 10px; background: rgba(0,0,0,.1); }
+.team-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.team-head .mini { margin-left: auto; }
+.team-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.mate { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; gap: 8px; background: var(--panel); --cw: 34px; min-width: 0; }
+.mate.offline { opacity: .55; }
+.mate.out { border-color: var(--dmg); }
+.mate-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mate-top b { font-family: var(--display); font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mate-field { display: flex; gap: 10px; align-items: flex-end; min-width: 0; }
+.mate-bench { display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; }
+.mate-slot { position: relative; display: grid; justify-items: center; gap: 2px; }
+.mate-slot.big { --cw: 58px; }
+.mate-slot .card { cursor: zoom-in; }
+.mate-slot .badge { right: -6px; top: -6px; font-size: 10px; padding: 3px 5px; }
+.mate-slot .card.noimg .cap { font-size: 7px; }
+.mate-counts { font: 500 12px var(--mono); color: var(--muted); }
+
+/* Room dialog */
+#btnRoom.in-room { border-color: var(--ok); color: var(--ok); }
+.room-block { display: grid; gap: 12px; }
+.room-block textarea { min-height: 120px; }
+.room-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.room-choice { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 8px; align-content: start; }
+.room-choice h3, #roomIn h3 { font: 700 13px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--amber); margin: 0; }
+.room-choice p { margin: 0; }
+.code-in { font: 700 22px var(--mono); letter-spacing: .3em; text-transform: uppercase; }
+.room-code { display: flex; align-items: center; gap: 12px; }
+.room-code span { font: 700 40px/1 var(--mono); letter-spacing: .25em; color: var(--amber); -webkit-user-select: all; user-select: all; }
+.room-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.room-link span { font: 13px var(--mono); color: var(--muted); overflow-wrap: anywhere; min-width: 0; flex: 1; -webkit-user-select: all; user-select: all; }
+.room-players { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+#roomMsg:empty { display: none; }
+@media (max-width: 560px) { .room-choices { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1180px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; max-height: none; overflow: visible; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .insp-art { max-width: min(100%, 300px, 30vh); }
+  #inspector:not(.has-sel) { display: none; }
+  #inspector.has-sel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; border-radius: 14px 14px 0 0; max-height: 62vh; overflow-y: auto; box-shadow: 0 -10px 30px rgba(0,0,0,.5); padding-bottom: max(14px, env(safe-area-inset-bottom, 0px)); padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); }
+  .insp-close { display: inline-block; justify-self: end; }
+}
+@media (max-width: 720px) {
+  :root { --cw: calc((100vw - 120px) / 5); }
+  .slot.active { --cw: calc((100vw - 120px) / 4); }
+  .mat { grid-template-columns: minmax(0, 1fr); padding: 10px; gap: 10px; }
+  .piles { grid-template-columns: repeat(3, minmax(0, 1fr)); order: -1; }
+  .pile { min-width: 0; }
+  .prizes { --cw: calc((100vw - 140px) / 6); }
+  .prizes .grid { grid-template-columns: repeat(6, var(--cw)); }
+  .front { grid-template-columns: auto 1fr; }
+  .front .spacer { display: none; }
+  .front .stadium { justify-self: start; order: 2; }
+  .bench { gap: 4px; }
+  .slot { padding: 4px; min-width: 0; }
+  .hand .hint { display: none; }
+  #btnSort { margin-left: auto; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><h1>Raid Table</h1><span id="deckName">No deck loaded</span></div>
+  <div class="tools">
+    <label class="turn" for="players">Players
+      <select id="players" class="pick"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+    </label>
+    <span class="turn">Turn <b id="turnNo">1</b></span>
+    <div class="sup" id="supBox" title="Your team may play as many Supporters per turn as there are players">
+      <span class="turn">Supporters <b id="supUsed">0</b>&thinsp;/&thinsp;<b id="supMax">3</b></span>
+      <button class="mini" id="supMinus" aria-label="Lower this turn's Supporter count by one">−</button>
+      <button class="mini" id="supPlus" aria-label="Raise this turn's Supporter count by one">+</button>
+    </div>
+    <button id="btnEndTurn">End turn</button>
+    <button id="btnDraw" title="Draw a card (D)">Draw</button>
+    <button id="btnUndo" title="Undo (Ctrl+Z)">Undo</button>
+    <button id="btnNew">New game</button>
+    <button id="btnRoom">Multiplayer</button>
+    <button id="btnGuide" title="What you can do on your turn (?)">Turn guide</button>
+    <button id="btnBack">Card back</button>
+    <button id="btnImport" class="primary">Import deck</button>
+  </div>
+</header>
+
+<div class="app">
+  <div class="table-col">
+    <section class="boss" id="bossZone" aria-label="Raid boss">
+      <div class="boss-empty" id="bossEmpty">
+        <div><span class="zone-label">Raid boss</span><p>No boss loaded yet.</p></div>
+        <button class="primary" id="btnBossSetupEmpty">Set up the raid boss</button>
+      </div>
+      <div class="boss-main" id="bossMain" hidden>
+        <button type="button" class="boss-card" id="bossCard" data-dropzone="benergy" aria-label="Show the boss card full size"></button>
+        <div class="boss-body">
+          <div class="boss-title">
+            <span class="zone-label">Raid boss</span>
+            <span class="pill" id="bossDiff">Medium</span>
+            <button class="mini" id="btnBossSetup">Boss setup</button>
+          </div>
+          <h2 class="boss-name" id="bossName"></h2>
+          <div class="track" aria-label="Boss cards left">
+            <div class="track-bar"><i id="bossBar"></i></div>
+            <span class="track-label" id="bossLeft"></span>
+          </div>
+          <ul class="boss-attacks" id="bossAttacks"></ul>
+          <div class="boss-row">
+            <div class="boss-att"><span class="zone-label">Energy <span class="count" id="bossEnergyCount">0</span></span><div class="chips" id="bossEnergy"></div></div>
+            <div class="boss-att"><span class="zone-label">Tool</span><div class="chips" id="bossTool"></div></div>
+          </div>
+          <div class="boss-row"><span class="zone-label">Conditions</span><div class="acts" id="bossStatus"></div></div>
+        </div>
+        <div class="boss-piles">
+          <div class="bpile"><span class="zone-label">Deck</span><span class="count" id="bDeckCount">0</span></div>
+          <div class="bpile frame" data-dropzone="bdiscard"><span class="zone-label">Discard</span><span class="count" id="bDiscardCount">0</span><button class="mini" data-view="bdiscard">View</button></div>
+          <div class="bpile frame" data-dropzone="blost"><span class="zone-label">Lost Zone</span><span class="count" id="bLostCount">0</span><button class="mini" data-view="blost">View</button></div>
+        </div>
+      </div>
+      <div class="banner" id="raidBanner" hidden></div>
+    </section>
+
+    <section class="team" id="team" hidden aria-label="Teammates"></section>
+
+    <section class="mat" aria-label="Playmat">
+      <div class="frame prizes" data-dropzone="prizes">
+        <span class="zone-label">Prizes <span class="count" id="prizeCount">0</span></span>
+        <div class="grid" id="prizes"></div>
+      </div>
+
+      <div class="field">
+        <div class="front">
+          <div class="spacer"></div>
+          <div id="activeSlot"></div>
+          <div class="frame stadium" data-dropzone="stadium">
+            <span class="zone-label">Stadium</span>
+            <div id="stadium"></div>
+          </div>
+        </div>
+        <div class="bench" id="bench"></div>
+      </div>
+
+      <div class="piles">
+        <div class="frame pile" data-dropzone="deck">
+          <span class="zone-label">Deck</span>
+          <div class="stack" id="deckPile"></div>
+          <div class="meta"><span class="count" id="deckCount">0</span><button class="mini" id="btnSearch">Search</button><button class="mini" id="btnShuffle">Shuffle</button></div>
+        </div>
+        <div class="frame pile" data-dropzone="discard">
+          <span class="zone-label">Discard</span>
+          <div class="stack" id="discardPile"></div>
+          <div class="meta"><span class="count" id="discardCount">0</span><button class="mini" data-view="discard">View</button></div>
+        </div>
+        <div class="frame pile" data-dropzone="lost">
+          <span class="zone-label">Lost Zone</span>
+          <div class="stack" id="lostPile"></div>
+          <div class="meta"><span class="count" id="lostCount">0</span><button class="mini" data-view="lost">View</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hand" data-dropzone="hand" aria-label="Hand">
+      <div class="head"><span class="zone-label">Hand <span class="count" id="handCount">0</span></span><span class="hint">Drag cards onto the mat · drop on a Pokémon to attach or evolve · click any card for actions</span><button class="mini" id="btnSort" title="Pokémon by evolution line, then Items, Tools, Stadiums, Supporters, then Energy">Sort</button></div>
+      <div class="row" id="hand"></div>
+    </section>
+  </div>
+
+  <aside class="side">
+    <section class="panel" id="inspector" aria-live="polite"></section>
+
+    <section class="panel calc" aria-label="Damage this turn">
+      <h2>Damage this turn</h2>
+      <p class="calc-hint" id="calcHint">Enter what each player's attack did to the boss this turn.</p>
+      <div class="row2" id="calcDamage"></div>
+      <div class="result"><b id="calcOut">0</b><span id="calcLabel">boss cards go to the Lost Zone at the end of its turn</span><small id="calcMath"></small></div>
+    </section>
+
+    <section class="panel">
+      <h2>Game log</h2>
+      <ul class="log" id="log"></ul>
+    </section>
+  </aside>
+</div>
+
+<section class="drawer" id="drawer" hidden aria-label="Card viewer">
+  <div class="head">
+    <h2 id="drawerTitle">Deck</h2>
+    <button id="drawerShuffle" class="mini">Shuffle deck &amp; close</button>
+    <button id="drawerClose" class="mini">Close</button>
+  </div>
+  <div class="grid" id="drawerGrid"></div>
+</section>
+
+<div class="modal-back" id="importBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+    <h2 id="importTitle">Import a deck list</h2>
+    <p>Paste a 60-card list in Pokémon TCG Live / Limitless export format, one card per line, like <code>4 Arven SVI 166</code>. The set code and number choose the exact print, so change them to pick different art. Card art comes from pokemontcg.io, with TCGdex as a backup.</p>
+    <textarea id="importText" spellcheck="false" aria-label="Deck list"></textarea>
+    <div class="foot">
+      <span class="progress" id="importProgress"></span>
+      <button id="importSample">Use sample deck</button>
+      <button id="importCancel">Cancel</button>
+      <button id="importGo" class="primary">Load deck</button>
+    </div>
+  </div>
+</div>
+
+<div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="Card, full size">
+  <div class="zoom-card" id="zoomCard"></div>
+  <button id="zoomClose" class="mini">Close</button>
+</div>
+
+<div class="modal-back" id="backBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="backTitle">
+    <h2 id="backTitle">Card back</h2>
+    <p>Use any image for face-down cards: your deck, Prize cards and the deck search. It's saved in this browser only.</p>
+    <div class="back-row">
+      <div class="card back" id="backPreview"></div>
+      <div class="back-opts">
+        <label for="backFile" class="field-label">Choose an image from your computer
+          <input type="file" id="backFile" accept="image/*">
+        </label>
+        <label for="backUrl" class="field-label">Or paste an image link
+          <input type="url" id="backUrl" placeholder="https://…/card-back.png" spellcheck="false">
+        </label>
+        <span class="progress" id="backMsg"></span>
+      </div>
+    </div>
+    <div class="foot">
+      <button id="backReset">Use built-in back</button>
+      <button id="backCancel">Cancel</button>
+      <button id="backSave" class="primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" id="guideBack" hidden>
+  <div class="modal guide" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="guide-head">
+      <h2 id="guideTitle">Turn guide</h2>
+      <span class="legend"><span class="tag must">Must</span><span class="tag once">Once a turn</span><span class="tag any">Any number</span><span class="tag team">Team limit</span></span>
+      <button id="guideClose" class="mini">Close</button>
+    </div>
+
+    <div class="guide-cols">
+      <section>
+        <h3>Your turn</h3>
+        <p class="guide-note">All players take their turns at the same time, then the boss goes.</p>
+        <ol class="steps">
+          <li><div><b>Draw a card</b> <span class="tag must">Must</span></div><p>If your deck is empty you keep playing and just skip the draw.</p></li>
+          <li><div><b>Do any of these, in any order</b></div>
+            <ul class="acts-list">
+              <li><span class="tag any">Any</span> Put Basic Pokémon on your Bench, up to 5.</li>
+              <li><span class="tag any">Any</span> Evolve your Pokémon. Not on your first turn, and not a Pokémon that came into play or already evolved this turn.</li>
+              <li><span class="tag once">Once</span> Attach an Energy card from your hand to one of your Pokémon.</li>
+              <li><span class="tag any">Any</span> Play Items. Attach Tools, one per Pokémon.</li>
+              <li><span class="tag once">Once</span> Play a Stadium. Only one can be in play, and it affects every player and the boss.</li>
+              <li><span class="tag team">Team</span> Play Supporters. The whole team can play as many as there are players each turn. One player can use several, and a Supporter can help a teammate, like Professor's Research drawing for someone else.</li>
+              <li><span class="tag once">Once</span> Retreat your Active Pokémon by discarding Energy to pay its Retreat Cost.</li>
+              <li><span class="tag any">Any</span> Use Abilities, following each card's own limits.</li>
+            </ul>
+          </li>
+          <li><div><b>Attack</b> <span class="tag once">Once</span></div><p>Optional, and allowed on your first turn. Attacking ends your turn. Add your damage to the Raid damage panel.</p></li>
+        </ol>
+        <div class="callout"><b>Check with your team first</b> before playing a card that affects "each player", like Iono. It happens to everyone at the same time.</div>
+      </section>
+
+      <section>
+        <h3>Damage and the boss</h3>
+        <ul class="facts">
+          <li>Add up every player's damage, plus 10 if the boss is Poisoned or 20 if Burned, minus anything it healed.</li>
+          <li>Divide by 10 × number of players and round down. That many boss cards go to the Lost Zone at the end of the boss's <i>next</i> turn.</li>
+          <li>Weakness and Resistance are ignored.</li>
+        </ul>
+        <h3>Boss turn</h3>
+        <ul class="facts">
+          <li>The boss draws one card per player, plus one, and plays each as it's drawn. It never holds a hand.</li>
+          <li>Tools attach (replacing the old one), Stadiums go into play, Energy attaches, Supporters resolve.</li>
+          <li>It attacks every player's Active Pokémon at once. Its attack costs count as any Energy and are paid by discarding.</li>
+          <li>Special Conditions on the boss only last one turn.</li>
+        </ul>
+        <h3>Knock Outs and winning</h3>
+        <ul class="facts">
+          <li>When your Pokémon is Knocked Out, <i>you</i> take Prize cards: 1, or 2 for most ex and V, or 3 for VMAX and Mega ex. Then promote a new Active Pokémon.</li>
+          <li>You're out of the game when you take your last Prize card.</li>
+          <li><b>Players win</b> when the boss's deck and discard pile are all in the Lost Zone. <b>The boss wins</b> when every player is out, including on the same turn the players would have won.</li>
+        </ul>
+        <h3>Using Raid Table</h3>
+        <ul class="facts">
+          <li>Drag cards between zones. Drop a Pokémon on a Pokémon to evolve, anything else to attach.</li>
+          <li>Click a card for its actions and a large preview. Click the deck to draw, a Prize card to take it.</li>
+          <li><kbd>D</kbd> draws, <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes, <kbd>?</kbd> opens this guide.</li>
+        </ul>
+      </section>
+    </div>
+    <p class="guide-src">Rules summarized from <a href="https://raidformat.com/how-to-play/" target="_blank" rel="noopener">raidformat.com</a>.</p>
+  </div>
+</div>
+
+<div class="modal-back" id="roomBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="roomTitle">
+    <h2 id="roomTitle">Multiplayer</h2>
+    <div id="roomOut">
+      <div id="roomSetup" class="room-block">
+        <p>To play together, Raid Table needs a free Firebase project to pass moves between players. Paste its web app config here, the block that starts with <code>apiKey</code>. The setup steps are in our chat.</p>
+        <textarea id="roomCfg" spellcheck="false" placeholder='const firebaseConfig = { apiKey: "…", authDomain: "…", databaseURL: "…", projectId: "…", … };'></textarea>
+        <div class="foot"><button id="roomCfgSave" class="primary">Save config</button></div>
+      </div>
+      <div id="roomJoinCreate" class="room-block">
+        <label class="field-label" for="roomName">Your name
+          <input type="text" id="roomName" class="text-in" maxlength="24" autocomplete="nickname" placeholder="Ash">
+        </label>
+        <div class="room-choices">
+          <div class="room-choice">
+            <h3>Start a raid</h3>
+            <p>Opens a room with your current boss and deck. You'll get a code to share.</p>
+            <button id="roomCreate" class="primary">Create room</button>
+          </div>
+          <div class="room-choice">
+            <h3>Join a raid</h3>
+            <label class="field-label" for="roomCode">Room code
+              <input type="text" id="roomCode" class="text-in code-in" maxlength="5" autocomplete="off" spellcheck="false" placeholder="ABCDE">
+            </label>
+            <button id="roomJoin">Join room</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="roomIn" hidden class="room-block">
+      <p>Share this code, or send the link. Each friend opens Raid Table, loads their own deck, and joins.</p>
+      <div class="room-code"><span id="roomCodeBig">ABCDE</span><button id="roomCopyCode" class="mini">Copy code</button></div>
+      <div class="room-link"><span id="roomLink"></span><button id="roomCopyLink" class="mini">Copy link</button></div>
+      <h3>At the table</h3>
+      <ul id="roomPlayers" class="room-players"></ul>
+      <div class="foot"><button id="roomLeave">Leave room</button></div>
+    </div>
+    <p class="progress" id="roomMsg" role="status"></p>
+    <div class="foot"><button id="roomClose">Close</button></div>
+  </div>
+</div>
+
+<section class="stage" id="bossStage" hidden aria-live="polite" aria-label="Boss turn"></section>
+
+<div class="modal-back" id="bossSetupBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bossSetupTitle">
+    <h2 id="bossSetupTitle">Raid boss setup</h2>
+    <label class="field-label" for="bossLine">Boss Pokémon (name, set code and number, like a deck list line)
+      <input type="text" id="bossLine" class="text-in" spellcheck="false" placeholder="Roaring Moon ex PAR 124">
+    </label>
+    <div class="row-2">
+      <label class="field-label" for="bossDiffSel">Difficulty
+        <select id="bossDiffSel" class="text-in">
+          <option value="easy">Easy: random attacks, players make card choices</option>
+          <option value="medium">Medium: random attacks, card choices made at random</option>
+          <option value="hard">Hard: random attacks, a boss player makes card choices</option>
+          <option value="extreme">Extremely Hard: a boss player makes every choice</option>
+        </select>
+      </label>
+      <label class="check" for="bossHarsh"><input type="checkbox" id="bossHarsh"> Harsher damage: divide by 10 × (players − 1)</label>
+    </div>
+    <label class="field-label" for="bossDeckText">Boss deck: 60 Trainer and Energy cards, no Pokémon
+      <textarea id="bossDeckText" spellcheck="false"></textarea>
+    </label>
+    <div class="foot">
+      <span class="progress" id="bossProgress"></span>
+      <button id="bossUseDefault">Use the Handbook deck</button>
+      <button id="bossCancel">Cancel</button>
+      <button id="bossGo" class="primary">Load boss</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------ *
+ *  Raid Table — solo sandbox (step 1)
+ *  State is a plain object; every change goes through act() so it can
+ *  be undone, logged, saved, and later synced to other players.
+ * ------------------------------------------------------------------ */
+
+const SAMPLE_DECK = `****** Pokémon Trading Card Game Deck List ******
+
+Pokémon - 18
+
+3 Mega Lucario ex MEG 77
+4 Riolu MEG 76
+2 Hariyama MEG 73
+3 Makuhita MEG 72
+2 Solrock MEG 75
+2 Lunatone MEG 74
+1 Fezandipiti ex SFA 38
+1 Bloodmoon Ursaluna ex TWM 141
+
+Trainer Cards - 30
+
+4 Fighting Gong MEG 116
+4 Lillie’s Determination MEG 119
+3 Iris’s Fighting Spirit JTG 149
+2 Boss’s Orders (Ghetsis) PAL 172
+1 Surfer SSP 187
+2 Gravity Mountain SSP 177
+4 Premium Power Pro MEG 124
+4 Ultra Ball MEG 131
+2 Night Stretcher SFA 61
+1 Secret Box TWM 163
+1 Switch MEG 130
+2 Air Balloon BLK 79
+
+Energy - 12
+
+12 Basic Fighting Energy SVE 6
+
+Total Cards - 60`;
+
+// In same-computer test mode (?local=1) every tab is its own player, so each tab keeps its own save.
+const TAB = /[?&]local=1/.test(location.search) ? (() => { try { let t = sessionStorage.getItem("raidtable.tab"); if (!t) { t = Math.random().toString(36).slice(2, 7); sessionStorage.setItem("raidtable.tab", t); } return "." + t; } catch { return ""; } })() : "";
+const STORE_GAME = "raidtable.game.v1" + TAB;
+const STORE_CARDS = "raidtable.cards.v6";   // v6: adds attacks, abilities and Trainer text
+const ENERGY_SYMBOLS = { R: "Fire", W: "Water", G: "Grass", L: "Lightning", P: "Psychic", F: "Fighting", D: "Darkness", M: "Metal", Y: "Fairy", C: "Colorless" };
+const ENERGY_COLORS = { Fire: "#e8663d", Water: "#4aa3df", Grass: "#5fb85a", Lightning: "#f2cf3b", Psychic: "#a66bd1", Fighting: "#c47a3f", Darkness: "#5a5f7a", Metal: "#a9b1b8", Fairy: "#e48fc0", Colorless: "#e6e0cc" };
+const STATUSES = ["Asleep", "Confused", "Paralyzed", "Poisoned", "Burned"];
+
+/* ---------- storage ---------- */
+function loadJSON(k, fallback) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch { return fallback; } }
+function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+
+let CARDS = loadJSON(STORE_CARDS, {});      // key -> card data (cache across games)
+let S = loadJSON(STORE_GAME, null);         // game state
+let undoStack = [];
+let selected = null;                         // a source descriptor
+let viewerZone = null;
+
+function emptyState() {
+  return { deckName: "", list: "", keys: {}, deck: [], hand: [], discard: [], lost: [], prizes: [], stadium: null, active: null, bench: [null, null, null, null, null], turn: 1, players: 3, supportersUsed: 0, log: [],
+    stadiumOwner: null, dmg: [0, 0, 0], started: false,
+    // raid boss
+    bkeys: {}, bossCfg: null, bdeck: [], bdiscard: [], blost: [], benergy: [], btool: null, bstatus: [], bt: null, result: null,
+    // multiplayer: ids of other players' cards in shared spots, Ready flags, raid number, revision, cards to hand back
+    skeys: {}, ready: {}, raidId: 1, rev: 0, returns: [],
+    // per player: boss hits already applied, which raid this board belongs to
+    seenHits: [], myRaidId: 1 };
+}
+
+/* ---------- deck list parsing ---------- */
+function cleanName(n) {
+  return n.replace(/\{([A-Z])\}/g, (_, s) => ENERGY_SYMBOLS[s] || s).replace(/[\u2018\u2019\u02bc]/g, "'").replace(/[\u201c\u201d]/g, '"').replace(/\s+/g, " ").trim();
+}
+function parseDeck(text) {
+  const entries = []; let section = null;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    // headings: "Pokémon: 18", "Pokémon (18)", "Pokémon - 18", "Trainer Cards - 30", "Energy - 12"
+    const h = line.match(/^(Pok[eé]mon|Trainers?(?: Cards?)?|Energy)(?:\s*[-–:(]\s*\d*\s*\)?)?$/i) || line.match(/^(Pok[eé]mon|Trainers?|Energy)\b\s*[:(\d]/i);
+    if (h) { section = /^pok/i.test(h[1]) ? "Pokémon" : /^tr/i.test(h[1]) ? "Trainer" : "Energy"; continue; }
+    if (/^total/i.test(line)) continue;
+    let m = line.match(/^(\d+)\s+(.+?)\s+([A-Z][A-Z0-9-]{1,5})\s+([A-Za-z]{0,4}\d+[a-z]?)$/);
+    if (m) { entries.push({ count: +m[1], name: cleanName(m[2]), set: m[3], num: m[4], section }); continue; }
+    m = line.match(/^(\d+)\s+(.+)$/);
+    if (m) entries.push({ count: +m[1], name: cleanName(m[2]), set: null, num: null, section });
+  }
+  return entries;
+}
+const entryKey = e => `${e.set || ""}|${e.num || ""}|${e.name}`.toLowerCase();
+
+/* ---------- card lookup ---------- */
+const PTCG = "https://api.pokemontcg.io/v2/cards";
+const TCGDEX = "https://api.tcgdex.net/v2/en/cards";
+const enc = encodeURIComponent;
+async function getJSON(url) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 15000);
+  try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
+  finally { clearTimeout(t); }
+}
+function normSuper(s) { if (!s) return null; s = String(s).toLowerCase(); return s.startsWith("pok") ? "Pokémon" : s.startsWith("tr") ? "Trainer" : s.startsWith("en") ? "Energy" : null; }
+function fromPtcg(c) {
+  if (!c) return null;
+  return { name: c.name, supertype: normSuper(c.supertype), subtypes: c.subtypes || [], hp: c.hp ? +c.hp : null, types: c.types || [], evolvesFrom: c.evolvesFrom || null, img: c.images?.small || null, imgLg: c.images?.large || c.images?.small || null, ref: c.id, print: `${c.set?.ptcgoCode || c.set?.id || ""} ${c.number || ""}`.trim(), rarity: c.rarity || "",
+    attacks: (c.attacks || []).map(a => ({ name: a.name, cost: a.cost || [], damage: a.damage || "", text: a.text || "" })),
+    abilities: (c.abilities || []).map(a => ({ name: a.name, text: a.text || "" })),
+    text: (c.rules || []).join("\n\n"), src: "pokemontcg.io" };
+}
+const PTCG_FIELDS = "id,name,supertype,subtypes,hp,types,evolvesFrom,rarity,number,set,images,attacks,abilities,rules";
+// Card numbers compare as numbers when they are numbers ("073" = "73"), otherwise as text ("TG01").
+const sameNumber = (a, b) => { a = String(a || "").trim(); b = String(b || "").trim(); return /^\d+$/.test(a) && /^\d+$/.test(b) ? +a === +b : a.toLowerCase() === b.toLowerCase(); };
+async function tcgdexDetail(brief) {
+  let d = {}; try { d = await getJSON(`${TCGDEX}/${enc(brief.id)}`); } catch {}
+  const img = brief.image || d.image;
+  return { name: brief.name || d.name, supertype: normSuper(d.category), subtypes: d.stage ? [d.stage] : (d.trainerType ? [d.trainerType] : []), hp: d.hp || null, types: d.types || [], evolvesFrom: d.evolveFrom || null, img: img ? img + "/low.webp" : null, imgLg: img ? img + "/high.webp" : null, ref: brief.id, print: `${d.set?.name || brief.id.split("-")[0]} ${brief.localId || ""}`.trim(),
+    attacks: (d.attacks || []).map(a => ({ name: a.name, cost: a.cost || [], damage: a.damage != null ? String(a.damage) : "", text: a.effect || "" })),
+    abilities: (d.abilities || []).map(a => ({ name: a.name, text: a.effect || "" })),
+    text: d.effect || "", src: "TCGdex" };
+}
+// TCGdex by name; with a number, only prints carrying that number count.
+async function lookupTcgdex(name, num) {
+  const list = await getJSON(`${TCGDEX}?name=eq:${enc(name)}`);
+  if (!Array.isArray(list) || !list.length) return null;
+  const pool = num ? list.filter(c => sameNumber(c.localId, num)) : list;
+  if (!pool.length) return null;
+  const pick = [...pool].reverse().find(c => c.image) || pool[pool.length - 1];
+  return tcgdexDetail(pick);
+}
+async function ptcgFirst(q) {
+  const c = (await getJSON(`${PTCG}?q=${enc(q)}&orderBy=-set.releaseDate&pageSize=3&select=${PTCG_FIELDS}`)).data?.[0];
+  return fromPtcg(c);
+}
+const quoteName = n => `name:"${n.replace(/"/g, "")}"`;
+// Tries the exact print first (set code + number) across both databases, then any print
+// with the same name and number. Only if all of that fails does it settle for another
+// print of the same name, and it marks the card so the app can say so.
+async function lookupCard(e) {
+  const plain = e.name.replace(/\s*\([^)]*\)\s*$/, "");
+  const names = plain !== e.name ? [e.name, plain] : [e.name];
+  if (/^basic .+ energy$/i.test(plain)) names.push(plain.replace(/^basic /i, ""));
+  const attempt = async fn => { try { return await fn(); } catch { return null; } };
+  let r = null;
+  if (e.set && e.num) {
+    r = await attempt(() => ptcgFirst(`set.ptcgoCode:${e.set} number:${e.num}`));
+    for (const n of names) { if (r) break; r = await attempt(() => ptcgFirst(`${quoteName(n)} number:${e.num}`)); }
+    for (const n of names) { if (r) break; r = await attempt(() => lookupTcgdex(n, e.num)); }
+    if (r) return Object.assign(r, { exact: true });
+  }
+  for (const n of names) { if (r) break; r = await attempt(() => ptcgFirst(quoteName(n))); }
+  for (const n of names) { if (r) break; r = await attempt(() => lookupTcgdex(n)); }
+  if (r) r.exact = !(e.set && e.num);
+  return r;
+}
+async function resolveEntries(entries, onProgress) {
+  const todo = entries.filter(e => { const c = CARDS[entryKey(e)]; return !c || !c.img || c.exact === false; });
+  let done = 0, i = 0;
+  async function worker() {
+    while (i < todo.length) {
+      const e = todo[i++];
+      const found = await lookupCard(e);
+      CARDS[entryKey(e)] = Object.assign({ name: e.name, supertype: e.section, subtypes: [], hp: null, types: [], img: null, imgLg: null, src: null }, found || {}, { supertype: (found && found.supertype) || e.section });
+      onProgress(++done, todo.length, e.name, !!found);
+    }
+  }
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  saveJSON(STORE_CARDS, CARDS);
+}
+
+/* ---------- card helpers ---------- */
+const keyOf = uid => S.keys[uid] || (S.bkeys || {})[uid] || (S.skeys || {})[uid];
+const D = uid => CARDS[keyOf(uid)] || { name: "Unknown card", supertype: null, subtypes: [] };
+const isPokemon = uid => D(uid).supertype === "Pokémon";
+const isBasic = uid => isPokemon(uid) && (D(uid).subtypes || []).some(s => /^basic$/i.test(s));
+const isStadium = uid => (D(uid).subtypes || []).some(s => /stadium/i.test(s));
+const isItem = uid => D(uid).supertype === "Trainer" && (D(uid).subtypes || []).some(s => /^item$/i.test(s)) && !(D(uid).subtypes || []).some(s => /tool/i.test(s));
+const isSupporter = uid => D(uid).supertype === "Trainer" && (D(uid).subtypes || []).some(s => /supporter/i.test(s));
+function energyType(uid) {
+  const d = D(uid); if (d.supertype !== "Energy") return null;
+  const t = (d.types && d.types[0]) || Object.values(ENERGY_SYMBOLS).find(n => d.name.includes(n));
+  return t || null;
+}
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function allUids() { return Object.keys(S.keys); }
+const slotNames = () => ["active", "bench0", "bench1", "bench2", "bench3", "bench4"];
+function slotGet(n) { return n === "active" ? S.active : S.bench[+n.slice(5)]; }
+function slotSet(n, v) { if (n === "active") S.active = v; else S.bench[+n.slice(5)] = v; }
+function slotLabel(n) { return n === "active" ? "Active" : "Bench " + (+n.slice(5) + 1); }
+function slotTop(sl) { return sl.stack[sl.stack.length - 1]; }
+function slotCards(sl) { return [...sl.stack, ...sl.att]; }
+const ZONE_LABEL = { hand: "hand", deck: "top of deck", deckBottom: "bottom of deck", discard: "discard", lost: "Lost Zone", prizes: "prizes", stadium: "Stadium", bdiscard: "the boss's discard", blost: "the boss's Lost Zone", benergy: "the boss" };
+
+/* ---------- actions ---------- */
+// Fields every player at the table shares. Everything else is one player's own board.
+const SHARED_FIELDS = ["players", "turn", "supportersUsed", "stadium", "stadiumOwner", "skeys", "dmg", "log",
+  "bkeys", "bossCfg", "bdeck", "bdiscard", "blost", "benergy", "btool", "bstatus", "bt", "result", "ready", "raidId", "rev", "returns"];
+const sharedPart = st => { const o = {}; for (const k of SHARED_FIELDS) o[k] = st[k] === undefined ? null : st[k]; return o; };
+const localPart = st => { const o = {}; for (const k in st) if (!SHARED_FIELDS.includes(k)) o[k] = st[k]; return o; };
+
+// Every change goes through act(): it can be undone, it's logged, saved, and in a room it's shared.
+function act(label, fn, opts = {}) {
+  const snap = JSON.stringify(S);
+  const sharedBefore = JSON.stringify(sharedPart(S));
+  const logLabel = label && MP && !opts.noName ? `${MP.name}: ${label}` : label;
+  const run = () => {
+    const r = fn();
+    if (r === false) return false;
+    if (logLabel) { S.log.unshift({ t: S.turn, msg: logLabel }); if (S.log.length > 150) S.log.length = 150; }
+  };
+  if (run() === false) return;
+  const sharedChanged = JSON.stringify(sharedPart(S)) !== sharedBefore;
+  const before = JSON.parse(snap);
+  const entry = { snap, shared: sharedChanged, supDelta: (S.supportersUsed || 0) - (before.supportersUsed || 0), revAfter: null, label };
+  if (!opts.noUndo) { undoStack.push(entry); if (undoStack.length > 80) undoStack.shift(); }
+  if (!opts.keepSel) validateSelection();
+  save(); render();
+  if (MP) { publishSeat(); if (sharedChanged) commitShared(snap, run, entry); }
+}
+function undo() {
+  if (!undoStack.length) return toast("Nothing to undo");
+  const e = undoStack.pop();
+  const before = JSON.parse(e.snap);
+  if (!MP) { S = before; validateSelection(); save(); render(); toast("Undone"); return; }
+  Object.assign(S, localPart(before));   // your own board goes straight back
+  validateSelection(); save(); render(); publishSeat();
+  if (e.shared) undoShared(e, before);
+  else toast("Undone");
+}
+function save() { saveJSON(STORE_GAME, S); }
+
+function sameSpot(src, dst) {
+  if (src.zone === "slot" || src.zone === "att") return dst.zone === "slot" && dst.slot === src.slot;
+  return src.zone === dst.zone;
+}
+function pull(src) {
+  if (src.zone === "slot") { const sl = slotGet(src.slot); slotSet(src.slot, null); return { slotObj: sl }; }
+  if (src.zone === "att") { const sl = slotGet(src.slot); sl.att = sl.att.filter(u => u !== src.uid); return { uids: [src.uid] }; }
+  if (src.zone === "stadium") { S.stadium = null; S.stadiumOwner = null; return { uids: [src.uid] }; }
+  if (src.zone === "btool") { S.btool = null; return { uids: [src.uid] }; }
+  S[src.zone] = S[src.zone].filter(u => u !== src.uid); return { uids: [src.uid] };
+}
+function place(item, dst) {
+  const uids = item.slotObj ? slotCards(item.slotObj) : item.uids;
+  switch (dst.zone) {
+    case "slot": {
+      const cur = slotGet(dst.slot);
+      if (item.slotObj) { slotSet(dst.slot, item.slotObj); return cur; }
+      const u = uids[0];
+      if (!cur) slotSet(dst.slot, { stack: [u], att: [], dmg: 0, status: [] });
+      else if (isPokemon(u)) { cur.stack.push(u); cur.status = []; }
+      else cur.att.push(u);
+      return null;
+    }
+    case "stadium":
+      if (S.stadium) discardStadium(S.stadium, S.stadiumOwner);
+      S.stadium = uids[0]; S.stadiumOwner = item.owner || mySeat();
+      if (S.keys[uids[0]]) S.skeys = { ...(S.skeys || {}), [uids[0]]: S.keys[uids[0]] };   // so teammates can see it
+      return null;
+    case "benergy": S.benergy.push(...uids); return null;
+    case "hand": S.hand.push(...uids); return null;
+    case "prizes": S.prizes.push(...uids); return null;
+    case "deckBottom": S.deck.push(...uids); return null;
+    default: S[dst.zone].unshift(...uids); return null;
+  }
+}
+// A Stadium that leaves play goes to its owner's discard pile, even if that owner is a teammate.
+function discardStadium(uid, owner) {
+  if (owner === "boss") S.bdiscard.unshift(uid);
+  else if (!MP || !owner || owner === mySeat() || owner === "player") S.discard.unshift(uid);
+  else S.returns = [...(S.returns || []), { id: Math.random().toString(36).slice(2, 9), seat: owner, uid, zone: "discard" }];
+}
+function describe(src) {
+  if (src.zone === "slot") { const sl = slotGet(src.slot); return sl ? D(slotTop(sl)).name : "Pokémon"; }
+  return D(src.uid).name;
+}
+// A Supporter going from hand to the discard pile counts as the team playing one,
+// unless the move says otherwise (e.g. discarding it to pay for Ultra Ball).
+function move(src, dst, opts = {}) {
+  if (!src || !dst || sameSpot(src, dst)) return;
+  const playsSupporter = !opts.noCount && src.zone === "hand" && dst.zone === "discard" && isSupporter(src.uid);
+  if (src.zone === "slot" && dst.zone === "stadium") return toast("Only a Stadium card goes in that spot");
+  if (src.zone === "slot" && /^b/.test(dst.zone)) return toast("Your Pokémon can't go to the boss's side");
+  if (src.zone === "stadium" && S.stadiumOwner === "boss" && dst.zone === "discard") dst = { zone: "bdiscard" };
+  if (src.zone === "stadium" && MP && S.stadiumOwner && S.stadiumOwner !== "boss" && S.stadiumOwner !== mySeat()) {
+    if (dst.zone !== "discard") return toast(`That Stadium belongs to ${seatName(S.stadiumOwner)}. You can only discard it.`);
+    return act(`Discarded ${describe(src)}, back to ${seatName(S.stadiumOwner)}'s discard pile`, () => { const o = S.stadiumOwner; S.stadium = null; S.stadiumOwner = null; discardStadium(src.uid, o); });
+  }
+  if (src.zone === "slot" && dst.zone === "slot" && dst.slot === src.slot) return;
+  const name = describe(src);
+  let label;
+  if (dst.zone === "slot") {
+    const cur = slotGet(dst.slot);
+    if (src.zone === "slot") label = cur ? `${name} switched with ${D(slotTop(cur)).name}` : `${name} moved to ${slotLabel(dst.slot)}`;
+    else if (!cur) label = `${name} played to ${slotLabel(dst.slot)}`;
+    else label = isPokemon(src.uid) ? `${D(slotTop(cur)).name} evolved into ${name}` : `${name} attached to ${D(slotTop(cur)).name}`;
+  } else if (src.zone === "slot" && dst.zone === "discard") label = `${name} went to the discard pile with everything attached`;
+  else if (opts.label) label = opts.label;
+  else if (playsSupporter) label = `Played ${name} (Supporter ${S.supportersUsed + 1} of ${S.players})`;
+  else label = `${name} → ${ZONE_LABEL[dst.zone] || dst.zone}`;
+  act(label, () => {
+    const item = pull(src);
+    const displaced = place(item, dst);
+    if (displaced) slotSet(src.slot, displaced);
+    if (playsSupporter) S.supportersUsed++;
+  });
+  if (playsSupporter) {
+    if (S.supportersUsed > S.players) toast(`That's ${S.supportersUsed} Supporters this turn. Your team's limit is ${S.players}.`);
+    else toast(`Supporter ${S.supportersUsed} of ${S.players} played. Discarded it as a cost? Press Undo, then use “Discard (not played)”.`);
+  }
+}
+function setSupporters(n) {
+  n = Math.max(0, n);
+  if (n === S.supportersUsed) return;
+  act(`Supporter count set to ${n} of ${S.players}`, () => { S.supportersUsed = n; }, { keepSel: true });
+}
+function setPlayers(n) {
+  if (n === S.players) return;
+  if (S.bt) return toast("Change the player count between turns, not during the boss turn");
+  act(`Players set to ${n}`, () => { S.players = n; S.dmg = Array.from({ length: n }, (_, i) => (S.dmg || [])[i] || 0); }, { keepSel: true });
+}
+function draw(n = 1) {
+  if (!S.deck.length) return toast("Your deck is empty. In Raid Format you keep playing and skip the draw.");
+  act(n === 1 ? "Drew a card" : `Drew ${n} cards`, () => { for (let i = 0; i < n && S.deck.length; i++) S.hand.push(S.deck.shift()); });
+}
+function shuffleDeck() { act("Shuffled the deck", () => { S.deck = shuffle(S.deck); }); }
+// Shuffles your cards back into your deck, draws 7 (mulliganing if needed) and sets 6 Prize cards.
+// Only touches your own board. Call inside act().
+function setupMyBoard() {
+  S.deck = shuffle(allUids()); S.hand = []; S.discard = []; S.lost = []; S.prizes = []; S.active = null; S.bench = [null, null, null, null, null];
+  if (S.stadium && S.stadiumOwner === mySeat()) { S.stadium = null; S.stadiumOwner = null; }
+  let mulligans = 0;
+  const knowsBasics = allUids().some(isBasic);   // card details may not have loaded
+  for (;;) {
+    S.hand = S.deck.splice(0, 7);
+    if (!knowsBasics || S.hand.some(isBasic) || mulligans >= 15) break;
+    mulligans++; S.deck = shuffle([...S.deck, ...S.hand]);
+  }
+  S.prizes = S.deck.splice(0, 6);
+  S.started = true; S.seenHits = []; S.myRaidId = S.raidId;
+  return mulligans;
+}
+const mulliganNote = n => `Mulliganed ${n}×: no Basic Pokémon in the opening hand (the boss draws nothing extra)`;
+let confirmNewAt = 0;
+function newGame() {
+  if (!allUids().length) return openImport();
+  if (MP && Date.now() - confirmNewAt > 4000) { confirmNewAt = Date.now(); return toast("This restarts the raid for everyone in the room. Press New game again to confirm."); }
+  act(hasBoss() ? "Started a new raid: everyone drew 7 and set 6 Prize cards, and the boss deck was shuffled" : "New game: drew 7 and set 6 Prize cards", () => {
+    S.stadium = null; S.stadiumOwner = null; S.returns = [];
+    S.raidId = (S.raidId || 1) + 1;
+    const m = setupMyBoard();
+    S.turn = 1; S.supportersUsed = 0; S.ready = {};
+    S.log = []; S.dmg = Array(S.players).fill(0);
+    if (hasBoss()) resetBoss();
+    if (m) S.log.unshift({ t: 1, msg: (MP ? MP.name + ": " : "") + mulliganNote(m) });
+  });
+  selected = null; closeViewer(); render();
+}
+function endTurn() {
+  if (hasBoss()) return startBossTurn();
+  act(`Ended turn ${S.turn}`, () => { S.turn++; S.supportersUsed = 0; S.dmg = Array(S.players).fill(0); });
+}
+
+/* ---------- hand sorting ---------- */
+// Pokémon by evolution line (lines with evolutions first, Basic → Stage 1 → Stage 2),
+// then Trainers (Item, Tool, Stadium, Supporter), then Energy (Basic, then Special).
+function trainerRank(d) {
+  const st = (d.subtypes || []).join(" ");
+  if (/supporter/i.test(st)) return 3;
+  if (/stadium/i.test(st)) return 2;
+  if (/tool/i.test(st)) return 1;
+  if (/item/i.test(st)) return 0;
+  return 4;
+}
+function stageRank(d) {
+  const st = d.subtypes || [];
+  if (st.includes("Stage 2")) return 2;
+  if (st.includes("Stage 1") || d.evolvesFrom) return 1;
+  return 0;
+}
+function sortHand() {
+  if (S.hand.length < 2) return;
+  const keys = Object.values(S.keys);
+  const listIdx = {}; keys.forEach((k, i) => { if (!(k in listIdx)) listIdx[k] = i; });
+  const byName = {}; for (const k of keys) { const d = CARDS[k]; if (d && !byName[d.name]) byName[d.name] = { d, idx: listIdx[k] }; }
+  // When a middle stage isn't in the deck (Pidgeot ex with no Pidgeotto, via Rare Candy),
+  // link the missing name to the Basic whose name shares the longest start (Pidgeotto → Pidgey).
+  const basics = Object.values(byName).filter(x => x.d.supertype === "Pokémon" && !x.d.evolvesFrom).map(x => x.d.name);
+  const shared = (a, b) => { let i = 0; while (i < a.length && i < b.length && a[i].toLowerCase() === b[i].toLowerCase()) i++; return i; };
+  const guessBasic = missing => { let best = null, n = 3; for (const b of basics) { const k = shared(b, missing); if (k > n) { n = k; best = b; } } return best; };
+  const rootOf = d => {
+    let name = d.name, from = d.evolvesFrom, guard = 0;
+    while (from && guard++ < 5) { name = from; from = byName[from]?.d.evolvesFrom; }
+    return byName[name] ? name : (guessBasic(name) || name);
+  };
+  const lines = {};
+  for (const n in byName) {
+    const { d, idx } = byName[n]; if (d.supertype !== "Pokémon") continue;
+    const r = rootOf(d); const L = lines[r] || (lines[r] = { idx: Infinity, evolves: false });
+    L.idx = Math.min(L.idx, idx); if (stageRank(d) > 0) L.evolves = true;
+  }
+  const keyOf = uid => {
+    const d = D(uid);
+    if (d.supertype === "Pokémon") { const L = lines[rootOf(d)] || { idx: 999, evolves: false }; return [0, (L.evolves ? 0 : 1000) + L.idx, stageRank(d), d.name]; }
+    if (d.supertype === "Trainer") return [1, trainerRank(d), 0, d.name];
+    if (d.supertype === "Energy") return [2, (d.subtypes || []).includes("Special") ? 1 : 0, 0, d.name];
+    return [3, 0, 0, d.name];
+  };
+  const cmp = (a, b) => { const x = keyOf(a), y = keyOf(b); for (let i = 0; i < 4; i++) { if (x[i] < y[i]) return -1; if (x[i] > y[i]) return 1; } return 0; };
+  const sorted = S.hand.slice().sort(cmp);
+  if (sorted.every((u, i) => u === S.hand[i])) return toast("Your hand is already sorted");
+  act("Sorted hand", () => { S.hand = sorted; }, { keepSel: true });
+}
+
+/* ---------- selection ---------- */
+function validateSelection() {
+  if (!selected) return;
+  const s = selected;
+  let ok = false;
+  if (s.zone === "slot") ok = !!slotGet(s.slot);
+  else if (s.zone === "att") ok = !!slotGet(s.slot) && slotGet(s.slot).att.includes(s.uid);
+  else if (s.zone === "stadium") ok = S.stadium === s.uid;
+  else if (s.zone === "btool") ok = S.btool === s.uid;
+  else ok = (S[s.zone] || []).includes(s.uid);
+  if (!ok) {
+    // follow a single card to wherever it went
+    if (s.uid) { const where = locate(s.uid); selected = where; } else selected = null;
+  }
+}
+function locate(uid) {
+  for (const z of ["hand", "deck", "discard", "lost", "prizes"]) if (S[z].includes(uid)) return z === "deck" || z === "prizes" ? null : { zone: z, uid };
+  if (S.stadium === uid) return { zone: "stadium", uid };
+  for (const z of ["benergy", "bdiscard", "blost"]) if ((S[z] || []).includes(uid)) return { zone: z, uid };
+  if (S.btool === uid) return { zone: "btool", uid };
+  for (const n of slotNames()) { const sl = slotGet(n); if (!sl) continue; if (sl.stack.includes(uid)) return { zone: "slot", slot: n }; if (sl.att.includes(uid)) return { zone: "att", slot: n, uid }; }
+  return null;
+}
+function select(src) { selected = src; render(); }
+
+/* ---------- rendering ---------- */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function cardEl(uid, opts = {}) {
+  const d = opts.key ? (CARDS[opts.key] || { name: "Card", supertype: null }) : D(uid);
+  const c = el("div", "card");
+  c.dataset.type = d.supertype || "Card";
+  const src = opts.large ? (d.imgLg || d.img) : d.img;
+  if (src) {
+    const img = new Image(); img.src = src; img.alt = d.name; img.draggable = false; img.decoding = "async";
+    img.onerror = () => { img.remove(); c.classList.add("noimg"); };
+    c.append(img);
+  } else c.classList.add("noimg");
+  c.append(el("span", "cap", d.name));
+  return c;
+}
+const backEl = () => el("div", "card back");
+function dragAttrs(node, src) { node.dataset.drag = "1"; for (const k in src) node.dataset[k === "zone" ? "zone" : k] = src[k]; return node; }
+function isSel(src) { return selected && selected.zone === src.zone && selected.uid === src.uid && selected.slot === src.slot; }
+
+function renderSlot(name, host) {
+  const sl = slotGet(name);
+  const box = el("div", "slot" + (name === "active" ? " active" : "") + (sl ? " filled" : ""));
+  box.dataset.dropzone = "slot"; box.dataset.dropslot = name;
+  box.append(el("span", "zone-label", slotLabel(name)));
+  if (sl) {
+    const top = slotTop(sl);
+    const p = dragAttrs(el("div", "pkm"), { zone: "slot", slot: name });
+    if (isSel({ zone: "slot", slot: name })) p.classList.add("selected");
+    if (sl.stack.length > 1) p.append(el("div", "under"));
+    p.append(cardEl(top));
+    if (sl.dmg) p.append(el("span", "badge", sl.dmg));
+    box.append(p);
+    const hp = D(top).hp;
+    if (hp) { const left = hp - sl.dmg; box.append(el("span", "hpline" + (left <= 0 ? " low" : ""), left <= 0 ? `KO · ${hp} HP` : `${left} / ${hp} HP`)); }
+    if (sl.status.length || sl.att.length) {
+      const chips = el("div", "chips");
+      for (const s of sl.status) chips.append(el("span", "status", s));
+      for (const u of sl.att) {
+        const ch = dragAttrs(el("span", "chip"), { zone: "att", slot: name, uid: u });
+        const t = energyType(u); const dot = el("i"); if (t) dot.style.background = ENERGY_COLORS[t] || ""; else dot.style.background = "var(--amber)";
+        ch.append(dot, D(u).name.replace(/^Basic /, "")); ch.title = D(u).name;
+        if (isSel({ zone: "att", slot: name, uid: u })) ch.style.borderColor = "var(--amber)";
+        chips.append(ch);
+      }
+      box.append(chips);
+    }
+  } else {
+    const ph = el("div", "card empty"); box.append(ph);
+  }
+  host.append(box);
+}
+function renderPile(zone, host) {
+  host.replaceChildren();
+  for (const k of ["drag", "zone", "uid", "slot"]) delete host.dataset[k];
+  const arr = S[zone];
+  if (!arr.length) { host.append(el("div", "card empty")); return; }
+  if (zone === "deck") {
+    host.append(backEl()); if (arr.length > 1) host.firstChild.style.transform = "translate(2px,2px)";
+    const top = backEl(); dragAttrs(host, { zone: "deck" }); host.append(top);
+  } else {
+    dragAttrs(host, { zone, uid: arr[0] });
+    host.append(cardEl(arr[0]));
+  }
+}
+function render() {
+  $("deckName").textContent = S.deckName ? `${S.deckName} · ${allUids().length} cards` : "No deck loaded";
+  $("turnNo").textContent = S.turn;
+  $("players").value = String(S.players);
+  $("supUsed").textContent = S.supportersUsed; $("supMax").textContent = S.players;
+  $("supBox").classList.toggle("full", S.supportersUsed >= S.players);
+  $("supBox").classList.toggle("over", S.supportersUsed > S.players);
+  $("supMinus").disabled = S.supportersUsed <= 0;
+  if ($("calcDamage").children.length !== S.players || (S.dmg || []).length !== S.players) renderCalcInputs(); else calc();
+  renderBoss();
+  renderHeaderMP(); renderTeam();
+  $("btnUndo").disabled = !undoStack.length;
+
+  // prizes
+  const pz = $("prizes"); pz.replaceChildren();
+  S.prizes.forEach(u => { const b = dragAttrs(backEl(), { zone: "prizes", uid: u }); b.title = "Take this Prize card"; b.style.touchAction = "none"; pz.append(b); });
+  $("prizeCount").textContent = S.prizes.length;
+
+  // active + bench
+  const a = $("activeSlot"); a.replaceChildren(); renderSlot("active", a);
+  const b = $("bench"); b.replaceChildren(); for (let i = 0; i < 5; i++) renderSlot("bench" + i, b);
+
+  // stadium
+  const st = $("stadium"); st.replaceChildren();
+  if (S.stadium) { const c = dragAttrs(cardEl(S.stadium), { zone: "stadium", uid: S.stadium }); c.style.touchAction = "none"; if (isSel({ zone: "stadium", uid: S.stadium })) c.classList.add("selected"); st.append(c); }
+  else st.append(el("div", "card empty"));
+
+  // piles
+  renderPile("deck", $("deckPile")); renderPile("discard", $("discardPile")); renderPile("lost", $("lostPile"));
+  $("deckCount").textContent = S.deck.length; $("discardCount").textContent = S.discard.length; $("lostCount").textContent = S.lost.length;
+
+  // hand
+  const h = $("hand"); h.replaceChildren();
+  S.hand.forEach(u => { const c = dragAttrs(cardEl(u), { zone: "hand", uid: u }); if (isSel({ zone: "hand", uid: u })) c.classList.add("selected"); h.append(c); });
+  $("handCount").textContent = S.hand.length;
+
+  // log
+  const lg = $("log"); lg.replaceChildren();
+  if (!S.log.length) lg.append(el("li", null, "Moves you make show up here."));
+  S.log.slice(0, 80).forEach(e => { const li = el("li"); li.append(`T${e.t} · `, el("b", null, e.msg)); lg.append(li); });
+
+  renderInspector();
+  if (viewerZone) renderViewer();
+}
+
+/* ---------- inspector ---------- */
+function btn(label, fn, cls) { const b = el("button", cls || null, label); b.type = "button"; b.addEventListener("click", fn); return b; }
+function renderInspector() {
+  const box = $("inspector"); box.replaceChildren();
+  box.classList.toggle("has-sel", !!selected);
+  const head = el("div"); head.style.display = "flex"; head.style.alignItems = "center";
+  const h2 = el("h2", null, "Card"); h2.style.marginRight = "auto"; head.append(h2);
+  if (selected) head.append(btn("Close", () => select(null), "mini insp-close"));
+  box.append(head);
+  if (!selected) { box.append(el("p", "empty-note", "Click any face-up card to see it large and get actions: attach, evolve, add damage, knock out, send to the Lost Zone.")); return; }
+
+  const s = selected;
+  const isSlot = s.zone === "slot";
+  const sl = isSlot ? slotGet(s.slot) : null;
+  const uid = isSlot ? slotTop(sl) : s.uid;
+  const d = D(uid);
+
+  const top = el("div", "insp-top");
+  const art = el("button", "insp-art"); art.type = "button";
+  art.title = "Show the card full size"; art.setAttribute("aria-label", `Show ${d.name} full size`);
+  art.append(cardEl(uid, { large: true }));
+  art.addEventListener("click", () => openZoom(uid));
+  top.append(art);
+  const info = el("div");
+  info.append(el("p", "insp-name", d.name));
+  const bits = [d.supertype, ...(d.subtypes || [])].filter(Boolean);
+  info.append(el("div", "insp-sub", bits.join(" · ") || "Card"));
+  if (d.print) info.append(el("div", "insp-sub", `Print shown: ${d.print}${d.rarity ? " · " + d.rarity : ""}`));
+  if (d.exact === false) { const w = el("div", "insp-warn", "The exact print from your deck list wasn't found, so this is another version with the same name. Its text may differ."); info.append(w); }
+  if (d.hp) info.append(el("div", "insp-sub", `HP ${d.hp}${sl ? ` · ${sl.dmg} damage` : ""}`));
+  const whereTxt = isSlot ? slotLabel(s.slot) : s.zone === "att" ? `Attached to ${D(slotTop(slotGet(s.slot))).name}` : ({ hand: "In your hand", discard: "In the discard pile", lost: "In the Lost Zone", deck: "In your deck", prizes: "A Prize card", stadium: "Stadium in play" }[s.zone] || "");
+  info.append(el("div", "insp-sub", whereTxt));
+  if (sl && sl.stack.length > 1) info.append(el("div", "insp-sub", "Evolved from " + sl.stack.slice(0, -1).map(u => D(u).name).join(" → ")));
+  if (!d.img && d.src === null) info.append(el("div", "insp-sub", "Art not found for this card"));
+  top.append(info);
+  box.append(top);
+
+  if (isSlot) {
+    box.append(el("div", "acts-label", "Damage"));
+    const dm = el("div", "acts");
+    [[-10, "−10"], [10, "+10"], [30, "+30"], [50, "+50"], [100, "+100"]].forEach(([v, l]) => dm.append(btn(l, () => act(null, () => { sl.dmg = Math.max(0, sl.dmg + v); }, { keepSel: true }))));
+    dm.append(btn("Clear", () => act(`Healed ${d.name}`, () => { sl.dmg = 0; }, { keepSel: true })));
+    box.append(dm);
+    box.append(el("div", "acts-label", "Special Conditions"));
+    const stt = el("div", "acts");
+    STATUSES.forEach(st => { const on = sl.status.includes(st); stt.append(btn(st, () => act(`${d.name} ${on ? "is no longer" : "is now"} ${st}`, () => { sl.status = on ? sl.status.filter(x => x !== st) : [...sl.status.filter(x => !(["Asleep", "Confused", "Paralyzed"].includes(st) && ["Asleep", "Confused", "Paralyzed"].includes(x))), st]; }, { keepSel: true }), on ? "on" : "")); });
+    box.append(stt);
+    box.append(el("div", "acts-label", "Move"));
+    const mv = el("div", "acts");
+    mv.append(btn("Knocked Out → discard", () => { move(s, { zone: "discard" }); toast("Take your Prize card(s) from the left"); }));
+    for (const n of slotNames()) if (n !== s.slot) { const o = slotGet(n); mv.append(btn(o ? `Switch with ${slotLabel(n)}` : `Move to ${slotLabel(n)}`, () => { move(s, { zone: "slot", slot: n }); selected = { zone: "slot", slot: n }; render(); })); }
+    mv.append(btn("Return to hand", () => move(s, { zone: "hand" })));
+    mv.append(btn("Lost Zone", () => move(s, { zone: "lost" })));
+    if (sl.stack.length > 1) mv.append(btn("Devolve (top card to hand)", () => act(`Devolved ${d.name}`, () => { S.hand.push(sl.stack.pop()); }, { keepSel: true })));
+    box.append(mv);
+    if (sl.att.length) {
+      box.append(el("div", "acts-label", "Attached"));
+      const at = el("div", "acts");
+      sl.att.forEach(u => at.append(btn(`Discard ${D(u).name.replace(/^Basic /, "")}`, () => { move({ zone: "att", slot: s.slot, uid: u }, { zone: "discard" }); selected = { zone: "slot", slot: s.slot }; render(); })));
+      box.append(at);
+    }
+    return;
+  }
+
+  // single card
+  const plays = el("div", "acts");
+  if (isSupporter(uid) && s.zone === "hand") plays.append(btn(`Play Supporter (${S.supportersUsed} of ${S.players} used)`, () => move(s, { zone: "discard" }), S.supportersUsed >= S.players ? "" : "primary"));
+  if (isItem(uid) && s.zone === "hand") plays.append(btn("Play Item", () => move(s, { zone: "discard" }, { label: `Played ${d.name} (Item)` }), "primary"));
+  if (isStadium(uid) && s.zone !== "stadium") plays.append(btn("Play Stadium", () => move(s, { zone: "stadium" }), s.zone === "hand" ? "primary" : ""));
+  if (plays.childNodes.length) { box.append(el("div", "acts-label", "Play")); box.append(plays); }
+
+  const pl = el("div", "acts");
+  const canAttach = !(isItem(uid) || isSupporter(uid) || isStadium(uid));   // Pokémon evolve; Energy and Tools attach
+  for (const n of slotNames()) {
+    const o = slotGet(n);
+    if (o && canAttach) pl.append(btn(`${isPokemon(uid) ? "Evolve" : "Attach to"} ${D(slotTop(o)).name} (${slotLabel(n)})`, () => move(s, { zone: "slot", slot: n })));
+  }
+  if (isPokemon(uid)) {
+    if (!S.active) pl.append(btn("Active", () => move(s, { zone: "slot", slot: "active" })));
+    const free = S.bench.findIndex(x => !x);
+    if (free >= 0) pl.append(btn("Bench", () => move(s, { zone: "slot", slot: "bench" + free })));
+  }
+  // Items, Supporters and Stadiums are played above, so they only show this section when it has something
+  const playedCard = isItem(uid) || isSupporter(uid) || isStadium(uid);
+  if (!pl.childNodes.length && !playedCard) pl.append(el("span", "insp-sub", "Put a Pokémon in play first."));
+  if (pl.childNodes.length) { box.append(el("div", "acts-label", isPokemon(uid) ? "Put in play" : "Attach")); box.append(pl); }
+  box.append(el("div", "acts-label", "Move to"));
+  const mv = el("div", "acts");
+  const supInHand = isSupporter(uid) && s.zone === "hand";
+  const bossSide = /^b/.test(s.zone) || (s.zone === "stadium" && S.stadiumOwner === "boss");
+  if (bossSide) {
+    box.append(el("div", "acts-label", "Boss's card"));
+    const bm = el("div", "acts");
+    if (s.zone !== "bdiscard") bm.append(btn("Boss's discard", () => move(s, { zone: "bdiscard" }), "primary"));
+    if (s.zone !== "blost") bm.append(btn("Boss's Lost Zone", () => move(s, { zone: "blost" })));
+    box.append(bm);
+    return;
+  }
+  [["hand", "Hand"], ["discard", supInHand ? "Discard (not played)" : "Discard"], ["lost", "Lost Zone"], ["deck", "Top of deck"], ["deckBottom", "Bottom of deck"], ["prizes", "Prizes"]].forEach(([z, l]) => { if (z !== s.zone) mv.append(btn(l, () => move(s, { zone: z }, { noCount: z === "discard" && supInHand }))); });
+  box.append(mv);
+}
+
+/* ---------- full-size zoom ---------- */
+function openZoom(uid) {
+  const d = D(uid); const z = $("zoom"), box = $("zoomCard");
+  box.replaceChildren();
+  const src = d.imgLg || d.img;
+  if (src) { const img = new Image(); img.src = src; img.alt = d.name; img.draggable = false; box.append(img); }
+  else { const c = cardEl(uid); c.classList.add("zoom-text"); box.append(c); }
+  z.hidden = false; $("zoomClose").focus();
+}
+function closeZoom() { $("zoom").hidden = true; }
+
+/* ---------- viewer drawer ---------- */
+function openViewer(zone) { viewerZone = zone; $("drawer").hidden = false; renderViewer(); }
+function closeViewer() { viewerZone = null; $("drawer").hidden = true; }
+function renderViewer() {
+  const z = viewerZone, arr = S[z];
+  $("drawerTitle").textContent = { deck: "Searching your deck", discard: "Discard pile", lost: "Lost Zone", bdiscard: "Boss's discard pile", blost: "Boss's Lost Zone" }[z] + ` · ${arr.length}`;
+  $("drawerShuffle").hidden = z !== "deck";
+  const g = $("drawerGrid"); g.replaceChildren();
+  if (!arr.length) g.append(el("p", "empty-note", "Nothing here yet."));
+  arr.forEach(u => { const c = dragAttrs(cardEl(u), { zone: z, uid: u }); if (isSel({ zone: z, uid: u })) c.classList.add("selected"); g.append(c); });
+}
+
+/* ---------- pointer drag & drop ---------- */
+let drag = null;
+function srcFromNode(n) {
+  const z = n.dataset.zone;
+  if (z === "deck" && !n.dataset.uid) return S.deck.length ? { zone: "deck", uid: S.deck[0], fromPile: true } : null;
+  const s = { zone: z };
+  if (n.dataset.uid) s.uid = n.dataset.uid;
+  if (n.dataset.slot) s.slot = n.dataset.slot;
+  return s;
+}
+function dropFromPoint(x, y) {
+  const t = document.elementFromPoint(x, y);
+  const z = t && t.closest("[data-dropzone]");
+  if (!z) return null;
+  return { node: z, dst: { zone: z.dataset.dropzone, slot: z.dataset.dropslot } };
+}
+document.addEventListener("pointerdown", e => {
+  if (e.button !== 0) return;
+  const n = e.target.closest("[data-drag]");
+  if (!n || e.target.closest("button")) return;
+  drag = { node: n, x: e.clientX, y: e.clientY, started: false, over: null, id: e.pointerId };
+});
+document.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (!drag.started) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 7) return;
+    drag.src = srcFromNode(drag.node);
+    if (!drag.src) { drag = null; return; }
+    drag.started = true;
+    const vis = drag.node.querySelector(".card:last-of-type") || drag.node;
+    const shown = drag.src.fromPile ? cardEl(drag.src.uid) : vis.cloneNode(true);
+    const r = vis.getBoundingClientRect();
+    drag.ghost = el("div", "ghost"); drag.ghost.style.width = r.width + "px";
+    shown.classList.remove("selected"); shown.style.width = r.width + "px"; shown.style.height = r.height + "px";
+    drag.ghost.append(shown); document.body.append(drag.ghost);
+    document.body.classList.add("dragging");
+  }
+  e.preventDefault();
+  drag.ghost.style.left = e.clientX + "px"; drag.ghost.style.top = e.clientY + "px";
+  const hit = dropFromPoint(e.clientX, e.clientY);
+  const nn = hit ? hit.node : null;
+  if (nn !== drag.over) { if (drag.over) drag.over.classList.remove("over"); if (nn) nn.classList.add("over"); drag.over = nn; }
+}, { passive: false });
+function endDrag(e, cancelled) {
+  if (!drag || (e && e.pointerId !== drag.id)) return;
+  const d = drag; drag = null;
+  document.body.classList.remove("dragging");
+  if (d.over) d.over.classList.remove("over");
+  if (d.ghost) d.ghost.remove();
+  if (cancelled) return;
+  if (d.started) {
+    const hit = dropFromPoint(e.clientX, e.clientY);
+    if (hit) move(d.src, hit.dst);
+    return;
+  }
+  // a click
+  const src = srcFromNode(d.node);
+  if (!src) return;
+  if (src.zone === "deck" && src.fromPile) return draw();
+  if (src.zone === "prizes") return move(src, { zone: "hand" });
+  select(src);
+}
+document.addEventListener("pointerup", e => endDrag(e, false));
+document.addEventListener("pointercancel", e => endDrag(e, true));
+document.addEventListener("dragstart", e => e.preventDefault());
+
+/* ---------- import ---------- */
+function openImport() { $("importText").value = S.list || SAMPLE_DECK; $("importProgress").textContent = ""; $("importBack").hidden = false; $("importText").focus(); }
+function closeImport() { $("importBack").hidden = true; }
+async function loadDeck(text, name) {
+  const entries = parseDeck(text);
+  const total = entries.reduce((n, e) => n + e.count, 0);
+  if (!entries.length) { $("importProgress").textContent = "No cards found. Use lines like “4 Arven SVI 166”."; return false; }
+  $("importGo").disabled = true;
+  const prog = $("importProgress");
+  prog.textContent = `Looking up ${entries.length} cards…`;
+  let missing = 0;
+  await resolveEntries(entries, (done, of, n, ok) => { if (!ok) missing++; prog.textContent = `Looking up cards ${done}/${of}: ${n}`; });
+  $("importGo").disabled = false;
+  if (MP) {   // in a room, only your own board changes
+    const keys = {}; let j = 0;
+    for (const e of entries) for (let k = 0; k < e.count; k++) keys[`${MP.seat}:c${++j}`] = entryKey(e);
+    if (S.stadium && S.stadiumOwner === MP.seat) { S.stadium = null; S.stadiumOwner = null; }
+    S.keys = keys; S.deckName = name || guessDeckName(entries); S.list = text; undoStack = []; selected = null;
+    act(`switched to ${S.deckName} and drew a new opening hand`, () => { const m = setupMyBoard(); if (m) S.log.unshift({ t: S.turn, msg: `${MP.name}: ${mulliganNote(m)}` }); }, { noUndo: true });
+    uploadCards(Object.values(keys));
+    toast("Deck loaded. Your opening hand is ready.");
+    return true;
+  }
+  const fresh = emptyState();
+  for (const k of ["bkeys", "bossCfg", "players"]) if (S && S[k] != null) fresh[k] = S[k];
+  fresh.deckName = name || guessDeckName(entries);
+  fresh.list = text;
+  let i = 0;
+  for (const e of entries) for (let k = 0; k < e.count; k++) fresh.keys["c" + (++i)] = entryKey(e);
+  S = fresh; undoStack = []; selected = null;
+  const noArt = entries.filter(e => !CARDS[entryKey(e)].img).map(e => e.name);
+  const notExact = entries.filter(e => CARDS[entryKey(e)].img && CARDS[entryKey(e)].exact === false).map(e => `${e.name} ${e.set} ${e.num}`);
+  newGame(); undoStack = [];
+  render();
+  if (total !== 60) toast(`Loaded ${total} cards. A Raid deck is normally 60.`);
+  else if (notExact.length) {
+    S.log.unshift({ t: S.turn, msg: `Exact print not found, showing another version of: ${notExact.join(", ")}` }); save(); render();
+    toast(`Couldn't find the exact print for ${notExact.length} card${notExact.length > 1 ? "s" : ""}. See the game log.`);
+  }
+  else if (noArt.length) toast(`Loaded. No art found for: ${noArt.slice(0, 3).join(", ")}${noArt.length > 3 ? "…" : ""}`);
+  else toast("Deck loaded. Your opening hand is ready.");
+  return true;
+}
+function guessDeckName(entries) {
+  const p = entries.filter(e => (CARDS[entryKey(e)] || {}).supertype === "Pokémon").sort((a, b) => ((CARDS[entryKey(b)].hp || 0) - (CARDS[entryKey(a)].hp || 0)))[0];
+  return p ? p.name + " deck" : "My deck";
+}
+
+/* ---------- Raid boss ---------- */
+const DEFAULT_BOSS = "Roaring Moon ex PAR 124";
+const DEFAULT_BOSS_DECK = `Trainer: 42
+1 Avery CRE 130
+2 Boss's Orders PAL 172
+2 Bug Catcher FST 226
+1 Collapsed Stadium BRS 137
+1 Cook TWM 147
+2 Crushing Hammer SVI 168
+1 Doctor CRE 134
+2 Energy Retrieval SVI 171
+1 Energy Search SVI 172
+1 Fan of Waves BST 127
+2 Flannery CRE 139
+1 Galar Mine RCL 160
+1 Gordie EVS 149
+1 Honey CRE 142
+2 Hyper Potion SSH 166
+1 Leon VIV 154
+1 Lucky Ice Pop EVS 150
+1 Nugget RCL 162
+1 Old Cemetery CRE 147
+1 Path to the Peak CRE 148
+2 Pokégear 3.0 SVI 186
+1 Rocky Helmet SVI 193
+1 Schoolboy FST 238
+1 Schoolgirl FST 239
+1 Sidney FST 241
+1 Spikemuth DAA 170
+2 Spirit Mask EVS 160
+1 Team Yell Grunt SSH 184
+2 Tool Jammer BST 136
+1 Yell Horn DAA 173
+2 Pokémon Catcher SVI 187
+1 Lucky Helmet TWM 158
+
+Energy: 18
+18 Basic {D} Energy SVE 7`;
+const DIFFICULTIES = { easy: "Easy", medium: "Medium", hard: "Hard", extreme: "Extremely Hard" };
+// How to resolve a choice on a boss Trainer, per difficulty (raidformat.com/difficulty)
+const DIFF_GUIDE = {
+  easy: "Players make any choices on this card, reading it as generously to the players as possible.",
+  medium: "Make any choices on this card at random. The buttons below flip coins, roll a die and pick at random for you.",
+  hard: "The boss player makes the choices on this card, reading it in the boss's favor. For Boss's Orders, the team decides whether it hits one player or all of them.",
+  extreme: "The boss player makes every choice on this card, reading it as strictly in the boss's favor as possible."
+};
+const isTool = uid => (D(uid).subtypes || []).some(s => /tool/i.test(s));
+const hasBoss = () => !!(S.bkeys && S.bkeys.boss);
+const bossUids = () => Object.keys(S.bkeys || {}).filter(u => u !== "boss");
+const bossName = () => D("boss").name;
+const bossBonus = () => ((S.bstatus || []).includes("Poisoned") ? 10 : 0) + ((S.bstatus || []).includes("Burned") ? 20 : 0);
+const damageTotal = () => (S.dmg || []).reduce((a, b) => a + (Math.max(0, +b) || 0), 0);
+const divisorPlayers = () => S.bossCfg?.harsh ? Math.max(1, S.players - 1) : S.players;
+const millFor = (pending, healed) => Math.floor(Math.max(0, pending - healed) / (10 * divisorPlayers()));
+const attackDamage = a => parseInt(String(a?.damage || "").replace(/[^\d]/g, ""), 10) || 0;
+function affordableAttacks() {
+  const atk = D("boss").attacks || [];
+  return atk.map((a, i) => i).filter(i => (atk[i].cost || []).length <= S.benergy.length);
+}
+
+function resetBoss() {   // call inside act()
+  S.bdeck = shuffle(bossUids()); S.bdiscard = []; S.blost = []; S.benergy = []; S.btool = null; S.bstatus = []; S.bt = null; S.result = null;
+  if (S.stadiumOwner === "boss") { S.stadium = null; S.stadiumOwner = null; }
+}
+
+function bossDrawTop() {
+  if (!S.bdeck.length) {
+    if (!S.bdiscard.length) return null;
+    S.bdeck = shuffle(S.bdiscard); S.bdiscard = [];
+    S.log.unshift({ t: S.turn, msg: "The boss deck ran out, so its discard pile was shuffled into a new deck" });
+  }
+  return S.bdeck.shift();
+}
+
+function startBossTurn() {
+  if (S.result) return toast("This raid is over. Press New game to start another.");
+  if (S.bt) return;
+  const dmg = damageTotal(), bonus = bossBonus();
+  act(`Players' turn ${S.turn} ended: ${dmg} damage to the boss${bonus ? `, +${bonus} from its Special Conditions` : ""}. Boss turn begins.`, () => {
+    if (S.bt || S.result) return false;   // someone else already started it
+    const dmg = damageTotal(), bonus = bossBonus();
+    S.ready = {};
+    S.bt = { phase: "draw", toDraw: S.players + 1, drawn: 0, current: null, auto: false, note: "", healed: 0, pending: dmg + bonus, playerDmg: dmg, bonus, attackIdx: null, rolls: [] };
+    bossReveal();
+  });
+  closeViewer();
+}
+
+// Moves the boss turn on by one card. Call inside act().
+function bossReveal() {
+  const bt = S.bt;
+  if (bt.current && !bt.auto) S.bdiscard.unshift(bt.current);   // a resolved Trainer goes to the boss's discard
+  bt.current = null; bt.auto = false; bt.note = ""; bt.rolls = [];
+  if (bt.toDraw <= 0) return enterBossAttack();
+  const u = bossDrawTop();
+  if (!u) { bt.toDraw = 0; S.log.unshift({ t: S.turn, msg: "The boss has no cards left to draw" }); return enterBossAttack(); }
+  bt.toDraw--; bt.drawn++; bt.current = u;
+  const d = D(u);
+  if (d.supertype === "Energy") {
+    S.benergy.push(u); bt.auto = true;
+    bt.note = `Energy goes straight onto ${bossName()}. It now has ${S.benergy.length} Energy attached.`;
+    S.log.unshift({ t: S.turn, msg: `Boss drew ${d.name} and attached it (${S.benergy.length} Energy)` });
+  } else if (isTool(u)) {
+    const old = S.btool; if (old) S.bdiscard.unshift(old);
+    S.btool = u; bt.auto = true;
+    bt.note = old ? `Tool: attached to ${bossName()}, replacing ${D(old).name}.` : `Tool: attached to ${bossName()}.`;
+    S.log.unshift({ t: S.turn, msg: `Boss attached ${d.name}` });
+  } else if (isStadium(u)) {
+    const old = S.stadium;
+    if (old) discardStadium(old, S.stadiumOwner);
+    S.stadium = u; S.stadiumOwner = "boss"; bt.auto = true;
+    bt.note = old ? `Stadium: now in play, replacing ${D(old).name}. It affects every player and the boss.` : "Stadium: now in play. It affects every player and the boss.";
+    S.log.unshift({ t: S.turn, msg: `Boss played the Stadium ${d.name}` });
+  } else {
+    const kind = isSupporter(u) ? "Supporter" : isItem(u) ? "Item" : d.supertype || "Card";
+    bt.note = `${kind}: carry out this card's effect now, then press Done.`;
+    S.log.unshift({ t: S.turn, msg: `Boss drew ${d.name}` });
+  }
+}
+
+function enterBossAttack() {
+  const bt = S.bt; bt.phase = "attack"; bt.attackIdx = null;
+  const opts = affordableAttacks();
+  if (S.bossCfg.difficulty !== "extreme" && opts.length) bt.attackIdx = opts[Math.floor(Math.random() * opts.length)];
+}
+
+function bossNext() { const step = S.bt && S.bt.drawn; act(null, () => { if (!S.bt || S.bt.phase !== "draw" || S.bt.drawn !== step) return false; bossReveal(); }); }
+function bossExtraDraw() { act("The boss draws 1 more card this turn", () => { S.bt.toDraw++; }, { keepSel: true }); }
+function bossPickAttack(i) { act(`The boss player chose ${D("boss").attacks[i].name}`, () => { S.bt.attackIdx = i; }); }
+function bossAttack(applyDamage) {
+  const bt = S.bt, a = D("boss").attacks[bt.attackIdx], cost = (a.cost || []).length, dmg = attackDamage(a);
+  const target = S.active ? D(slotTop(S.active)).name : null;
+  const label = `${bossName()} used ${a.name}, discarding ${cost} Energy` + (applyDamage && target && dmg ? ` and doing ${dmg} damage to ${target}` : "");
+  const lbl = MP && applyDamage && dmg ? `${bossName()} used ${a.name}, discarding ${cost} Energy and doing ${dmg} damage to every player's Active Pokémon` : label;
+  act(lbl, () => {
+    if (!S.bt || S.bt.phase !== "attack") return false;
+    for (let i = 0; i < cost && S.benergy.length; i++) S.bdiscard.unshift(S.benergy.pop());
+    if (applyDamage && dmg) {
+      if (MP) S.bt.hit = { id: Math.random().toString(36).slice(2, 9), dmg, attack: a.name };   // each player applies it to their own Active
+      else if (S.active) S.active.dmg += dmg;
+    }
+    S.bt.phase = "end";
+  });
+  if (MP) processInbox();
+}
+function bossSkipAttack(reason) { act(`${bossName()} did not attack${reason ? ` (${reason})` : ""}`, () => { if (!S.bt || S.bt.phase !== "attack") return false; S.bt.phase = "end"; }); }
+function bossEndTurn() {
+  const bt = S.bt, n = millFor(bt.pending, bt.healed);
+  act(`End of boss turn: ${n} boss card${n === 1 ? "" : "s"} sent to the Lost Zone`, () => {
+    if (!S.bt || S.bt.phase !== "end") return false;
+    for (let i = 0; i < n; i++) {
+      if (!S.bdeck.length) { if (!S.bdiscard.length) break; S.bdeck = shuffle(S.bdiscard); S.bdiscard = []; }
+      S.blost.unshift(S.bdeck.shift());
+    }
+    S.bstatus = [];   // the boss recovers from Special Conditions at Pokémon Checkup
+    if (!S.bdeck.length && !S.bdiscard.length) { S.result = "players"; S.log.unshift({ t: S.turn, msg: "Every boss card is in the Lost Zone. The players win the raid!" }); }
+    S.bt = null; S.turn++; S.supportersUsed = 0; S.dmg = Array(S.players).fill(0); S.ready = {};
+  });
+}
+function bossRoll(kind) {
+  let msg;
+  if (kind === "coin") msg = `Coin flip: ${Math.random() < .5 ? "Heads" : "Tails"}`;
+  else if (kind === "d6") msg = `D6 roll: ${1 + Math.floor(Math.random() * 6)}`;
+  else if (kind === "player") msg = `Random player: Player ${1 + Math.floor(Math.random() * S.players)}`;
+  else {
+    const filled = S.bench.map((sl, i) => sl ? i : -1).filter(i => i >= 0);
+    msg = filled.length ? `Random Benched Pokémon: ${D(slotTop(S.bench[filled[Math.floor(Math.random() * filled.length)]])).name}` : "Random Benched Pokémon: you have none";
+  }
+  act(msg, () => { S.bt.rolls.push(msg); }, { keepSel: true });
+}
+function toggleBossStatus(st) {
+  const on = (S.bstatus || []).includes(st);
+  const rotation = ["Asleep", "Confused", "Paralyzed"];
+  act(`${bossName()} ${on ? "is no longer" : "is now"} ${st}`, () => {
+    S.bstatus = on ? S.bstatus.filter(x => x !== st) : [...S.bstatus.filter(x => !(rotation.includes(st) && rotation.includes(x))), st];
+  }, { keepSel: true });
+}
+
+/* ---------- boss setup ---------- */
+function openBossSetup() {
+  const cfg = S.bossCfg || {};
+  $("bossLine").value = cfg.line || DEFAULT_BOSS;
+  $("bossDiffSel").value = cfg.difficulty || "medium";
+  $("bossHarsh").checked = !!cfg.harsh;
+  $("bossDeckText").value = cfg.list || DEFAULT_BOSS_DECK;
+  $("bossProgress").textContent = "";
+  $("bossSetupBack").hidden = false; $("bossLine").focus();
+}
+function closeBossSetup() { $("bossSetupBack").hidden = true; }
+async function loadBoss(line, list, difficulty, harsh) {
+  const prog = $("bossProgress");
+  const be = parseDeck("1 " + line.trim().replace(/^\d+\s+/, ""))[0];
+  if (!be) { prog.textContent = "Enter the boss as a card name with its set code and number."; return false; }
+  be.section = "Pokémon";
+  const entries = parseDeck(list);
+  const count = entries.reduce((n, e) => n + e.count, 0);
+  if (!entries.length) { prog.textContent = "The boss deck is empty. Paste a list or use the Handbook deck."; return false; }
+  const cfg = S.bossCfg;
+  const sameCards = cfg && hasBoss() && cfg.line === line && cfg.list === list;
+  if (sameCards) {   // only the difficulty changed: keep the raid going
+    if (cfg.difficulty !== difficulty || !!cfg.harsh !== !!harsh)
+      act(`Difficulty set to ${DIFFICULTIES[difficulty]}${harsh ? " with harsher damage" : ""}`, () => { S.bossCfg = { ...cfg, difficulty, harsh }; });
+    return true;
+  }
+  $("bossGo").disabled = true;
+  prog.textContent = "Looking up the boss…";
+  await resolveEntries([be, ...entries], (done, of, n) => { prog.textContent = `Looking up cards ${done}/${of}: ${n}`; });
+  $("bossGo").disabled = false;
+  const bd = CARDS[entryKey(be)];
+  if (!bd || !(bd.attacks || []).length) { prog.textContent = `Couldn't find attacks for “${be.name}”. Check the set code and number, or try again when you're online.`; return false; }
+  act(`Raid boss: ${bd.name}, ${DIFFICULTIES[difficulty]}${harsh ? " with harsher damage" : ""}. Its ${count}-card deck was shuffled.`, () => {
+    S.bkeys = { boss: entryKey(be) };
+    let i = 0;
+    for (const e of entries) for (let k = 0; k < e.count; k++) S.bkeys["b" + (++i)] = entryKey(e);
+    S.bossCfg = { line, list, difficulty, harsh };
+    resetBoss();
+  });
+  uploadCards(Object.values(S.bkeys || {}));
+  const pokemon = entries.filter(e => CARDS[entryKey(e)].supertype === "Pokémon").map(e => e.name);
+  if (pokemon.length) toast(`Boss decks shouldn't contain Pokémon: ${pokemon.slice(0, 3).join(", ")}`);
+  else if (count !== 60) toast(`Boss loaded with a ${count}-card deck. Raid boss decks are normally 60.`);
+  else toast(`${bd.name} is ready. Good luck!`);
+  return true;
+}
+
+/* ---------- boss rendering ---------- */
+function costPips(cost) { const w = el("span", "pips"); (cost || []).forEach(() => w.append(el("i"))); if (!(cost || []).length) w.append(el("em", null, "free")); return w; }
+function renderBoss() {
+  const on = hasBoss();
+  $("bossEmpty").hidden = on; $("bossMain").hidden = !on;
+  const et = $("btnEndTurn");
+  if (MP && on) {
+    const mine = !!(S.ready || {})[MP.seat], { ready, total } = readyCount();
+    et.textContent = mine ? `Ready ✓ (${ready}/${total})` : `I'm ready (${ready}/${total})`;
+    et.classList.toggle("primary", !mine && !S.bt);
+  } else { et.textContent = on ? "End turn → Boss" : "End turn"; et.classList.remove("primary"); }
+  et.disabled = !!S.bt || !!S.result;
+  // banners
+  const ban = $("raidBanner");
+  let msg = null, cls = "";
+  if (S.result === "players") { msg = "Every boss card is in the Lost Zone. The players win the raid!"; cls = "win"; }
+  else if (S.started && S.prizes.length === 0 && allUids().length) { msg = "You've taken your last Prize card, so you're out of the raid. The boss wins once every player is out."; cls = "out"; }
+  ban.hidden = !msg; if (msg) { ban.textContent = msg; ban.className = "banner " + cls; }
+  if (!on) { $("bossStage").hidden = true; document.body.classList.remove("stage-open"); return; }
+
+  const d = D("boss");
+  const card = $("bossCard"); card.replaceChildren(cardEl("boss", { large: true }));
+  $("bossName").textContent = d.name + (d.hp ? `` : "");
+  $("bossDiff").textContent = DIFFICULTIES[S.bossCfg.difficulty] + (S.bossCfg.harsh ? " · harsh" : "");
+  const total = bossUids().length, left = S.bdeck.length + S.bdiscard.length;
+  $("bossBar").style.width = (total ? (left / total) * 100 : 0) + "%";
+  $("bossLeft").textContent = `${left} of ${total} boss cards left · ${S.blost.length} in the Lost Zone`;
+
+  const list = $("bossAttacks"); list.replaceChildren();
+  const afford = new Set(affordableAttacks());
+  (d.abilities || []).forEach(ab => { const li = el("li", "ability"); li.append(el("span", "atk-kind", "Ability"), el("b", null, ab.name)); if (ab.text) li.append(el("p", null, ab.text)); list.append(li); });
+  (d.attacks || []).forEach((a, i) => {
+    const li = el("li", afford.has(i) ? "ready" : "");
+    li.append(costPips(a.cost), el("b", null, a.name), el("span", "atk-dmg", a.damage || ""));
+    if (a.text) li.append(el("p", null, a.text));
+    li.title = afford.has(i) ? "The boss has enough Energy for this attack" : `Needs ${(a.cost || []).length} Energy`;
+    list.append(li);
+  });
+
+  const en = $("bossEnergy"); en.replaceChildren();
+  if (!S.benergy.length) en.append(el("span", "muted", "None"));
+  S.benergy.forEach(u => { const ch = dragAttrs(el("span", "chip"), { zone: "benergy", uid: u }); const t = energyType(u); const dot = el("i"); dot.style.background = t ? (ENERGY_COLORS[t] || "") : "var(--amber)"; ch.append(dot, D(u).name.replace(/^Basic /, "")); en.append(ch); });
+  $("bossEnergyCount").textContent = S.benergy.length;
+  const tl = $("bossTool"); tl.replaceChildren();
+  if (S.btool) { const ch = dragAttrs(el("span", "chip"), { zone: "btool", uid: S.btool }); ch.append(D(S.btool).name); tl.append(ch); } else tl.append(el("span", "muted", "None"));
+  const st = $("bossStatus"); st.replaceChildren();
+  STATUSES.forEach(x => { const b = btn(x, () => toggleBossStatus(x), (S.bstatus || []).includes(x) ? "mini on" : "mini"); st.append(b); });
+  $("bDeckCount").textContent = S.bdeck.length; $("bDiscardCount").textContent = S.bdiscard.length; $("bLostCount").textContent = S.blost.length;
+  renderStage();
+}
+
+function renderStage() {
+  const box = $("bossStage"); const bt = S.bt;
+  box.hidden = !bt; document.body.classList.toggle("stage-open", !!bt);
+  if (!bt) return;
+  box.replaceChildren();
+  const diff = S.bossCfg.difficulty;
+  const art = el("button", "stage-card"); art.type = "button";
+  const body = el("div", "stage-body");
+  const head = el("div", "stage-head");
+  const acts = el("div", "acts stage-acts");
+  box.append(art, body);
+
+  if (bt.phase === "draw" && bt.current) {
+    const u = bt.current, d = D(u);
+    art.append(cardEl(u, { large: true })); art.onclick = () => openZoom(u); art.title = "Show full size";
+    head.append(el("span", "zone-label", `Boss turn · card ${bt.drawn} of ${bt.drawn + bt.toDraw}`), el("h3", null, d.name));
+    body.append(head, el("p", "stage-note" + (bt.auto ? " auto" : ""), bt.note));
+    if (d.text) body.append(el("div", "stage-text", d.text));
+    if (!bt.auto) {
+      body.append(el("p", "stage-guide", DIFF_GUIDE[diff]));
+      const h = el("div", "acts");
+      h.append(btn("Flip a coin", () => bossRoll("coin"), "mini"), btn("Roll a D6", () => bossRoll("d6"), "mini"), btn("Random player", () => bossRoll("player"), "mini"), btn("Random Benched Pokémon", () => bossRoll("bench"), "mini"));
+      body.append(h);
+      if (bt.rolls.length) { const r = el("ul", "rolls"); bt.rolls.forEach(x => r.append(el("li", null, x))); body.append(r); }
+    }
+    body.append(healRow());
+    acts.append(btn("+1 boss draw", bossExtraDraw, "mini"));
+    acts.append(btn(bt.auto ? (bt.toDraw ? "Next card" : "To the attack") : (bt.toDraw ? "Done: discard it, next card" : "Done: discard it, to the attack"), bossNext, "primary"));
+    body.append(acts);
+    return;
+  }
+
+  art.append(cardEl("boss", { large: true })); art.onclick = () => openZoom("boss"); art.title = "Show full size";
+  if (bt.phase === "attack") {
+    head.append(el("span", "zone-label", "Boss turn · attack"), el("h3", null, `${bossName()} attacks`));
+    body.append(head);
+    const status = S.bstatus || [];
+    if (status.includes("Paralyzed")) body.append(el("p", "stage-warn", "The boss is Paralyzed, so it can't attack this turn."));
+    else if (status.includes("Asleep")) body.append(el("p", "stage-warn", "The boss is Asleep. Flip a coin: on tails it can't attack."));
+    else if (status.includes("Confused")) body.append(el("p", "stage-warn", "The boss is Confused. Flip a coin: on tails the attack fails and it puts 3 damage counters on itself."));
+    const opts = affordableAttacks();
+    if (!opts.length) {
+      body.append(el("p", "stage-note", `It doesn't have enough Energy for any attack (${S.benergy.length} attached).`));
+      acts.append(btn("Continue", () => bossSkipAttack("not enough Energy"), "primary"));
+      body.append(acts); return;
+    }
+    if (bt.attackIdx == null) {   // Extremely Hard: the boss player picks
+      body.append(el("p", "stage-guide", "Extremely Hard: the boss player chooses the attack."));
+      const pick = el("div", "acts");
+      opts.forEach(i => pick.append(btn(`${D("boss").attacks[i].name}${D("boss").attacks[i].damage ? " · " + D("boss").attacks[i].damage : ""}`, () => bossPickAttack(i))));
+      body.append(pick);
+      acts.append(btn("Flip a coin", () => bossRoll("coin"), "mini"), btn("Roll a D6", () => bossRoll("d6"), "mini"), btn("No attack", () => bossSkipAttack(), "mini"));
+      if (bt.rolls.length) { const r = el("ul", "rolls"); bt.rolls.forEach(x => r.append(el("li", null, x))); body.append(r); }
+      body.append(acts); return;
+    }
+    const a = D("boss").attacks[bt.attackIdx], dmg = attackDamage(a), cost = (a.cost || []).length;
+    body.append(el("p", "stage-note", diff === "extreme" ? "The boss player's choice:" : "Chosen at random from the attacks it can pay for:"));
+    const card = el("div", "atk-card");
+    card.append(costPips(a.cost), el("b", null, a.name), el("span", "atk-dmg", a.damage || ""));
+    if (a.text) card.append(el("p", null, a.text));
+    body.append(card);
+    body.append(el("p", "stage-guide", `It hits every player's Active Pokémon at once. It pays ${cost} Energy by discarding ${cost} attached Energy card${cost === 1 ? "" : "s"}.${/\+|×|x$/.test(a.damage || "") ? " Its damage can grow, so add any extra damage yourself from the card panel." : ""}${a.text ? " Carry out the rest of the attack's text yourself." : ""}`));
+    if (bt.rolls.length) { const r = el("ul", "rolls"); bt.rolls.forEach(x => r.append(el("li", null, x))); body.append(r); }
+    const autoHit = dmg && (MP || S.active);
+    if (autoHit) acts.append(btn(MP ? `Attack: ${dmg} damage to every player's Active Pokémon` : `Attack: ${dmg} damage to ${D(slotTop(S.active)).name}`, () => bossAttack(true), "primary"));
+    acts.append(btn(autoHit ? "Attack, we'll add damage ourselves" : "Attack", () => bossAttack(false), autoHit ? "" : "primary"));
+    acts.append(btn("Flip a coin", () => bossRoll("coin"), "mini"));
+    acts.append(btn("Roll a D6", () => bossRoll("d6"), "mini"));
+    acts.append(btn("It can't attack", () => bossSkipAttack("Special Condition"), "mini"));
+    body.append(acts); return;
+  }
+
+  // end of the boss turn
+  const n = millFor(bt.pending, bt.healed);
+  head.append(el("span", "zone-label", "Boss turn · end"), el("h3", null, `${n} boss card${n === 1 ? "" : "s"} to the Lost Zone`));
+  body.append(head);
+  const math = el("div", "stage-math"); math.id = "stageMath";
+  body.append(math);
+  body.append(healRow());
+  body.append(el("p", "stage-guide", "Pokémon Checkup: the boss recovers from all Special Conditions now. Then it's the players' turn."));
+  const go = btn("", bossEndTurn, "primary"); go.id = "stageEndBtn";
+  acts.append(go);
+  body.append(acts);
+  updateEndNumbers();
+}
+// Refreshes the end-of-turn numbers in place, so typing a heal amount never rebuilds the panel mid-click.
+function updateEndNumbers() {
+  const bt = S.bt; if (!bt || bt.phase !== "end") return;
+  const n = millFor(bt.pending, bt.healed);
+  const h3 = $("bossStage").querySelector("h3"); if (h3) h3.textContent = `${n} boss card${n === 1 ? "" : "s"} to the Lost Zone`;
+  const math = $("stageMath");
+  if (math) {
+    math.replaceChildren(el("span", null, `Players' damage ${bt.playerDmg}`));
+    if (bt.bonus) math.append(el("span", null, `+ ${bt.bonus} Special Conditions`));
+    if (bt.healed) math.append(el("span", null, `− ${bt.healed} healed`));
+    math.append(el("span", null, `÷ (10 × ${divisorPlayers()}) = ${n}`));
+  }
+  const go = $("stageEndBtn"); if (go) go.textContent = `Send ${n} to the Lost Zone and start the players' turn`;
+}
+function healRow() {
+  const row = el("label", "heal-row"); row.htmlFor = "stageHeal";
+  row.append(el("span", null, "Damage the boss healed this turn"));
+  const inp = el("input"); inp.type = "number"; inp.min = "0"; inp.step = "10"; inp.id = "stageHeal"; inp.inputMode = "numeric"; inp.value = S.bt.healed || 0;
+  inp.addEventListener("input", () => { S.bt.healed = Math.max(0, +inp.value || 0); save(); calc(); updateEndNumbers(); });
+  row.append(inp); return row;
+}
+
+/* ---------- damage this turn ---------- */
+// In a room, typing your damage is shared after a short pause (not undoable, like typing anywhere).
+let dmgTimer = null;
+function queueDamage(i, v) {
+  clearTimeout(dmgTimer);
+  dmgTimer = setTimeout(() => act(null, () => { if (S.bt) return false; S.dmg = [...(S.dmg || [])]; S.dmg[i] = v; }, { noUndo: true, keepSel: true }), 400);
+}
+function renderCalcInputs() {
+  const n = S.players || 3; const host = $("calcDamage");
+  if (!Array.isArray(S.dmg) || S.dmg.length !== n) S.dmg = Array.from({ length: n }, (_, i) => (S.dmg || [])[i] || 0);
+  host.replaceChildren();
+  for (let i = 0; i < n; i++) {
+    const seat = MP ? seatList().find(x => x.order === i) : null;
+    const mine = !MP || (seat && seat.id === MP.seat);
+    const lab = el("label", null, MP ? (seat ? (mine ? `${seat.name} (you)` : seat.name) : `Player ${i + 1}`) : (i === 0 ? "You (Player 1)" : `Player ${i + 1}`)); lab.htmlFor = "calcP" + i;
+    const inp = el("input"); inp.type = "number"; inp.min = "0"; inp.step = "10"; inp.inputMode = "numeric"; inp.id = "calcP" + i; inp.value = S.dmg[i] || 0;
+    inp.dataset.mine = mine ? "1" : "";
+    inp.addEventListener("input", () => {
+      const v = Math.max(0, +inp.value || 0);
+      if (MP) queueDamage(i, v);   // shared through act(), so teammates get it
+      else { S.dmg[i] = v; save(); calc(); }
+    });
+    lab.append(inp); host.append(lab);
+  }
+  calc();
+}
+function calc() {
+  const locked = !!S.bt;
+  $("calcDamage").querySelectorAll("input").forEach((inp, i) => { inp.disabled = locked || (MP && !inp.dataset.mine); if (document.activeElement !== inp) inp.value = (S.dmg || [])[i] || 0; });
+  const div = divisorPlayers();
+  const pending = locked ? S.bt.pending : damageTotal() + bossBonus();
+  const healed = locked ? S.bt.healed : 0;
+  const out = Math.floor(Math.max(0, pending - healed) / (10 * div));
+  $("calcOut").textContent = out;
+  $("calcHint").textContent = locked ? "Locked during the boss turn. Healing is entered in the boss turn panel." : "Enter what each player's attack did to the boss this turn.";
+  const bonus = locked ? S.bt.bonus : bossBonus(), dmg = locked ? S.bt.playerDmg : damageTotal();
+  $("calcMath").textContent = `(${dmg}${bonus ? " + " + bonus : ""}${healed ? " − " + healed : ""}) ÷ (10 × ${div}) = ${(Math.max(0, pending - healed) / (10 * div)).toFixed(2).replace(/\.00$/, "")} → ${out}`;
+}
+
+/* ---------- multiplayer ---------- */
+// Paste your Firebase web app config here before publishing, so friends don't have to:
+// const FIREBASE_CONFIG = { apiKey: "…", authDomain: "…", databaseURL: "https://….firebasedatabase.app", projectId: "…", appId: "…" };
+const FIREBASE_CONFIG = null;
+const FIREBASE_VERSION = "10.12.2";
+const STORE_ROOM = "raidtable.room.v1" + TAB;       // { code, seat, name, transport } to rejoin after a reload
+const STORE_FBCFG = "raidtable.firebase.v1";  // a config pasted in the app instead of the file
+let MP = null;   // { code, seat, name, order, t: transport, seats: {}, online: {} }
+const mySeat = () => MP ? MP.seat : "player";
+const seatName = seat => (MP && MP.seats[seat] && MP.seats[seat].name) || "a teammate";
+const encKey = k => k.replace(/[%.#$\[\]\/]/g, c => "%" + c.charCodeAt(0).toString(16));
+const decKey = k => k.replace(/%([0-9a-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+
+function firebaseConfig() {
+  if (FIREBASE_CONFIG) return FIREBASE_CONFIG;
+  try { return JSON.parse(localStorage.getItem(STORE_FBCFG) || "null"); } catch { return null; }
+}
+// Reads the config object Firebase shows ("const firebaseConfig = { apiKey: "…", … }") without running it.
+function parseFirebaseConfig(text) {
+  const cfg = {};
+  for (const m of text.matchAll(/["']?(\w+)["']?\s*:\s*["']([^"']+)["']/g)) cfg[m[1]] = m[2];
+  return cfg.apiKey && cfg.databaseURL && cfg.projectId ? cfg : null;
+}
+
+/* Transports: the same small interface over Firebase, or over this browser (for testing in two tabs). */
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("Couldn't load " + src)); document.head.append(s); });
+}
+async function firebaseTransport(code) {
+  const cfg = firebaseConfig();
+  if (!cfg) throw new Error("Multiplayer isn't connected to Firebase yet. Paste your Firebase config below.");
+  if (!window.firebase) {
+    const base = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/`;
+    await loadScript(base + "firebase-app-compat.js");
+    await loadScript(base + "firebase-auth-compat.js");
+    await loadScript(base + "firebase-database-compat.js");
+  }
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  await firebase.auth().signInAnonymously();
+  const root = firebase.database().ref("rooms/" + code);
+  return {
+    kind: "firebase",
+    watch(path, cb) { root.child(path).on("value", snap => cb(snap.val())); },
+    get: async path => (await root.child(path).get()).val(),
+    set: (path, v) => root.child(path).set(v),
+    async transact(path, fn) {
+      const r = await root.child(path).transaction(cur => fn(cur), undefined, false);
+      return { committed: r.committed, value: r.snapshot.val() };
+    },
+    presence(seat) {
+      const ref = root.child("presence/" + seat);
+      firebase.database().ref(".info/connected").on("value", s => { if (s.val()) { ref.onDisconnect().remove(); ref.set(true); } });
+    },
+    close() { root.off(); firebase.database().ref(".info/connected").off(); root.child("presence/" + (MP && MP.seat)).remove(); }
+  };
+}
+function localTransport(code) {
+  const KEY = "raidtable.localroom." + code;
+  const ch = new BroadcastChannel("raidtable-" + code);
+  const watchers = [];
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  const at = (tree, path) => path.split("/").reduce((o, k) => (o == null ? null : o[k]), tree) ?? null;
+  const put = (tree, path, v) => { const ks = path.split("/"); let o = tree; for (const k of ks.slice(0, -1)) { if (o[k] == null || typeof o[k] !== "object") o[k] = {}; o = o[k]; } if (v == null) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = v; };
+  const notify = () => { const tree = read(); for (const w of watchers) w.cb(at(tree, w.path)); };
+  const lock = fn => (navigator.locks ? navigator.locks.request(KEY, async () => fn()) : Promise.resolve(fn()));
+  const changed = () => { ch.postMessage(1); setTimeout(notify, 0); };
+  ch.onmessage = notify;
+  return {
+    kind: "local",
+    watch(path, cb) { watchers.push({ path, cb }); cb(at(read(), path)); },
+    get: async path => at(read(), path),
+    set: (path, v) => lock(() => { const t = read(); put(t, path, v); localStorage.setItem(KEY, JSON.stringify(t)); }).then(changed),
+    transact: (path, fn) => lock(() => {
+      const t = read(); const cur = at(t, path); const nv = fn(cur);
+      if (nv === undefined) return { committed: false, value: cur };
+      put(t, path, nv); localStorage.setItem(KEY, JSON.stringify(t)); return { committed: true, value: nv };
+    }).then(r => { if (r.committed) changed(); return r; }),
+    presence(seat) { this.set("presence/" + seat, true); },
+    close() { ch.close(); }
+  };
+}
+const useLocalTransport = () => /[?&]local=1/.test(location.search);
+
+/* Shared state: optimistic locally, then committed with a transaction that replays the move
+   on top of anything a teammate did in the meantime. */
+async function commitShared(snapStr, run, entry) {
+  const pre = JSON.parse(snapStr);
+  const baseRev = pre.rev || 0;
+  const optimistic = JSON.parse(JSON.stringify(sharedPart(S)));   // a copy: later moves must not leak into this commit
+  let replayed = null, aborted = false;
+  let res;
+  try {
+    res = await MP.t.transact("shared", cur => {
+      if (!cur) return undefined;
+      const remote = JSON.parse(cur);
+      replayed = null; aborted = false;
+      if ((remote.rev || 0) === baseRev) return JSON.stringify({ ...optimistic, rev: baseRev + 1 });
+      const saved = S;
+      S = { ...pre, ...remote };
+      let r; try { r = run(); } catch (err) { r = false; }
+      const out = S; S = saved;
+      if (r === false) { aborted = true; return undefined; }
+      replayed = out;
+      return JSON.stringify({ ...sharedPart(out), rev: (remote.rev || 0) + 1 });
+    });
+  } catch (err) { toast("Lost the connection to the room. Your last move may not have reached your teammates."); return; }
+  if (!res.committed) {
+    if (aborted) toast("A teammate got there first, so that move didn't go through.");
+    const cur = await MP.t.get("shared");
+    if (cur) { S.rev = -1; applyRemoteShared(JSON.parse(cur)); }
+    return;
+  }
+  const committed = JSON.parse(res.value);
+  entry.revAfter = committed.rev;
+  if (replayed) Object.assign(S, localPart(replayed));
+  S.rev = -1; applyRemoteShared(committed);
+  publishSeat(); save();
+}
+async function undoShared(e, before) {
+  let partial = false;
+  const res = await MP.t.transact("shared", cur => {
+    if (!cur) return undefined;
+    const r = JSON.parse(cur); partial = false;
+    const note = { t: r.turn, msg: `${MP.name} undid: ${e.label || "their last move"}` };
+    if (e.revAfter != null && r.rev === e.revAfter) {
+      const back = sharedPart(before);
+      return JSON.stringify({ ...back, rev: r.rev + 1, log: [note, ...(r.log || [])].slice(0, 150) });
+    }
+    if (e.supDelta) {   // a teammate acted since: still take back the Supporter
+      r.supportersUsed = Math.max(0, (r.supportersUsed || 0) - e.supDelta);
+      r.log = [note, ...(r.log || [])].slice(0, 150); r.rev++;
+      partial = true;
+      return JSON.stringify(r);
+    }
+    partial = true; return undefined;
+  });
+  const cur = res.committed ? res.value : await MP.t.get("shared");
+  if (cur) { S.rev = -1; applyRemoteShared(JSON.parse(cur)); }
+  toast(partial ? (e.supDelta ? "Undone. A teammate has moved since, so only your board and the Supporter count were changed back." : "Your board was undone. A teammate has moved since, so the shared table was left as it is.") : "Undone");
+}
+function applyRemoteShared(remote) {
+  if (!remote || (remote.rev || 0) <= (S.rev || 0)) return;   // stale, or what we already have
+  for (const k of SHARED_FIELDS) if (k in remote) S[k] = remote[k];
+  if (!S.skeys) S.skeys = {}; if (!S.ready) S.ready = {}; if (!S.returns) S.returns = []; if (!S.log) S.log = []; if (!S.dmg) S.dmg = [];
+  if (!Array.isArray(S.bench)) S.bench = [null, null, null, null, null];
+  validateSelection(); save(); render();
+  processInbox();
+  maybeStartBossTurn();
+}
+// Things the table asks of this player: a boss attack to apply, a Stadium to take back, a new raid.
+function processInbox() {
+  if (!MP) return;
+  if (S.raidId && S.myRaidId !== S.raidId) {
+    const raid = S.raidId;
+    act("Set up for the new raid: drew 7 and set 6 Prize cards", () => { if (S.myRaidId === raid) return false; const m = setupMyBoard(); if (m) S.log.unshift({ t: S.turn, msg: `${MP.name}: ${mulliganNote(m)}` }); }, { noUndo: true });
+    undoStack = [];
+    return;
+  }
+  const hit = S.bt && S.bt.hit;
+  if (hit && !(S.seenHits || []).includes(hit.id)) {
+    if (S.active) act(`${bossName()}'s ${hit.attack} did ${hit.dmg} damage to ${D(slotTop(S.active)).name}`, () => { S.active.dmg += hit.dmg; S.seenHits = [...(S.seenHits || []), hit.id]; }, { noUndo: true });
+    else { S.seenHits = [...(S.seenHits || []), hit.id]; save(); }
+  }
+  const mine = (S.returns || []).filter(r => r.seat === MP.seat);
+  if (mine.length) act(null, () => {
+    const ids = new Set(mine.map(r => r.id));
+    for (const r of (S.returns || []).filter(r => ids.has(r.id))) if (S.keys[r.uid] && !S.discard.includes(r.uid)) S.discard.unshift(r.uid);
+    S.returns = (S.returns || []).filter(r => !ids.has(r.id));
+  }, { noUndo: true });
+}
+
+/* Your board as teammates see it, plus your whole board so you can rejoin after a reload. */
+let publishTimer = null;
+function publishSeat() {
+  if (!MP) return;
+  clearTimeout(publishTimer);
+  publishTimer = setTimeout(() => {
+    const slotSum = sl => sl ? { stack: sl.stack.map(keyOf), att: sl.att.map(keyOf), dmg: sl.dmg, status: sl.status } : null;
+    const seat = { name: MP.name, order: MP.order, at: Date.now(), deckName: S.deckName,
+      board: { active: slotSum(S.active), bench: S.bench.map(slotSum), prizes: S.prizes.length, hand: S.hand.length, deck: S.deck.length, discard: S.discard.length, lost: S.lost.length, out: S.started && S.prizes.length === 0 },
+      state: localPart(S) };
+    MP.t.set("seats/" + MP.seat, JSON.stringify(seat));
+  }, 120);
+}
+// Card details travel with the room, so teammates see your cards without looking them up.
+function uploadCards(keys) {
+  if (!MP) return;
+  for (const k of new Set(keys)) {
+    const d = CARDS[k]; if (!d || MP.uploaded.has(k)) continue;
+    MP.uploaded.add(k);
+    const { name, supertype, subtypes, hp, types, evolvesFrom, img, imgLg, attacks, abilities, text, print, exact } = d;
+    MP.t.set("cards/" + encKey(k), JSON.stringify({ name, supertype, subtypes, hp, types, evolvesFrom, img, imgLg, attacks, abilities, text, print, exact }));
+  }
+}
+const allMyKeys = () => [...Object.values(S.keys), ...Object.values(S.bkeys || {})];
+
+// Card ids must be unique across the table, so a player's ids get their seat in front: "k3f9:c12".
+function rekey(prefix) {
+  const map = {}, keys = {};
+  for (const [u, k] of Object.entries(S.keys)) { const base = u.includes(":") ? u.split(":").pop() : u; const nu = `${prefix}:${base}`; map[u] = nu; keys[nu] = k; }
+  const m = u => map[u] || u;
+  S.keys = keys;
+  for (const z of ["deck", "hand", "discard", "lost", "prizes"]) S[z] = S[z].map(m);
+  const ms = sl => sl ? { ...sl, stack: sl.stack.map(m), att: sl.att.map(m) } : null;
+  S.active = ms(S.active); S.bench = S.bench.map(ms);
+  if (S.stadium && map[S.stadium]) S.stadium = map[S.stadium];
+  undoStack = []; selected = null;
+}
+const newSeatId = () => Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 4);
+function newRoomCode() { const A = "ABCDEFGHJKMNPQRSTUVWXYZ"; let c = ""; for (let i = 0; i < 5; i++) c += A[Math.floor(Math.random() * A.length)]; return c; }
+
+async function connect(code) { return useLocalTransport() ? localTransport(code) : firebaseTransport(code); }
+function startSync(t, code, seat, name, order) {
+  MP = { code, seat, name, order, t, seats: {}, online: {}, uploaded: new Set() };
+  try { localStorage.setItem(STORE_ROOM, JSON.stringify({ code, seat, name })); } catch {}
+  t.presence(seat);
+  t.watch("shared", v => { if (v) applyRemoteShared(JSON.parse(v)); });
+  t.watch("seats", v => {
+    MP.seats = {};
+    for (const [id, str] of Object.entries(v || {})) { try { MP.seats[id] = JSON.parse(str); } catch {} }
+    renderTeam(); renderHeaderMP(); renderCalcInputs(); maybeStartBossTurn();
+  });
+  t.watch("presence", v => { MP.online = v || {}; renderTeam(); });
+  t.watch("cards", v => {
+    let added = false;
+    for (const [ek, str] of Object.entries(v || {})) { const k = decKey(ek); if (!CARDS[k] || !CARDS[k].img) { try { CARDS[k] = JSON.parse(str); added = true; } catch {} } }
+    if (added) { saveJSON(STORE_CARDS, CARDS); render(); }
+  });
+  uploadCards(allMyKeys());
+  publishSeat(); render();
+}
+async function createRoom(name) {
+  let code = newRoomCode();
+  let room = await connect(code);
+  if (await room.get("shared")) { room.close(); code = newRoomCode(); room = await connect(code); }
+  const seat = newSeatId();
+  rekey(seat);
+  if (S.stadium && S.stadiumOwner && S.stadiumOwner !== "boss") S.stadiumOwner = seat;
+  const shared = { ...sharedPart(S), players: 1, dmg: [0], ready: {}, rev: 1, returns: [], skeys: S.stadium && S.keys[S.stadium] ? { [S.stadium]: S.keys[S.stadium] } : {},
+    log: [{ t: S.turn, msg: `${name} opened room ${code}` }, ...(S.log || [])].slice(0, 150) };
+  const r = await room.transact("shared", cur => cur ? undefined : JSON.stringify(shared));
+  if (!r.committed) throw new Error("That room code was just taken. Please try again.");
+  S.rev = 0; Object.assign(S, shared); S.rev = 1; S.myRaidId = S.raidId;
+  startSync(room, code, seat, name, 0);
+}
+async function joinRoom(code, name) {
+  code = code.trim().toUpperCase().replace(/[^A-Z]/g, "");
+  if (code.length !== 5) throw new Error("Room codes are 5 letters.");
+  const room = await connect(code);
+  const cur = await room.get("shared");
+  if (!cur) { room.close(); throw new Error(`There's no room called ${code}. Check the code with whoever made it.`); }
+  let saved = null; try { saved = JSON.parse(localStorage.getItem(STORE_ROOM) || "null"); } catch {}
+  let seat = saved && saved.code === code ? saved.seat : null;
+  const existing = seat ? await room.get("seats/" + seat) : null;
+  let order;
+  if (existing) {   // rejoining: get your board back
+    const mine = JSON.parse(existing);
+    Object.assign(S, mine.state); order = mine.order; name = name || mine.name;
+  } else {
+    seat = newSeatId();
+    const r = await room.transact("shared", c => {
+      if (!c) return undefined;
+      const sh = JSON.parse(c); order = sh.players || 0;
+      sh.players = order + 1; sh.dmg = [...(sh.dmg || []), 0]; sh.rev = (sh.rev || 0) + 1;
+      sh.log = [{ t: sh.turn, msg: `${name} joined the raid` }, ...(sh.log || [])].slice(0, 150);
+      return JSON.stringify(sh);
+    });
+    if (!r.committed) throw new Error("Couldn't join the room. Please try again.");
+    rekey(seat);
+    if (S.stadium && S.stadiumOwner !== "boss") { S.stadium = null; S.stadiumOwner = null; }
+    S.myRaidId = -1;   // the room's raid will set up a fresh board for you
+  }
+  S.rev = -1;
+  startSync(room, code, seat, name, order);
+}
+function leaveRoom() {
+  if (!MP) return;
+  const name = MP.name;
+  try { MP.t.close(); } catch {}
+  MP = null;
+  try { localStorage.removeItem(STORE_ROOM); } catch {}
+  S.ready = {}; S.players = Math.max(1, S.players);
+  undoStack = []; save(); render();
+  toast(`${name}, you've left the room. You're playing solo now.`);
+}
+async function resumeRoom() {
+  let saved = null; try { saved = JSON.parse(localStorage.getItem(STORE_ROOM) || "null"); } catch {}
+  if (!saved || (!firebaseConfig() && !useLocalTransport())) return;
+  try { await joinRoom(saved.code, saved.name); toast(`Back in room ${saved.code}`); }
+  catch (err) { toast(err.message); try { localStorage.removeItem(STORE_ROOM); } catch {} }
+}
+
+/* Ready-up: once every player is ready, the first player in seat order starts the boss turn. */
+function seatList() { return MP ? Object.entries(MP.seats).map(([id, s]) => ({ id, ...s })).sort((a, b) => a.order - b.order) : []; }
+function toggleReady() {
+  const on = !!(S.ready || {})[MP.seat];
+  act(on ? "isn't ready yet" : "is ready for the boss turn", () => { if (S.bt) return false; S.ready = { ...(S.ready || {}), [MP.seat]: !on }; if (on) delete S.ready[MP.seat]; }, { keepSel: true });
+  maybeStartBossTurn();
+}
+function readyCount() { const ids = seatList().map(s => s.id); return { ready: ids.filter(id => (S.ready || {})[id]).length, total: ids.length }; }
+function maybeStartBossTurn() {
+  if (!MP || S.bt || S.result || !hasBoss()) return;
+  const { ready, total } = readyCount();
+  if (!total || ready < total) return;
+  const first = seatList()[0];
+  if (first && first.id === MP.seat) startBossTurn();
+}
+
+/* ---------- multiplayer UI ---------- */
+function renderHeaderMP() {
+  const b = $("btnRoom");
+  b.textContent = MP ? `Room ${MP.code}` : "Multiplayer";
+  b.classList.toggle("in-room", !!MP);
+  $("players").disabled = !!MP;
+  $("players").title = MP ? "Set by how many people are in the room" : "";
+}
+function renderTeam() {
+  const box = $("team");
+  const others = seatList().filter(s => !MP || s.id !== MP.seat);
+  box.hidden = !MP;
+  if (!MP) return;
+  box.replaceChildren();
+  const head = el("div", "team-head");
+  const { ready, total } = readyCount();
+  head.append(el("span", "zone-label", `Room ${MP.code} · ${total} player${total === 1 ? "" : "s"}`));
+  if (!S.bt && hasBoss() && ready > 0 && ready < total) {
+    head.append(el("span", "muted", `${ready} of ${total} ready`));
+    head.append(btn("Start the boss turn without waiting", () => startBossTurn(), "mini"));
+  }
+  box.append(head);
+  if (!others.length) { box.append(el("p", "muted", `No teammates yet. Send them the room code ${MP.code}, or the link in the Room menu.`)); return; }
+  const row = el("div", "team-row");
+  for (const s of others) {
+    const b = s.board || {};
+    const card = el("div", "mate" + (MP.online[s.id] ? "" : " offline") + (b.out ? " out" : ""));
+    const top = el("div", "mate-top");
+    top.append(el("b", null, s.name || "Player"));
+    if ((S.ready || {})[s.id] && !S.bt) top.append(el("span", "tag once", "Ready"));
+    if (!MP.online[s.id]) top.append(el("span", "muted", "offline"));
+    card.append(top);
+    const field = el("div", "mate-field");
+    const mini = (sl, big) => {
+      const w = el("div", "mate-slot" + (big ? " big" : ""));
+      if (!sl || !sl.stack || !sl.stack.length) { w.append(el("div", "card empty")); return w; }
+      const k = sl.stack[sl.stack.length - 1];
+      const c = cardEl(null, { key: k }); c.title = (CARDS[k] || {}).name || "";
+      c.addEventListener("click", () => openZoomKey(k));
+      w.append(c);
+      if (sl.dmg) w.append(el("span", "badge", sl.dmg));
+      const hp = (CARDS[k] || {}).hp;
+      if (big && hp) w.append(el("span", "hpline" + (hp - sl.dmg <= 0 ? " low" : ""), `${Math.max(0, hp - sl.dmg)}/${hp}`));
+      if (big && (sl.att || []).length) w.append(el("span", "hpline", `${sl.att.length} attached`));
+      return w;
+    };
+    field.append(mini(b.active, true));
+    const bench = el("div", "mate-bench"); (b.bench || []).forEach(sl => bench.append(mini(sl, false))); field.append(bench);
+    card.append(field);
+    card.append(el("div", "mate-counts", b.out ? "Out of the raid" : `Prizes ${b.prizes ?? "?"} · Hand ${b.hand ?? "?"} · Deck ${b.deck ?? "?"}`));
+    row.append(card);
+  }
+  box.append(row);
+}
+function openZoomKey(k) {
+  const d = CARDS[k] || {}; const box = $("zoomCard"); box.replaceChildren();
+  const src = d.imgLg || d.img;
+  if (src) { const img = new Image(); img.src = src; img.alt = d.name || ""; box.append(img); } else box.append(cardEl(null, { key: k }));
+  $("zoom").hidden = false; $("zoomClose").focus();
+}
+
+function openRoomDialog() {
+  const back = $("roomBack"); back.hidden = false;
+  const inRoom = !!MP;
+  $("roomOut").hidden = inRoom; $("roomIn").hidden = !inRoom;
+  $("roomMsg").textContent = "";
+  const needCfg = !firebaseConfig() && !useLocalTransport();
+  $("roomSetup").hidden = !needCfg;
+  $("roomJoinCreate").hidden = needCfg;
+  if (inRoom) {
+    $("roomCodeBig").textContent = MP.code;
+    const link = location.href.split(/[?#]/)[0] + "?room=" + MP.code + (useLocalTransport() ? "&local=1" : "");
+    $("roomLink").textContent = link;
+    const list = $("roomPlayers"); list.replaceChildren();
+    seatList().forEach(s => { const li = el("li", null, `${s.name}${s.id === MP.seat ? " (you)" : ""}`); if (!MP.online[s.id]) li.append(el("span", "muted", " · offline")); list.append(li); });
+  } else {
+    let saved = null; try { saved = JSON.parse(localStorage.getItem(STORE_ROOM) || "null"); } catch {}
+    if (!$("roomName").value) $("roomName").value = (saved && saved.name) || "";
+    const q = location.search.match(/[?&]room=([A-Za-z]{5})/);
+    if (q && !$("roomCode").value) $("roomCode").value = q[1].toUpperCase();
+  }
+}
+function closeRoomDialog() { $("roomBack").hidden = true; }
+async function roomAction(kind) {
+  const name = $("roomName").value.trim();
+  if (!name) { $("roomMsg").textContent = "Enter your name first, so teammates know who's who."; $("roomName").focus(); return; }
+  if (!allUids().length) { $("roomMsg").textContent = "Load your deck first (Import deck), then join."; return; }
+  $("roomMsg").textContent = kind === "create" ? "Opening a room…" : "Joining…";
+  $("roomCreate").disabled = $("roomJoin").disabled = true;
+  try {
+    if (kind === "create") await createRoom(name); else await joinRoom($("roomCode").value, name);
+    openRoomDialog();
+    toast(kind === "create" ? `Room ${MP.code} is open. Share the code with your friends.` : `You've joined room ${MP.code}.`);
+  } catch (err) { $("roomMsg").textContent = err.message || "Something went wrong connecting to the room."; }
+  finally { $("roomCreate").disabled = $("roomJoin").disabled = false; }
+}
+async function copyText(text, okMsg) {
+  try { await navigator.clipboard.writeText(text); toast(okMsg); }
+  catch { toast("Couldn't copy automatically. Select the text and copy it."); }
+}
+
+/* ---------- toast ---------- */
+let toastTimer;
+/* ---------- custom card back ---------- */
+const STORE_BACK = "raidtable.back.v1";
+let pendingBack = null;   // undefined-ish: null = no change chosen yet; "" = built-in
+function applyBack(src) {
+  document.body.classList.toggle("custom-back", !!src);
+  if (src) document.documentElement.style.setProperty("--back-img", `url("${src.replace(/"/g, "%22")}")`);
+  else document.documentElement.style.removeProperty("--back-img");
+}
+function previewBack(src) {
+  const p = $("backPreview");
+  p.classList.toggle("preview-custom", !!src);
+  if (src) p.style.setProperty("--preview-img", `url("${src.replace(/"/g, "%22")}")`); else p.style.removeProperty("--preview-img");
+}
+function openBack() {
+  pendingBack = null; $("backFile").value = ""; $("backUrl").value = ""; $("backMsg").textContent = "";
+  let cur = ""; try { cur = localStorage.getItem(STORE_BACK) || ""; } catch {}
+  previewBack(cur); $("backBack").hidden = false;
+}
+function closeBack() { $("backBack").hidden = true; }
+// Shrink an uploaded picture to card size so it fits in browser storage.
+function fileToCardImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const w = 420, h = 586, c = document.createElement("canvas"); c.width = w; c.height = h;
+      const g = c.getContext("2d"); const scale = Math.max(w / img.width, h / img.height);
+      const dw = img.width * scale, dh = img.height * scale;
+      g.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      URL.revokeObjectURL(url); resolve(c.toDataURL("image/jpeg", 0.88));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("That file isn't an image this browser can open.")); };
+    img.src = url;
+  });
+}
+
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3200); }
+
+/* ---------- wiring ---------- */
+$("btnDraw").onclick = () => draw();
+$("btnUndo").onclick = undo;
+$("btnNew").onclick = newGame;
+$("btnEndTurn").onclick = () => (MP && hasBoss() ? toggleReady() : endTurn());
+$("btnImport").onclick = openImport;
+$("btnShuffle").onclick = shuffleDeck;
+$("btnSearch").onclick = () => openViewer("deck");
+document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => openViewer(b.dataset.view));
+$("drawerClose").onclick = closeViewer;
+$("drawerShuffle").onclick = () => { shuffleDeck(); closeViewer(); };
+$("importCancel").onclick = closeImport;
+$("importSample").onclick = () => { $("importText").value = SAMPLE_DECK; };
+$("importGo").onclick = async () => { if (await loadDeck($("importText").value)) closeImport(); };
+$("importBack").addEventListener("click", e => { if (e.target === $("importBack")) closeImport(); });
+$("players").onchange = e => setPlayers(+e.target.value);
+$("supMinus").onclick = () => setSupporters(S.supportersUsed - 1);
+$("supPlus").onclick = () => setSupporters(S.supportersUsed + 1);
+$("btnSort").onclick = sortHand;
+$("btnBossSetup").onclick = openBossSetup;
+$("btnRoom").onclick = openRoomDialog;
+$("roomClose").onclick = closeRoomDialog;
+$("roomBack").addEventListener("click", e => { if (e.target === $("roomBack")) closeRoomDialog(); });
+$("roomCreate").onclick = () => roomAction("create");
+$("roomJoin").onclick = () => roomAction("join");
+$("roomCode").addEventListener("keydown", e => { if (e.key === "Enter") roomAction("join"); });
+$("roomLeave").onclick = () => { leaveRoom(); openRoomDialog(); };
+$("roomCopyCode").onclick = () => copyText(MP.code, "Room code copied");
+$("roomCopyLink").onclick = () => copyText($("roomLink").textContent, "Link copied");
+$("roomCfgSave").onclick = () => {
+  const cfg = parseFirebaseConfig($("roomCfg").value);
+  if (!cfg) { $("roomMsg").textContent = "That doesn't look like a Firebase config. It needs apiKey, databaseURL and projectId."; return; }
+  try { localStorage.setItem(STORE_FBCFG, JSON.stringify(cfg)); } catch {}
+  $("roomMsg").textContent = "Saved. Now create or join a room.";
+  openRoomDialog();
+};
+$("btnBossSetupEmpty").onclick = openBossSetup;
+$("bossCard").onclick = () => openZoom("boss");
+$("bossCancel").onclick = closeBossSetup;
+$("bossUseDefault").onclick = () => { $("bossDeckText").value = DEFAULT_BOSS_DECK; };
+$("bossSetupBack").addEventListener("click", e => { if (e.target === $("bossSetupBack")) closeBossSetup(); });
+$("bossGo").onclick = async () => { if (await loadBoss($("bossLine").value.trim() || DEFAULT_BOSS, $("bossDeckText").value, $("bossDiffSel").value, $("bossHarsh").checked)) closeBossSetup(); };
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input, textarea, select")) return;
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
+  else if (e.key === "d" || e.key === "D") draw();
+  else if (e.key === "?") openGuide();
+  else if (e.key === "Escape") { if (!$("zoom").hidden) closeZoom(); else if (!$("guideBack").hidden) closeGuide(); else if (!$("backBack").hidden) closeBack(); else if (!$("importBack").hidden) closeImport(); else if (!$("bossSetupBack").hidden) closeBossSetup(); else if (!$("roomBack").hidden) closeRoomDialog(); else if (viewerZone) closeViewer(); else select(null); }
+});
+
+if (S && S.keys) {   // fill in fields added since this game was saved
+  const base = emptyState();
+  for (const k in base) if (S[k] === undefined) S[k] = base[k];
+  if (!S.players) S.players = 3;
+}
+// Load the default raid boss when this game doesn't have one yet.
+async function ensureBoss() {
+  if (hasBoss()) return;
+  const ok = await loadBoss(DEFAULT_BOSS, DEFAULT_BOSS_DECK, "medium", false);
+  if (ok) undoStack = [];
+}
+if (!S || !S.keys) {
+  S = emptyState(); render();
+  // open in a working state: load the sample deck straight away
+  $("importText").value = SAMPLE_DECK;
+  $("importBack").hidden = false;
+  loadDeck(SAMPLE_DECK, "Mega Lucario ex sample").then(ok => { if (ok) closeImport(); return ensureBoss(); });
+} else {
+  render();
+  // a saved game whose card data is from an older version: refetch its cards
+  const missing = Object.values(S.keys).some(k => !CARDS[k]);
+  if (missing && S.list) {
+    toast("Updating card art to match your deck list…");
+    resolveEntries(parseDeck(S.list), () => {}).then(() => { render(); toast("Card art updated"); }).then(refreshBoss);
+  } else refreshBoss();
+}
+// A saved boss whose card data is from an older version: refetch it, or load the default boss.
+function refreshBoss() {
+  if (!hasBoss()) return ensureBoss();
+  const missing = Object.values(S.bkeys).some(k => !CARDS[k]);
+  if (missing && S.bossCfg) {
+    const be = parseDeck("1 " + S.bossCfg.line)[0]; if (be) be.section = "Pokémon";
+    resolveEntries([be, ...parseDeck(S.bossCfg.list)].filter(Boolean), () => {}).then(render);
+  }
+}
+$("zoom").addEventListener("click", closeZoom);
+resumeRoom().then(() => { if (!MP && /[?&]room=[A-Za-z]{5}/.test(location.search)) openRoomDialog(); });
+try { applyBack(localStorage.getItem(STORE_BACK) || ""); } catch {}
+$("btnBack").onclick = openBack;
+function openGuide() { $("guideBack").hidden = false; $("guideClose").focus(); }
+function closeGuide() { $("guideBack").hidden = true; }
+$("btnGuide").onclick = openGuide;
+$("guideClose").onclick = closeGuide;
+$("guideBack").addEventListener("click", e => { if (e.target === $("guideBack")) closeGuide(); });
+$("backCancel").onclick = closeBack;
+$("backBack").addEventListener("click", e => { if (e.target === $("backBack")) closeBack(); });
+$("backFile").onchange = async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  try { pendingBack = await fileToCardImage(f); previewBack(pendingBack); $("backUrl").value = ""; $("backMsg").textContent = f.name; }
+  catch (err) { $("backMsg").textContent = err.message; }
+};
+$("backUrl").oninput = e => {
+  const v = e.target.value.trim();
+  if (!v) return;
+  if (!/^https?:\/\//i.test(v)) { $("backMsg").textContent = "Links need to start with http:// or https://"; return; }
+  const test = new Image();
+  test.onload = () => { pendingBack = v; previewBack(v); $("backMsg").textContent = "Image found"; $("backFile").value = ""; };
+  test.onerror = () => { $("backMsg").textContent = "Couldn't load an image from that link."; };
+  test.src = v;
+};
+$("backReset").onclick = () => { pendingBack = ""; previewBack(""); $("backMsg").textContent = "Built-in back selected"; };
+$("backSave").onclick = () => {
+  if (pendingBack === null) return closeBack();
+  try { if (pendingBack) localStorage.setItem(STORE_BACK, pendingBack); else localStorage.removeItem(STORE_BACK); }
+  catch { $("backMsg").textContent = "Couldn't save it in this browser. Try a smaller image."; return; }
+  applyBack(pendingBack); closeBack(); toast(pendingBack ? "Card back updated" : "Using the built-in card back");
+};
+</script>
+</body>
+</html>
