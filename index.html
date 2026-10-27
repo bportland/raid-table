@@ -189,6 +189,12 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .drawer .grid { overflow-y: auto; display: flex; flex-wrap: wrap; gap: 8px; align-content: start; padding: 2px; }
 .drawer .grid .card { touch-action: pan-y; }
 body.dragging .drawer { opacity: .18; pointer-events: none; }
+.drawer-top { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.drawer-top input { width: 64px; background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; color: var(--ink); font-family: var(--mono); }
+.drawer .card .pos { position: absolute; left: 4px; bottom: 4px; font: 700 10px/1 var(--mono); padding: 3px 5px; border-radius: 4px; background: var(--amber); color: var(--amber-ink); }
+/* The card viewer sits above the boss turn panel, and both step aside while a card is being dragged. */
+.drawer { z-index: 38; }
+body.dragging .stage { opacity: .18; pointer-events: none; }
 
 /* Import dialog */
 .modal-back { position: fixed; inset: 0; z-index: 50; background: rgba(5,15,17,.7); display: grid; place-items: center; padding: 16px; }
@@ -299,6 +305,8 @@ body.stage-open { padding-bottom: calc(50vh + 16px); }
 .rolls li { font: 700 12.5px var(--mono); background: var(--felt-deep); border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 8px; }
 .stage-math { display: flex; flex-wrap: wrap; gap: 6px 10px; font: 500 13px var(--mono); color: var(--muted); }
 .heal-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.heal-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.heal-hint { flex-basis: 100%; font-size: 12px; color: var(--muted); }
 .heal-row input { width: 90px; background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; color: var(--ink); font-family: var(--mono); }
 .calc-hint { margin: 0; font-size: 12.5px; color: var(--muted); }
 .calc input:disabled { opacity: .55; }
@@ -454,15 +462,13 @@ body.hub-open { overflow: hidden; }
           <div class="boss-row"><span class="zone-label">Conditions</span><div class="acts" id="bossStatus"></div></div>
         </div>
         <div class="boss-piles">
-          <div class="bpile"><span class="zone-label">Deck</span><span class="count" id="bDeckCount">0</span></div>
+          <div class="bpile frame" data-dropzone="bdeck"><span class="zone-label">Deck</span><span class="count" id="bDeckCount">0</span><button class="mini" data-view="bdeck">View</button></div>
           <div class="bpile frame" data-dropzone="bdiscard"><span class="zone-label">Discard</span><span class="count" id="bDiscardCount">0</span><button class="mini" data-view="bdiscard">View</button></div>
           <div class="bpile frame" data-dropzone="blost"><span class="zone-label">Lost Zone</span><span class="count" id="bLostCount">0</span><button class="mini" data-view="blost">View</button></div>
         </div>
       </div>
       <div class="banner" id="raidBanner" hidden></div>
     </section>
-
-    <section class="team" id="team" hidden aria-label="Teammates"></section>
 
     <section class="mat" aria-label="Playmat">
       <div class="frame prizes" data-dropzone="prizes">
@@ -505,6 +511,8 @@ body.hub-open { overflow: hidden; }
       <div class="head"><span class="zone-label">Hand <span class="count" id="handCount">0</span></span><span class="hint">Drag cards onto the mat · drop on a Pokémon to attach or evolve · click any card for actions</span><button class="mini" id="btnSort" title="Pokémon by evolution line, then Items, Tools, Stadiums, Supporters, then Energy">Sort</button></div>
       <div class="row" id="hand"></div>
     </section>
+
+    <section class="team" id="team" hidden aria-label="Teammates"></section>
   </div>
 
   <aside class="side">
@@ -527,6 +535,8 @@ body.hub-open { overflow: hidden; }
 <section class="drawer" id="drawer" hidden aria-label="Card viewer">
   <div class="head">
     <h2 id="drawerTitle">Deck</h2>
+    <label class="drawer-top" id="drawerTopWrap" for="drawerTop" hidden>Show the top <input type="number" id="drawerTop" min="1" step="1" value="7" inputmode="numeric"></label>
+    <button id="drawerAll" class="mini" hidden>Show all</button>
     <button id="drawerShuffle" class="mini">Shuffle deck &amp; close</button>
     <button id="drawerClose" class="mini">Close</button>
   </div>
@@ -610,7 +620,7 @@ body.hub-open { overflow: hidden; }
       <section>
         <h3>Damage and the boss</h3>
         <ul class="facts">
-          <li>Add up every player's damage, plus 10 if the boss is Poisoned or 20 if Burned, minus anything it healed.</li>
+          <li>Add up every player's damage, plus 10 if the boss is Poisoned or 20 if Burned, minus anything it healed, plus any damage it did to itself.</li>
           <li>Divide by 10 × number of players and round down. That many boss cards go to the Lost Zone at the end of the boss's <i>next</i> turn.</li>
           <li>Weakness and Resistance are ignored.</li>
         </ul>
@@ -952,7 +962,7 @@ function slotSet(n, v) { if (n === "active") S.active = v; else S.bench[+n.slice
 function slotLabel(n) { return n === "active" ? "Active" : "Bench " + (+n.slice(5) + 1); }
 function slotTop(sl) { return sl.stack[sl.stack.length - 1]; }
 function slotCards(sl) { return [...sl.stack, ...sl.att]; }
-const ZONE_LABEL = { hand: "hand", deck: "top of deck", deckBottom: "bottom of deck", discard: "discard", lost: "Lost Zone", prizes: "prizes", stadium: "Stadium", bdiscard: "the boss's discard", blost: "the boss's Lost Zone", benergy: "the boss" };
+const ZONE_LABEL = { bdeck: "the top of the boss's deck", hand: "hand", deck: "top of deck", deckBottom: "bottom of deck", discard: "discard", lost: "Lost Zone", prizes: "prizes", stadium: "Stadium", bdiscard: "the boss's discard", blost: "the boss's Lost Zone", benergy: "the boss" };
 
 /* ---------- actions ---------- */
 // Fields every player at the table shares. Everything else is one player's own board.
@@ -978,7 +988,8 @@ function act(label, fn, opts = {}) {
   if (!opts.noUndo) { undoStack.push(entry); if (undoStack.length > 80) undoStack.shift(); }
   if (!opts.keepSel) validateSelection();
   save(); render();
-  if (MP) { publishSeat(); if (sharedChanged) commitShared(snap, run, entry); }
+  localSeq++;
+  if (MP) { publishSeat(); if (sharedChanged) commitShared(snap, run, entry, localSeq); }
 }
 function undo() {
   if (!undoStack.length) return toast("Nothing to undo");
@@ -1434,15 +1445,26 @@ function setMagnified(on) {
 }
 
 /* ---------- viewer drawer ---------- */
-function openViewer(zone) { viewerZone = zone; $("drawer").hidden = false; renderViewer(); }
+let viewerTop = 7;   // how many boss deck cards to show (Pokégear 3.0 looks at 7)
+function openViewer(zone) { viewerZone = zone; if (zone === "bdeck") { viewerTop = 7; $("drawerTop").value = 7; } $("drawer").hidden = false; renderViewer(); }
 function closeViewer() { viewerZone = null; $("drawer").hidden = true; }
 function renderViewer() {
-  const z = viewerZone, arr = S[z];
-  $("drawerTitle").textContent = { deck: "Searching your deck", discard: "Discard pile", lost: "Lost Zone", bdiscard: "Boss's discard pile", blost: "Boss's Lost Zone" }[z] + ` · ${arr.length}`;
-  $("drawerShuffle").hidden = z !== "deck";
+  const z = viewerZone, all = S[z] || [];
+  const bossDeck = z === "bdeck";
+  const arr = bossDeck && viewerTop ? all.slice(0, viewerTop) : all;
+  $("drawerTitle").textContent = bossDeck
+    ? (viewerTop && viewerTop < all.length ? `Boss deck · top ${arr.length} of ${all.length}` : `Boss deck · all ${all.length}`)
+    : { deck: "Searching your deck", discard: "Discard pile", lost: "Lost Zone", bdiscard: "Boss's discard pile", blost: "Boss's Lost Zone" }[z] + ` · ${all.length}`;
+  $("drawerShuffle").hidden = !(z === "deck" || bossDeck);
+  $("drawerShuffle").textContent = bossDeck ? "Shuffle boss deck & close" : "Shuffle deck & close";
+  $("drawerTopWrap").hidden = !bossDeck; $("drawerAll").hidden = !bossDeck || !viewerTop || viewerTop >= all.length;
   const g = $("drawerGrid"); g.replaceChildren();
   if (!arr.length) g.append(el("p", "empty-note", "Nothing here yet."));
-  arr.forEach(u => { const c = dragAttrs(cardEl(u), { zone: z, uid: u }); if (isSel({ zone: z, uid: u })) c.classList.add("selected"); g.append(c); });
+  arr.forEach((u, i) => {
+    const c = dragAttrs(cardEl(u), { zone: z, uid: u }); if (isSel({ zone: z, uid: u })) c.classList.add("selected");
+    if (bossDeck) c.append(el("span", "pos", i === 0 ? "Top" : String(i + 1)));   // order matters when looking at the top cards
+    g.append(c);
+  });
 }
 
 /* ---------- pointer drag & drop ---------- */
@@ -1706,8 +1728,13 @@ function bossAttack(applyDamage) {
 }
 function bossSkipAttack(reason) { act(`${bossName()} did not attack${reason ? ` (${reason})` : ""}`, () => { if (!S.bt || S.bt.phase !== "attack") return false; S.bt.phase = "end"; }); }
 function bossEndTurn() {
-  const bt = S.bt, n = millFor(bt.pending, bt.healed);
+  // A healing number typed a moment ago may not have been shared yet: use what's in the box.
+  const hi = $("stageHeal");
+  let healed = S.bt.healed;
+  if (healTimer && hi) { clearTimeout(healTimer); healTimer = null; healed = Math.round(+hi.value || 0); }
+  const n = millFor(S.bt.pending, healed);
   act(`End of boss turn: ${n} boss card${n === 1 ? "" : "s"} sent to the Lost Zone`, () => {
+    if (S.bt) S.bt.healed = healed;
     if (!S.bt || S.bt.phase !== "end") return false;
     for (let i = 0; i < n; i++) {
       if (!S.bdeck.length) { if (!S.bdiscard.length) break; S.bdeck = shuffle(S.bdiscard); S.bdiscard = []; }
@@ -1835,10 +1862,15 @@ function renderBoss() {
   renderStage();
 }
 
+let stageSig = null;
 function renderStage() {
   const box = $("bossStage"); const bt = S.bt;
   box.hidden = !bt; document.body.classList.toggle("stage-open", !!bt);
-  if (!bt) return;
+  if (!bt) { stageSig = null; return; }
+  // While you're typing in the healing box, don't rebuild the panel unless the boss turn itself moved on.
+  const sig = [bt.phase, bt.current, bt.drawn, bt.toDraw, bt.attackIdx, (bt.rolls || []).length, S.benergy.length, S.bossCfg && S.bossCfg.difficulty].join("|");
+  if (sig === stageSig && document.activeElement && document.activeElement.id === "stageHeal") { updateEndNumbers(); return; }
+  stageSig = sig;
   box.replaceChildren();
   const diff = S.bossCfg.difficulty;
   const art = el("button", "stage-card"); art.type = "button";
@@ -1929,17 +1961,33 @@ function updateEndNumbers() {
   if (math) {
     math.replaceChildren(el("span", null, `Players' damage ${bt.playerDmg}`));
     if (bt.bonus) math.append(el("span", null, `+ ${bt.bonus} Special Conditions`));
-    if (bt.healed) math.append(el("span", null, `− ${bt.healed} healed`));
+    if (bt.healed) math.append(el("span", null, healText(bt.healed)));
     math.append(el("span", null, `÷ (10 × ${divisorPlayers()}) = ${n}`));
   }
   const go = $("stageEndBtn"); if (go) go.textContent = `Send ${n} to the Lost Zone and start the players' turn`;
+  const hi = $("stageHeal"); if (hi && document.activeElement !== hi && +hi.value !== (bt.healed || 0)) hi.value = bt.healed || 0;
 }
+// Healing lowers the cards sent to the Lost Zone. A negative number is damage the boss did to itself
+// (Roaring Moon ex's Frenzied Gouging does 200 to itself), which raises them.
+const healText = h => h > 0 ? `− ${h} healed` : h < 0 ? `+ ${-h} it did to itself` : "";
+let healTimer = null;
 function healRow() {
+  const wrap = el("div", "heal-wrap");
   const row = el("label", "heal-row"); row.htmlFor = "stageHeal";
   row.append(el("span", null, "Damage the boss healed this turn"));
-  const inp = el("input"); inp.type = "number"; inp.min = "0"; inp.step = "10"; inp.id = "stageHeal"; inp.inputMode = "numeric"; inp.value = S.bt.healed || 0;
-  inp.addEventListener("input", () => { S.bt.healed = Math.max(0, +inp.value || 0); save(); calc(); updateEndNumbers(); });
-  row.append(inp); return row;
+  const inp = el("input"); inp.type = "number"; inp.step = "10"; inp.id = "stageHeal"; inp.inputMode = "numeric"; inp.value = S.bt.healed || 0;
+  inp.addEventListener("input", () => {
+    const v = Math.round(+inp.value || 0);
+    if (MP) {   // shared after a short pause (through act, so the change is seen and sent), and the whole team sees the same total
+      clearTimeout(healTimer);
+      healTimer = setTimeout(() => { healTimer = null; act(null, () => { if (!S.bt) return false; S.bt.healed = v; }, { noUndo: true, keepSel: true }); }, 400);
+    } else { S.bt.healed = v; save(); calc(); updateEndNumbers(); }
+  });
+  row.append(inp);
+  const selfHit = btn("It damaged itself…", () => { inp.value = -Math.abs(+inp.value || 0) || ""; inp.focus(); if (+inp.value) inp.dispatchEvent(new Event("input")); }, "mini");
+  selfHit.title = "Turns the number negative, for damage the boss did to itself";
+  wrap.append(row, selfHit, el("span", "heal-hint", "Use a negative number, like −200, if the boss damaged itself."));
+  return wrap;
 }
 
 /* ---------- damage this turn ---------- */
@@ -1978,7 +2026,7 @@ function calc() {
   $("calcOut").textContent = out;
   $("calcHint").textContent = locked ? "Locked during the boss turn. Healing is entered in the boss turn panel." : "Enter what each player's attack did to the boss this turn.";
   const bonus = locked ? S.bt.bonus : bossBonus(), dmg = locked ? S.bt.playerDmg : damageTotal();
-  $("calcMath").textContent = `(${dmg}${bonus ? " + " + bonus : ""}${healed ? " − " + healed : ""}) ÷ (10 × ${div}) = ${(Math.max(0, pending - healed) / (10 * div)).toFixed(2).replace(/\.00$/, "")} → ${out}`;
+  $("calcMath").textContent = `(${dmg}${bonus ? " + " + bonus : ""}${healed ? " " + healText(healed) : ""}) ÷ (10 × ${div}) = ${(Math.max(0, pending - healed) / (10 * div)).toFixed(2).replace(/\.00$/, "")} → ${out}`;
 }
 
 /* ---------- multiplayer ---------- */
@@ -2086,7 +2134,8 @@ const useLocalTransport = () => /[?&]local=1/.test(location.search);
 
 /* Shared state: optimistic locally, then committed with a transaction that replays the move
    on top of anything a teammate did in the meantime. */
-async function commitShared(snapStr, run, entry) {
+let localSeq = 0;   // counts your moves, so a slow retry never overwrites a newer move on your board
+async function commitShared(snapStr, run, entry, seq) {
   const pre = JSON.parse(snapStr);
   const baseRev = pre.rev || 0;
   const optimistic = JSON.parse(JSON.stringify(sharedPart(S)));   // a copy: later moves must not leak into this commit
@@ -2099,7 +2148,7 @@ async function commitShared(snapStr, run, entry) {
       replayed = null; aborted = false;
       if ((remote.rev || 0) === baseRev) return JSON.stringify({ ...optimistic, rev: baseRev + 1 });
       const saved = S;
-      S = { ...pre, ...remote };
+      S = { ...JSON.parse(snapStr), ...remote };   // a fresh copy every attempt, so a retried move can't happen twice
       let r; try { r = run(); } catch (err) { r = false; }
       const out = S; S = saved;
       if (r === false) { aborted = true; return undefined; }
@@ -2115,7 +2164,7 @@ async function commitShared(snapStr, run, entry) {
   }
   const committed = JSON.parse(res.value);
   entry.revAfter = committed.rev;
-  if (replayed) Object.assign(S, localPart(replayed));
+  if (replayed && seq === localSeq) Object.assign(S, localPart(replayed));   // only if you haven't moved since
   S.rev = -1; applyRemoteShared(committed);
   publishSeat(); save();
 }
@@ -2561,7 +2610,9 @@ $("btnShuffle").onclick = shuffleDeck;
 $("btnSearch").onclick = () => openViewer("deck");
 document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => openViewer(b.dataset.view));
 $("drawerClose").onclick = closeViewer;
-$("drawerShuffle").onclick = () => { shuffleDeck(); closeViewer(); };
+$("drawerShuffle").onclick = () => { if (viewerZone === "bdeck") act("Shuffled the boss deck", () => { S.bdeck = shuffle(S.bdeck); }); else shuffleDeck(); closeViewer(); };
+$("drawerTop").addEventListener("input", e => { const n = Math.floor(+e.target.value); if (n >= 1) { viewerTop = n; renderViewer(); } });
+$("drawerAll").onclick = () => { viewerTop = 0; renderViewer(); };
 $("importCancel").onclick = closeImport;
 $("importSample").onclick = () => { $("importText").value = SAMPLE_DECK; };
 $("importGo").onclick = async () => { if (await loadDeck($("importText").value)) closeImport(); };
