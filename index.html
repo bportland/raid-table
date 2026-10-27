@@ -239,6 +239,8 @@ body.custom-back .card.back { background: var(--back-img) center / cover no-repe
 .guide kbd { font: 700 11.5px var(--mono); background: var(--felt-deep); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; }
 .guide-src { margin: 0; font-size: 12.5px !important; color: var(--muted) !important; }
 @media (max-width: 760px) { .guide-cols { grid-template-columns: minmax(0, 1fr); gap: 4px; } .guide-cols section + section h3:first-child { margin-top: 16px; } }
+.sample-pick { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-right: auto; }
+.sample-pick select { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; color: var(--ink); font: 14px var(--body); }
 .modal .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
 .modal .progress { margin-right: auto; font: 500 12.5px var(--mono); color: var(--muted); }
 .modal a { color: var(--amber); }
@@ -550,7 +552,10 @@ body.hub-open { overflow: hidden; }
     <textarea id="importText" spellcheck="false" aria-label="Deck list"></textarea>
     <div class="foot">
       <span class="progress" id="importProgress"></span>
-      <button id="importSample">Use sample deck</button>
+      <label class="sample-pick" for="importSampleSel">Sample deck
+        <select id="importSampleSel"></select>
+      </label>
+      <button id="importSample">Use this sample</button>
       <button id="importCancel">Cancel</button>
       <button id="importGo" class="primary">Load deck</button>
     </div>
@@ -696,6 +701,11 @@ body.hub-open { overflow: hidden; }
 <div class="modal-back" id="bossSetupBack" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bossSetupTitle">
     <h2 id="bossSetupTitle">Raid boss setup</h2>
+    <div class="row-2">
+      <label class="field-label" for="bossPick">Choose a boss
+        <select id="bossPick" class="text-in"></select>
+      </label>
+    </div>
     <label class="field-label" for="bossLine">Boss Pokémon (name, set code and number, like a deck list line)
       <input type="text" id="bossLine" class="text-in" spellcheck="false" placeholder="Roaring Moon ex PAR 124">
     </label>
@@ -710,12 +720,14 @@ body.hub-open { overflow: hidden; }
       </label>
       <label class="check" for="bossHarsh"><input type="checkbox" id="bossHarsh"> Harsher damage: divide by 10 × (players − 1)</label>
     </div>
-    <label class="field-label" for="bossDeckText">Boss deck: 60 Trainer and Energy cards, no Pokémon
+    <label class="field-label" for="bossDeckPick">Choose a boss deck
+      <select id="bossDeckPick" class="text-in"></select>
+    </label>
+    <label class="field-label" for="bossDeckText">Boss deck list: 60 Trainer and Energy cards, no Pokémon
       <textarea id="bossDeckText" spellcheck="false"></textarea>
     </label>
     <div class="foot">
       <span class="progress" id="bossProgress"></span>
-      <button id="bossUseDefault">Use the Handbook deck</button>
       <button id="bossCancel">Cancel</button>
       <button id="bossGo" class="primary">Load boss</button>
     </div>
@@ -787,6 +799,59 @@ Energy - 12
 12 Basic Fighting Energy SVE 6
 
 Total Cards - 60`;
+// Sample decks offered in Import deck. The first one loads automatically on a first visit.
+const SAMPLE_DECKS = [
+  { name: "Mega Lucario ex", list: SAMPLE_DECK },
+  { name: "Wailord ex", list: `Pokémon: 15
+4 Wailmer PBL 15
+4 Wailord ex PBL 97
+2 Popplio PBL 18
+2 Brionne PBL 19
+2 Primarina PBL 88
+1 Meowth ex POR 62
+
+Trainer: 33
+3 Misty's Vitality PBL 80
+2 Lillie's Determination ASC 192
+2 Lillie's Determination MEG 119
+2 Ciphermaniac's Codebreaking TEF 145
+2 Boss's Orders PAL 172
+2 Hilda WHT 84
+4 Pokégear 3.0 UNB 182
+4 Poké Pad POR 81
+2 Ultra Ball SVI 196
+2 Great Haul Net CRI 78
+1 Scoop Up Cyclone PRE 128
+3 Heavy Baton TEF 151
+4 Surfing Beach CRI 114
+
+Energy: 12
+9 Water Energy MEE 3
+3 Bubbly Water Energy CRI 84` },
+  { name: "Tropius & Ogerpon", list: `Pokémon: 15
+4 Tropius SVI 7
+3 Teal Mask Ogerpon ex TWM 25
+3 Sprigatito PAL 13
+2 Floragato PAL 14
+3 Meowscarada ex PAL 15
+
+Trainer: 33
+4 Lillie's Determination MEG 119
+2 Professor's Research SVI 189
+2 Iono PAL 185
+2 Arven SVI 166
+2 Boss's Orders PAL 172
+4 Ultra Ball SVI 196
+4 Nest Ball SVI 181
+4 Rare Candy SVI 191
+3 Pokégear 3.0 UNB 182
+2 Switch SVI 194
+2 Super Rod PAL 188
+2 Energy Retrieval SVI 171
+
+Energy: 12
+12 Basic {G} Energy SVE 1` }
+];
 
 // In same-computer test mode (?local=1) every tab is its own player, so each tab keeps its own save.
 let TAB = /[?&]local=1/.test(location.search) ? (() => { try { let t = sessionStorage.getItem("raidtable.tab"); if (!t) { t = Math.random().toString(36).slice(2, 7); sessionStorage.setItem("raidtable.tab", t); } return "." + t; } catch { return ""; } })() : "";
@@ -855,7 +920,7 @@ function parseDeck(text) {
     const h = line.match(/^(Pok[eé]mon|Trainers?(?: Cards?)?|Energy)(?:\s*[-–:(]\s*\d*\s*\)?)?$/i) || line.match(/^(Pok[eé]mon|Trainers?|Energy)\b\s*[:(\d]/i);
     if (h) { section = /^pok/i.test(h[1]) ? "Pokémon" : /^tr/i.test(h[1]) ? "Trainer" : "Energy"; continue; }
     if (/^total/i.test(line)) continue;
-    let m = line.match(/^(\d+)\s+(.+?)\s+([A-Z][A-Z0-9-]{1,5})\s+([A-Za-z]{0,4}\d+[a-z]?)$/);
+    let m = line.match(/^(\d+)\s+(.+?)\s+((?=[A-Z0-9-]*[A-Z])[A-Z0-9][A-Z0-9-]{1,5})\s+([A-Za-z]{0,4}\d+[a-z]?)$/);   // set codes like SVI, PR-SV or 30C
     if (m) { entries.push({ count: +m[1], name: cleanName(m[2]), set: m[3], num: m[4], section }); continue; }
     m = line.match(/^(\d+)\s+(.+)$/);
     if (m) entries.push({ count: +m[1], name: cleanName(m[2]), set: null, num: null, section });
@@ -1583,6 +1648,16 @@ function guessDeckName(entries) {
 
 /* ---------- Raid boss ---------- */
 const DEFAULT_BOSS = "Roaring Moon ex PAR 124";
+// Bosses offered in Boss setup. The first is loaded automatically for a new raid.
+const BOSS_CHOICES = [
+  { name: "Roaring Moon ex", line: "Roaring Moon ex PAR 124" },
+  { name: "Mewtwo ex", line: "Mewtwo ex 30C 151" },
+  { name: "Team Rocket's Nidoking ex", line: "Team Rocket's Nidoking ex DRI 119" },
+  // A gentle boss for new players: two plain damage attacks (20 and 30), no effects.
+  { name: "Ponyta (beginner)", line: "Ponyta BS 60" },
+  // The next step up: 40 and 70 damage. Earthquake's damage to "your own Benched Pokémon" does nothing for a boss.
+  { name: "Dugtrio (intermediate)", line: "Dugtrio BS 19" }
+];
 const DEFAULT_BOSS_DECK = `Trainer: 42
 1 Avery CRE 130
 2 Boss's Orders PAL 172
@@ -1619,6 +1694,24 @@ const DEFAULT_BOSS_DECK = `Trainer: 42
 
 Energy: 18
 18 Basic {D} Energy SVE 7`;
+// A gentle boss deck for new players: Energy, healing, and Trainers that do nothing for a boss
+// (Rare Candy, Switch and Nest Ball have no Pokémon to work on). No disruption.
+const GENTLE_BOSS_DECK = `Trainer: 28
+4 Cook TWM 147
+4 Hyper Potion SSH 166
+4 Energy Search SVI 172
+4 Energy Retrieval SVI 171
+4 Rare Candy SVI 191
+4 Switch SVI 194
+4 Nest Ball SVI 181
+
+Energy: 32
+32 Basic {D} Energy SVE 7`;
+// Boss decks offered in Boss setup.
+const BOSS_DECKS = [
+  { name: "Handbook (standard)", list: DEFAULT_BOSS_DECK },
+  { name: "Gentle (beginner)", list: GENTLE_BOSS_DECK }
+];
 const DIFFICULTIES = { easy: "Easy", medium: "Medium", hard: "Hard", extreme: "Extremely Hard" };
 // How to resolve a choice on a boss Trainer, per difficulty (raidformat.com/difficulty)
 const DIFF_GUIDE = {
@@ -1768,11 +1861,24 @@ function toggleBossStatus(st) {
 function openBossSetup() {
   const cfg = S.bossCfg || {};
   $("bossLine").value = cfg.line || DEFAULT_BOSS;
+  syncBossPick();
   $("bossDiffSel").value = cfg.difficulty || "medium";
   $("bossHarsh").checked = !!cfg.harsh;
   $("bossDeckText").value = cfg.list || DEFAULT_BOSS_DECK;
+  syncBossDeckPick();
   $("bossProgress").textContent = "";
   $("bossSetupBack").hidden = false; $("bossLine").focus();
+}
+// The picker shows which listed boss is in the box, or "Another boss" when you've typed your own.
+// Same idea for the boss deck: shows which listed deck is in the box, or "Your own list".
+function syncBossDeckPick() {
+  const t = $("bossDeckText").value.trim();
+  const i = BOSS_DECKS.findIndex(d => d.list.trim() === t);
+  $("bossDeckPick").value = i >= 0 ? String(i) : "custom";
+}
+function syncBossPick() {
+  const i = BOSS_CHOICES.findIndex(b => b.line.toLowerCase() === $("bossLine").value.trim().toLowerCase());
+  $("bossPick").value = i >= 0 ? String(i) : "custom";
 }
 function closeBossSetup() { $("bossSetupBack").hidden = true; }
 async function loadBoss(line, list, difficulty, harsh) {
@@ -2621,8 +2727,14 @@ $("drawerShuffle").onclick = () => { if (viewerZone === "bdeck") act("Shuffled t
 $("drawerTop").addEventListener("input", e => { const n = Math.floor(+e.target.value); if (n >= 1) { viewerTop = n; renderViewer(); } });
 $("drawerAll").onclick = () => { viewerTop = 0; renderViewer(); };
 $("importCancel").onclick = closeImport;
-$("importSample").onclick = () => { $("importText").value = SAMPLE_DECK; };
-$("importGo").onclick = async () => { if (await loadDeck($("importText").value)) closeImport(); };
+SAMPLE_DECKS.forEach((d, i) => { const o = document.createElement("option"); o.value = i; o.textContent = d.name; $("importSampleSel").append(o); });
+$("importSample").onclick = () => { $("importText").value = SAMPLE_DECKS[+$("importSampleSel").value].list; };
+// A sample deck loads under its own name; anything else is named after its biggest Pokémon.
+$("importGo").onclick = async () => {
+  const text = $("importText").value;
+  const sample = SAMPLE_DECKS.find(d => d.list.trim() === text.trim());
+  if (await loadDeck(text, sample ? `${sample.name} sample` : undefined)) closeImport();
+};
 $("importBack").addEventListener("click", e => { if (e.target === $("importBack")) closeImport(); });
 $("players").onchange = e => setPlayers(+e.target.value);
 $("supMinus").onclick = () => setSupporters(S.supportersUsed - 1);
@@ -2648,7 +2760,14 @@ $("roomCfgSave").onclick = () => {
 $("btnBossSetupEmpty").onclick = openBossSetup;
 $("bossCard").onclick = () => openZoom("boss");
 $("bossCancel").onclick = closeBossSetup;
-$("bossUseDefault").onclick = () => { $("bossDeckText").value = DEFAULT_BOSS_DECK; };
+BOSS_CHOICES.forEach((b, i) => { const o = document.createElement("option"); o.value = String(i); o.textContent = b.name; $("bossPick").append(o); });
+{ const o = document.createElement("option"); o.value = "custom"; o.textContent = "Another boss (type it below)"; $("bossPick").append(o); }
+$("bossPick").onchange = e => { if (e.target.value === "custom") { $("bossLine").value = ""; $("bossLine").focus(); } else $("bossLine").value = BOSS_CHOICES[+e.target.value].line; };
+$("bossLine").addEventListener("input", syncBossPick);
+BOSS_DECKS.forEach((d, i) => { const o = document.createElement("option"); o.value = String(i); o.textContent = d.name; $("bossDeckPick").append(o); });
+{ const o = document.createElement("option"); o.value = "custom"; o.textContent = "Your own list (paste it below)"; $("bossDeckPick").append(o); }
+$("bossDeckPick").onchange = e => { if (e.target.value === "custom") { $("bossDeckText").focus(); } else $("bossDeckText").value = BOSS_DECKS[+e.target.value].list; };
+$("bossDeckText").addEventListener("input", syncBossDeckPick);
 $("bossSetupBack").addEventListener("click", e => { if (e.target === $("bossSetupBack")) closeBossSetup(); });
 $("bossGo").onclick = async () => { if (await loadBoss($("bossLine").value.trim() || DEFAULT_BOSS, $("bossDeckText").value, $("bossDiffSel").value, $("bossHarsh").checked)) closeBossSetup(); };
 document.addEventListener("keydown", e => {
@@ -2675,7 +2794,7 @@ if (!S || !S.keys) {
   // open in a working state: load the sample deck straight away
   $("importText").value = SAMPLE_DECK;
   $("importBack").hidden = false;
-  loadDeck(SAMPLE_DECK, "Mega Lucario ex sample").then(ok => { if (ok) closeImport(); return ensureBoss(); });
+  loadDeck(SAMPLE_DECKS[0].list, `${SAMPLE_DECKS[0].name} sample`).then(ok => { if (ok) closeImport(); return ensureBoss(); });
 } else {
   render();
   // a saved game whose card data is from an older version: refetch its cards
