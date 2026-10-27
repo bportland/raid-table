@@ -1,22 +1,28 @@
-# Raid Table
+# Raid Table tests
 
-A free web app for playing the Pokémon Trading Card Game cooperatively with friends. Team up against a Raid Boss Pokémon, online or on one screen.
+Browser tests that play the real app (`index.html`) in headless Chromium. The internet is blocked during tests and stand-in card data is generated from the app's own sample decks, boss decks and bosses, so the tests don't depend on pokemontcg.io or TCGdex being up.
 
-**Play:** https://bportland.github.io/raid-table/
+## Setup (once)
 
-## Features
-- Import your deck from a Pokémon TCG Live or Limitless deck list
-- Drag-and-drop playmat with undo, hand sorting and a turn guide
-- Automated Raid Boss turns at four difficulty levels
-- Online multiplayer rooms with a shared boss, Supporter limit and damage tracking
+```bash
+pip install playwright
+python -m playwright install chromium
+```
 
-## Rules and credits
-- The game rules come from **Raid Format** ([raidformat.com](https://raidformat.com/)), a cooperative way to play the Pokémon TCG. Raid Table is an independent app and isn't affiliated with or endorsed by Raid Format. Please visit their site for the full rules, boss suggestions and deck lists.
-- The default boss deck is the sample list published on raidformat.com, from the official *Pokémon TCG Alternative Play Handbook*.
-- Card data and images are loaded from [pokemontcg.io](https://pokemontcg.io/) and [TCGdex](https://tcgdex.dev/).
+## Run
 
-## Built with AI
-This app was designed and written with the help of **Claude**, an AI assistant made by [Anthropic](https://www.anthropic.com/). The project owner directed the features and rules, and tested and reviewed the result.
+From the repository root:
 
-## Disclaimer
-Raid Table is a free, non-commercial fan project. It is not affiliated with, endorsed, sponsored or approved by The Pokémon Company International, Nintendo, Game Freak or Creatures Inc. Pokémon and all related names, card text and images are trademarks and copyrights of their respective owners.
+```bash
+python tests/run_all.py
+```
+
+It prints PASS or FAIL for each test and takes about a minute.
+
+## What's covered
+
+- `test_solo.py`: a first visit loads a deck and boss; damage math; a full boss turn (draws, attack, healing, damage the boss does to itself); Undo; no sideways scrolling on a phone.
+- `test_two_players.py`: two players in one room using same-computer mode (`?local=1`): joining, seeing each other's boards, the shared Supporter counter and Undo, shared damage entry, Ready starting the boss turn, the boss's attack hitting both players once, a Stadium returning to its owner, two players acting at the same moment, rejoining after a reload.
+- `test_firebase_like.py`: the same multiplayer code with a stand-in connection that behaves like real Firebase (stale local copies, retries, delays). These cover bugs that only appeared with Firebase: extra cards when drawing quickly while a teammate acts, healing that wasn't shared, and the cursor jumping out of the damage box.
+
+Firebase itself is never contacted. To check the real thing, play a round on two devices on the live site.
