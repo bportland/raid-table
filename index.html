@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: a printed playmat. Prizes left, Active + Bench + hand centre, Deck / Discard / a one-line Lost Zone
-   right, an inspector + Raid tools column on the right. On laptops and desktops it all fits the window without
+/* Layout: a printed playmat. Prizes beside Active + Bench, the hand across the bottom under both, Deck / Discard /
+   a one-line Lost Zone down the right, an inspector + Raid tools column on the right. On laptops and desktops it all fits the window without
    scrolling (card size follows the window height). One deliberate dark felt look. */
 :root {
   color-scheme: dark;
@@ -93,10 +93,10 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .frame { border: 1px solid var(--line); border-radius: calc(var(--r) * 2.2); padding: 7px; display: grid; gap: 6px; align-content: start; justify-items: center; position: relative; }
 .frame.over, .hand.over, .slot.over { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(240,164,60,.35) inset; }
 
-/* Prizes fill the left side of the mat: 2 across, 3 down, each row a third of the height. A card taller
-   than its row overlaps the one below a little, like a stacked pile. */
+/* Prizes fill the space beside the Active and Bench: 2 across, 3 down. The bottom row gets a whole card;
+   the two above share what's left, so each card overlaps the one below it like a stacked pile. */
 .prizes { --cw: var(--cw0); display: flex; flex-direction: column; }
-.prizes .grid { flex: 1; display: grid; grid-template-columns: repeat(2, var(--cw)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 6px; align-items: center; min-height: calc(calc(var(--cw) * 1.397) * .6); }
+.prizes .grid { flex: 1; display: grid; grid-template-columns: repeat(2, var(--cw)); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 6px; align-items: start; min-height: calc(calc(var(--cw) * 1.397) * .6); }
 .prizes .count { font: 700 12px var(--mono); }
 
 .field { display: grid; gap: 8px; align-content: start; min-width: 0; }
@@ -105,6 +105,13 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .bench { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .bench .slot { justify-self: stretch; }
 .piles { display: grid; gap: 8px; align-content: start; }
+/* Two rows: Prizes beside the Active and Bench, then the hand across the whole width under both.
+   Deck, Discard and Lost Zone run down the right side of both rows. */
+.mat > .hand { grid-column: 1 / 3; grid-row: 2; }
+/* The Prizes take their height from the Active and Bench beside them (contain: size stops the cards
+   making the row taller), so the three rows of cards overlap to fit. */
+.mat > .prizes { contain: size; width: calc(var(--cw) * 2 + 22px); }
+.mat > .piles { grid-column: 3; grid-row: 1 / 3; }
 .lost-mini { grid-template-columns: auto auto; align-items: center; justify-content: space-between; padding: 5px 8px; }
 .lost-mini .stack { display: none; }
 .lost-mini .meta { gap: 6px; }
@@ -460,6 +467,10 @@ body.hub-open { overflow: hidden; }
   .slot.active { --cw: calc((100vw - 120px) / 4); }
   .mat { grid-template-columns: minmax(0, 1fr); padding: 10px; gap: 10px; }
   .piles { grid-template-columns: repeat(3, minmax(0, 1fr)); order: -1; }
+  .mat > .hand, .mat > .piles { grid-column: auto; grid-row: auto; }
+  .mat > .prizes { contain: none; width: auto; }
+  .pkm .hpline { font-size: 9px; padding: 1px 3px; }
+  .hp-unit { display: none; }
   .pile { min-width: 0; }
   .prizes { --cw: calc((100vw - 140px) / 6); }
   .prizes .grid { grid-template-columns: repeat(6, var(--cw)); grid-template-rows: none; flex: none; }
@@ -550,11 +561,12 @@ body.hub-open { overflow: hidden; }
           </div>
         </div>
         <div class="bench" id="bench"></div>
-        <section class="hand" data-dropzone="hand" aria-label="Hand">
-          <div class="head"><span class="zone-label">Hand <span class="count" id="handCount">0</span></span><span class="deck-name" id="deckName">No deck loaded</span><span class="hint">Drag cards onto the mat · drop on a Pokémon to attach or evolve · click any card for actions</span><button class="mini" id="btnSort" title="Pokémon by evolution line, then Items, Tools, Stadiums, Supporters, then Energy">Sort</button></div>
-          <div class="row" id="hand"></div>
-        </section>
       </div>
+
+      <section class="hand" data-dropzone="hand" aria-label="Hand">
+        <div class="head"><span class="zone-label">Hand <span class="count" id="handCount">0</span></span><span class="deck-name" id="deckName">No deck loaded</span><span class="hint">Drag cards onto the mat · drop on a Pokémon to attach or evolve · click any card for actions</span><button class="mini" id="btnSort" title="Pokémon by evolution line, then Items, Tools, Stadiums, Supporters, then Energy">Sort</button></div>
+        <div class="row" id="hand"></div>
+      </section>
 
       <div class="piles">
         <div class="frame pile" data-dropzone="deck">
@@ -1550,7 +1562,12 @@ function renderSlot(name, host) {
     box.append(p);
     // HP, attached cards and Special Conditions sit over the bottom of the card, so a spot never grows taller.
     const hp = D(top).hp;
-    if (hp) { const left = hp - sl.dmg; p.append(el("span", "hpline" + (left <= 0 ? " low" : ""), left <= 0 ? `KO · ${hp} HP` : `${left} / ${hp} HP`)); }
+    if (hp) {
+      const left = hp - sl.dmg;
+      const line = el("span", "hpline" + (left <= 0 ? " low" : ""), left <= 0 ? `KO · ${hp}` : `${left} / ${hp}`);
+      line.append(el("span", "hp-unit", " HP"));   // dropped on phones, where cards are narrow
+      p.append(line);
+    }
     if (sl.status.length || sl.att.length) {
       const chips = el("div", "chips");
       for (const s of sl.status) chips.append(el("span", "status", s));

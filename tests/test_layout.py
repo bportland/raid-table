@@ -54,9 +54,10 @@ def test_fits_laptop_and_desktop_without_scrolling():
                 # The right column fits too, card panel and all; only the game log may scroll inside itself.
                 assert pg.evaluate(f"{SCROLLS}('.side')") <= 1, f"the side column doesn't fit {where}"
                 assert pg.evaluate(f"{SCROLLS}('#inspector')") <= 1, f"the card panel doesn't fit {where}"
-            # The hand is on the playmat, inside the window.
+            # The hand is on the playmat, inside the window, running under the Prizes as well as the Bench.
             assert pg.evaluate("!!document.querySelector('.mat section.hand')")
             assert pg.evaluate("document.querySelector('section.hand').getBoundingClientRect().bottom") <= h
+            assert pg.evaluate("document.querySelector('section.hand').getBoundingClientRect().left <= document.querySelector('.prizes').getBoundingClientRect().left + 1")
             # The Prize cards fill most of the left side of the mat.
             filled = pg.evaluate("(() => { const p = document.querySelector('.prizes').getBoundingClientRect(), c = [...document.querySelectorAll('#prizes .card')].map(e => e.getBoundingClientRect());"
                                  " return (Math.max(...c.map(r => r.bottom)) - Math.min(...c.map(r => r.top))) / p.height; })()")
@@ -74,6 +75,8 @@ def test_phone_never_scrolls_sideways():
         assert pg.evaluate("document.documentElement.scrollWidth") <= 390
         pg.evaluate("select(null)"); pg.wait_for_timeout(100)
         assert pg.evaluate("document.documentElement.scrollWidth") <= 390
+        # A Pokémon's HP line stays within its (narrow) card.
+        assert pg.evaluate("[...document.querySelectorAll('.pkm')].filter(p => { const h = p.querySelector('.hpline'); return h && h.getBoundingClientRect().width > p.getBoundingClientRect().width + 1; }).length") == 0
         b.close()
     assert not errors, errors
 
