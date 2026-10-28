@@ -26,9 +26,9 @@ SUPPORTERS = {"Avery", "Boss's Orders", "Boss's Orders (Ghetsis)", "Bug Catcher"
               "Ciphermaniac's Codebreaking", "Hilda", "Team Rocket's Petrel", "Judge", "Gwynn",
               "Wally's Compassion", "Carmine", "Urbain"}
 STADIUMS = {"Collapsed Stadium", "Galar Mine", "Old Cemetery", "Path to the Peak", "Spikemuth",
-            "Gravity Mountain", "Surfing Beach", "Prism Tower"}
+            "Gravity Mountain", "Surfing Beach", "Prism Tower", "Academy at Night"}
 TOOLS = {"Rocky Helmet", "Lucky Helmet", "Spirit Mask", "Air Balloon", "Defiance Band", "Heavy Baton",
-         "Forest Seal Stone"}
+         "Forest Seal Stone", "Bravery Charm", "Future Booster Energy Capsule"}
 
 
 def _img(name, color):
@@ -173,11 +173,23 @@ def watch_errors(page, label, errors):
     page.on("pageerror", lambda e: errors.append(f"{label}: {e}"))
 
 
+def start_raid(page):
+    """A first visit opens the New raid dialog; start with its defaults (first sample deck, first boss)."""
+    page.wait_for_selector("#setupBack:not([hidden])", timeout=10000)
+    page.click("#setupGo")
+    page.wait_for_function("hasBoss() && S.hand.length === 8 && document.getElementById('setupBack').hidden", timeout=10000)
+
+
+def open_app(page, url=None):
+    page.goto(url or APP.as_uri())
+    start_raid(page)
+
+
 def two_players(ctx, url):
     """Opens two tabs in same-computer mode: Ash creates a room, Misty joins it."""
     a, b = ctx.new_page(), ctx.new_page()
-    a.goto(url + "?local=1"); b.goto(url + "?local=1")
-    a.wait_for_timeout(1500)
+    open_app(a, url + "?local=1"); open_app(b, url + "?local=1")
+    a.wait_for_timeout(500)
     a.click("#btnRoom"); a.fill("#roomName", "Ash"); a.click("#roomCreate"); a.wait_for_timeout(800); a.click("#roomClose")
     b.click("#btnRoom"); b.fill("#roomName", "Misty"); b.fill("#roomCode", a.evaluate("MP.code")); b.click("#roomJoin")
     b.wait_for_timeout(1500); b.click("#roomClose")
@@ -192,9 +204,9 @@ def room_of(ctx, url, names):
     """Opens one tab per name in same-computer mode: the first creates a room, the rest join it one by one."""
     pages = [ctx.new_page() for _ in names]
     for pg in pages:
-        pg.goto(url + "?local=1")
+        open_app(pg, url + "?local=1")
     host = pages[0]
-    host.wait_for_timeout(1500)
+    host.wait_for_timeout(500)
     host.click("#btnRoom"); host.fill("#roomName", names[0]); host.click("#roomCreate"); host.wait_for_timeout(800); host.click("#roomClose")
     code = host.evaluate("MP.code")
     for i, (pg, name) in enumerate(zip(pages[1:], names[1:]), start=2):

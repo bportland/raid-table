@@ -6,7 +6,7 @@ what it needs: an evolution, a Pokémon Tool and a Stadium with two copies.
 """
 from playwright.sync_api import sync_playwright
 
-from helpers import APP, offline_context, serve, step_boss_draws, two_players, watch_errors
+from helpers import offline_context, open_app, serve, step_boss_draws, two_players, watch_errors
 
 # Empties the board, then makes the cards the tests need and returns their ids:
 # a, a2: Basic "A" Pokémon; b: evolves from A; c: another Basic; e1, e2: Energy;
@@ -43,8 +43,7 @@ def _open(p, errors):
     b = p.chromium.launch()
     pg = offline_context(b).new_page()
     watch_errors(pg, "solo", errors)
-    pg.goto(APP.as_uri())
-    pg.wait_for_timeout(1500)
+    open_app(pg)
     return b, pg
 
 
