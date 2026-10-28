@@ -183,7 +183,7 @@ def two_players(ctx, url):
     # Wait until each tab sees both players and Misty's fresh board is dealt.
     for pg in (a, b):
         pg.wait_for_function("MP && seatList().length === 2", timeout=10000)
-    b.wait_for_function("S.myRaidId === S.raidId && S.hand.length === 7", timeout=10000)
+    b.wait_for_function("S.myRaidId === S.raidId && S.hand.length === 8", timeout=10000)   # 7, plus the turn's draw
     return a, b
 
 
@@ -204,7 +204,7 @@ def room_of(ctx, url, names):
     for pg in pages:
         pg.wait_for_function(f"MP && seatList().length === {len(names)}", timeout=10000)
     for pg in pages[1:]:
-        pg.wait_for_function("S.myRaidId === S.raidId && S.hand.length === 7", timeout=10000)
+        pg.wait_for_function("S.myRaidId === S.raidId && S.hand.length === 8", timeout=10000)   # 7, plus the turn's draw
     return pages
 
 

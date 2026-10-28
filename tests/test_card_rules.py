@@ -6,7 +6,7 @@ what it needs: an evolution, a Pokémon Tool and a Stadium with two copies.
 """
 from playwright.sync_api import sync_playwright
 
-from helpers import APP, offline_context, watch_errors
+from helpers import APP, offline_context, serve, step_boss_draws, two_players, watch_errors
 
 # Empties the board, then makes the cards the tests need and returns their ids:
 # a, a2: Basic "A" Pokémon; b: evolves from A; c: another Basic; e1, e2: Energy;
@@ -189,7 +189,132 @@ def test_rule_help_setting():
     assert not errors, errors
 
 
+# Puts a Basic in the Active spot and gives it two attacks that cost the type of an Energy in the deck.
+# Returns the Energy's id and type.
+ATTACKER = """() => {
+  const basic = S.hand.find(u => isBasic(u));
+  move({ zone: 'hand', uid: basic }, { zone: 'slot', slot: 'active' });
+  const e = S.deck.find(u => energyType(u));
+  const t = energyType(e);
+  CARDS[keyOf(basic)].attacks = [
+    { name: 'Jab', cost: [t], damage: '30', text: '' },
+    { name: 'Big Punch', cost: [t, 'Colorless'], damage: '100+', text: '' }];
+  act(null, () => { S.deck = S.deck.filter(u => u !== e); S.hand.push(e); }, { noUndo: true });
+  select({ zone: 'slot', slot: 'active' });
+  return { e, t };
+}"""
+
+
+def test_turn_draw_and_attack():
+    errors = []
+    with sync_playwright() as p:
+        b, pg = _open(p, errors)
+        # The opening 7, then the draw for turn 1.
+        assert pg.evaluate("S.hand.length") == 8 and pg.evaluate("S.drewTurn") == 1
+        pg.evaluate("setPlayers(1)")
+        en = pg.evaluate(ATTACKER)
+        assert "attack (ends your turn)" in pg.inner_text("#inspector").lower()   # section labels show in capitals
+
+        # Not enough Energy: stopped, with the cost spelled out.
+        pg.click("#inspector button:has-text('Jab')")
+        assert f"It needs 1 {en['t']} Energy" in pg.inner_text("#ruleMsg")
+        pg.click("#ruleOk")
+        assert pg.evaluate("S.attackTurn") == 0
+
+        # With the Energy, the attack's damage goes in your box and, playing alone, the boss turn starts.
+        assert _play(pg, en["e"], _slot("active")) is None
+        pg.evaluate("select({ zone: 'slot', slot: 'active' })")
+        pg.click("#inspector button:has-text('Jab')")
+        assert pg.evaluate("S.dmg[0]") == 30
+        assert pg.evaluate("S.bt && S.bt.phase") == "draw"
+        assert pg.evaluate("S.log.some(e => /used Jab for 30 damage/.test(e.msg))")
+
+        # When the boss turn ends, turn 2 starts with a draw.
+        hand = pg.evaluate("S.hand.length")
+        step_boss_draws(pg)
+        pg.evaluate("S.bt && S.bt.phase === 'attack' && bossSkipAttack('test')"); pg.wait_for_timeout(100)
+        pg.locator("#stageEndBtn").click(); pg.wait_for_timeout(200)
+        assert pg.evaluate("S.turn") == 2
+        assert pg.evaluate("S.hand.length") == hand + 1 and pg.evaluate("S.drewTurn") == 2
+        # Undo of the boss turn's end doesn't give you an extra card when it ends again.
+        pg.click("#btnUndo"); pg.wait_for_timeout(100)
+        assert pg.evaluate("S.turn") == 1 and pg.evaluate("S.hand.length") == hand
+        pg.locator("#stageEndBtn").click(); pg.wait_for_timeout(200)
+        assert pg.evaluate("S.hand.length") == hand + 1
+        b.close()
+    assert not errors, errors
+
+
+def test_attack_ends_your_turn():
+    errors = []
+    with sync_playwright() as p:
+        b, pg = _open(p, errors)
+        en = pg.evaluate(ATTACKER)   # 3 players (the default): the turn ends, but the boss waits for End turn
+        assert _play(pg, en["e"], _slot("active")) is None
+        pg.click("#inspector button:has-text('Jab')")
+        assert pg.evaluate("S.dmg[0]") == 30 and pg.evaluate("S.bt") is None
+        assert "teammates' damage" in pg.inner_text("#toast")
+
+        # After attacking you can't attack again or play more cards, unless you override.
+        pg.evaluate("select({ zone: 'slot', slot: 'active' })")
+        pg.click("#inspector button:has-text('Jab')")
+        assert pg.inner_text("#ruleMsg") == "You've already attacked this turn."
+        pg.click("#ruleOk")
+        basic = pg.evaluate("S.hand.find(u => isBasic(u)) || null")
+        if basic:
+            assert _play(pg, basic, _slot("bench0")) == "You've attacked this turn, and attacking ends your turn."
+            pg.click("#ruleOverride")
+            assert pg.evaluate("!!S.bench[0]")
+
+        # A "+" attack adds its base damage and says you may need to add more.
+        pg.evaluate("act(null, () => { S.attackTurn = 0; S.active.att.push(S.deck.find(u => D(u).supertype === 'Energy')); S.deck = S.deck.filter(u => !S.active.att.includes(u)); }, { noUndo: true })")
+        pg.evaluate("select({ zone: 'slot', slot: 'active' })")
+        pg.click("#inspector button:has-text('Big Punch')")
+        assert pg.evaluate("S.dmg[0]") == 130
+        assert "If its effect adds more" in pg.inner_text("#toast")
+
+        # With Rule help off, attacking only adds the damage, and nothing draws for you.
+        pg.click("#btnRules")
+        pg.evaluate("act(null, () => { S.attackTurn = 0; S.dmg = [0, 0, 0]; }, { noUndo: true }); setPlayers(1)")
+        pg.evaluate("select({ zone: 'slot', slot: 'active' })")
+        assert "attack (ends your turn)" not in pg.inner_text("#inspector").lower()
+        pg.click("#inspector button:has-text('Jab')")
+        assert pg.evaluate("S.dmg[0]") == 30 and pg.evaluate("S.bt") is None
+        hand = pg.evaluate("S.hand.length")
+        pg.evaluate("act(null, () => { S.turn++; }, { noUndo: true })"); pg.wait_for_timeout(100)
+        assert pg.evaluate("S.hand.length") == hand
+        # Turning it back on mid-turn doesn't draw: you were drawing by hand this turn.
+        pg.click("#btnRules"); pg.wait_for_timeout(100)
+        assert pg.evaluate("S.hand.length") == hand
+        b.close()
+    assert not errors, errors
+
+
+def test_attack_marks_you_ready_in_a_room():
+    errors = []
+    with serve(firebase_like=True) as url, sync_playwright() as p:
+        b = p.chromium.launch()
+        a, m = two_players(offline_context(b), url)
+        watch_errors(a, "Ash", errors); watch_errors(m, "Misty", errors)
+        en = m.evaluate(ATTACKER)
+        assert _play(m, en["e"], _slot("active")) is None
+        m.evaluate("select({ zone: 'slot', slot: 'active' })")
+        m.click("#inspector button:has-text('Jab')")
+        # Misty's 30 is Player 2's damage, and she's Ready; the boss waits for Ash.
+        for pg in (a, m):
+            pg.wait_for_function("S.dmg[1] === 30 && Object.keys(S.ready).length === 1", timeout=5000)
+        assert a.evaluate("S.bt") is None
+        a.click("#btnEndTurn")
+        for pg in (a, m):
+            pg.wait_for_function("S.bt && S.bt.phase === 'draw'", timeout=5000)
+        b.close()
+    assert not errors, errors
+
+
 if __name__ == "__main__":
     test_pokemon_rules(); print("Pokémon rules: PASS")
     test_attach_and_play_rules(); print("attach and play rules: PASS")
     test_rule_help_setting(); print("Rule help setting: PASS")
+    test_turn_draw_and_attack(); print("turn draw and attack: PASS")
+    test_attack_ends_your_turn(); print("attack ends your turn: PASS")
+    test_attack_marks_you_ready_in_a_room(); print("attack marks you Ready in a room: PASS")

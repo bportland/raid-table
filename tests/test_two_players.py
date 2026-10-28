@@ -14,7 +14,7 @@ def test_two_player_round():
 
         assert a.evaluate("S.players") == 2 and m.evaluate("S.players") == 2
         assert a.evaluate("seatList().map(s => s.name)") == ["Ash", "Misty"]
-        assert m.evaluate("S.hand.length") == 7 and m.evaluate("S.prizes.length") == 6   # Misty got a fresh board
+        assert m.evaluate("S.hand.length") == 8 and m.evaluate("S.prizes.length") == 6   # Misty got a fresh board, and drew for turn 1
 
         # Both put a Basic Pokémon in the Active spot; each sees the other's.
         for pg in (a, m):
