@@ -30,19 +30,37 @@ def _page(b, w, h, errors):
     return pg
 
 
+# The tallest card panel: your Active, with two attacks, two Energy and a Special Condition.
+PICK_ACTIVE = """() => {
+  CARDS[keyOf(slotTop(S.active))].attacks = [{ name: 'Jab', cost: ['Fighting'], damage: '30', text: '' }, { name: 'Big Punch', cost: ['Fighting', 'Colorless'], damage: '100+', text: '' }];
+  select({ zone: 'slot', slot: 'active' });
+}"""
+SCROLLS = "(s => (e => e.scrollHeight - e.clientHeight)(document.querySelector(s)))"
+
+
 def test_fits_laptop_and_desktop_without_scrolling():
     errors = []
     with sync_playwright() as p:
         b = p.chromium.launch()
         for w, h in ((1366, 657), (1440, 789), (1920, 961)):
             pg = _page(b, w, h, errors)
-            size = f"{w}x{h}"
-            assert pg.evaluate("document.documentElement.scrollHeight") <= h, f"the page scrolls at {size}"
-            assert pg.evaluate("document.documentElement.scrollWidth") <= w, f"the page scrolls sideways at {size}"
-            assert pg.evaluate("(t => t.scrollHeight - t.clientHeight)(document.querySelector('.table-col'))") <= 1, f"the table doesn't fit at {size}"
+            for picked in ("a hand card", "your Active"):
+                if picked == "your Active":
+                    pg.evaluate(PICK_ACTIVE); pg.wait_for_timeout(150)
+                where = f"at {w}x{h} with {picked} picked"
+                assert pg.evaluate("document.documentElement.scrollHeight") <= h, f"the page scrolls {where}"
+                assert pg.evaluate("document.documentElement.scrollWidth") <= w, f"the page scrolls sideways {where}"
+                assert pg.evaluate(f"{SCROLLS}('.table-col')") <= 1, f"the table doesn't fit {where}"
+                # The right column fits too, card panel and all; only the game log may scroll inside itself.
+                assert pg.evaluate(f"{SCROLLS}('.side')") <= 1, f"the side column doesn't fit {where}"
+                assert pg.evaluate(f"{SCROLLS}('#inspector')") <= 1, f"the card panel doesn't fit {where}"
             # The hand is on the playmat, inside the window.
             assert pg.evaluate("!!document.querySelector('.mat section.hand')")
             assert pg.evaluate("document.querySelector('section.hand').getBoundingClientRect().bottom") <= h
+            # The Prize cards fill most of the left side of the mat.
+            filled = pg.evaluate("(() => { const p = document.querySelector('.prizes').getBoundingClientRect(), c = [...document.querySelectorAll('#prizes .card')].map(e => e.getBoundingClientRect());"
+                                 " return (Math.max(...c.map(r => r.bottom)) - Math.min(...c.map(r => r.top))) / p.height; })()")
+            assert filled > .8, f"the Prize cards fill only {filled:.0%} of their column at {w}x{h}"
             pg.close()
         b.close()
     assert not errors, errors

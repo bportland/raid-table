@@ -93,9 +93,10 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .frame { border: 1px solid var(--line); border-radius: calc(var(--r) * 2.2); padding: 7px; display: grid; gap: 6px; align-content: start; justify-items: center; position: relative; }
 .frame.over, .hand.over, .slot.over { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(240,164,60,.35) inset; }
 
-/* Prize cards are face down and only ever taken, so they're smaller: 3 across, 2 down. */
-.prizes { --cw: calc(var(--cw0) * .62); }
-.prizes .grid { display: grid; grid-template-columns: repeat(3, var(--cw)); gap: 5px; min-height: calc(calc(var(--cw) * 1.397) * .6); }
+/* Prizes fill the left side of the mat: 2 across, 3 down, each row a third of the height. A card taller
+   than its row overlaps the one below a little, like a stacked pile. */
+.prizes { --cw: var(--cw0); display: flex; flex-direction: column; }
+.prizes .grid { flex: 1; display: grid; grid-template-columns: repeat(2, var(--cw)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 6px; align-items: center; min-height: calc(calc(var(--cw) * 1.397) * .6); }
 .prizes .count { font: 700 12px var(--mono); }
 
 .field { display: grid; gap: 8px; align-content: start; min-width: 0; }
@@ -166,12 +167,34 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
   body { height: 100vh; display: flex; flex-direction: column; }
   .app { flex: 1; min-height: 0; align-items: stretch; }
   .table-col { min-height: 0; overflow-y: auto; align-content: start; scrollbar-color: var(--line) transparent; }
-  .side { position: static; max-height: none; align-content: start; }
+  /* The side column fits too: the card panel takes what it needs (scrolling inside itself only if a card
+     has a very long list of actions), damage stays compact, and the game log fills the rest. */
+  .side { position: static; max-height: none; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  .side > .panel { flex: none; }
+  .side > #inspector { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: var(--line) transparent; }
+  .side > .log-panel { flex: 1 1 0; min-height: 56px; display: flex; flex-direction: column; }
+  .log-panel .log { flex: 1; min-height: 0; max-height: none; align-content: start; }
+  #inspector.has-sel > :first-child { display: none !important; }   /* the "Card" heading (styled inline); its Close button is only for small screens */
+}
+/* Short laptop screens (like 1366x768): squeeze the side column a little more so even a busy Active fits.
+   ("body" makes these win over the normal rules further down.) */
+@media (min-width: 1181px) and (max-height: 700px) {
+  .calc-hint, #calcMath { display: none; }
+  body .side { gap: 8px; }
+  body .side .panel { padding: 8px 10px; gap: 5px; }
+  body .insp-top { grid-template-columns: minmax(0, 60px) minmax(0, 1fr); }
+  body .acts button { padding: 3px 6px; }
+  body #inspector.has-sel { gap: 3px; }
+  body .calc input { padding: 3px 6px; }
+  body .calc .result { padding: 5px 10px; }
+  body .side > .log-panel { min-height: 34px; }
 }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 10px; min-width: 0; }
 .panel h2 { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; margin: 0; color: var(--muted); }
+.side .panel { padding: 10px 12px; gap: 7px; }
 /* A small picture beside the card's details: clicking it shows the card full screen. */
-.insp-top { display: grid; grid-template-columns: minmax(0, 132px) minmax(0, 1fr); gap: 12px; align-items: start; }
+.insp-top { display: grid; grid-template-columns: minmax(0, 76px) minmax(0, 1fr); gap: 12px; align-items: start; }
+#inspector.has-sel { gap: 5px; }
 .insp-art { display: block; padding: 0; border: 0; background: none; border-radius: 12px; cursor: zoom-in; justify-self: start; width: 100%; }
 .insp-art .card { width: 100%; height: auto; aspect-ratio: 63 / 88; border-radius: 4.5% / 3.3%; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
 .insp-art .card.noimg .cap { font-size: 14px; }
@@ -186,22 +209,24 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .zoom-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
 .zoom-hint { font-size: 12.5px; color: var(--muted); }
 .zoom-card .zoom-text { --cw: min(420px, 80vw); }
-.insp-name { font: 700 17px/1.2 var(--display); margin: 0 0 2px; overflow-wrap: anywhere; }
-.insp-sub { color: var(--muted); font-size: 13px; }
-.acts { display: flex; flex-wrap: wrap; gap: 5px; }
-.acts-label { font: 600 10.5px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
-.acts button { font-size: 12.5px; padding: 5px 8px; }
+.insp-name { font: 700 16px/1.2 var(--display); margin: 0 0 2px; overflow-wrap: anywhere; }
+.insp-sub { color: var(--muted); font-size: 12.5px; }
+.acts { display: flex; flex-wrap: wrap; gap: 4px; }
+.acts-label { font: 600 10.5px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 1px; }
+.acts button { font-size: 12px; padding: 4px 7px; }
 .acts button.on { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); }
+.acts button.to-empty { border-style: dashed; color: var(--muted); }
 .insp-warn { margin-top: 6px; font-size: 12.5px; color: var(--amber); }
 .empty-note { color: var(--muted); font-size: 13.5px; margin: 0; }
 .insp-close { display: none; }
 
-.calc label { display: grid; gap: 3px; font-size: 12.5px; color: var(--muted); }
-.calc .row2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+/* One row of damage boxes (up to 4 players), and the result on one compact line. */
+.calc label { display: grid; gap: 2px; font-size: 11.5px; color: var(--muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.calc .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: 6px; }
 .calc input, .calc select { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; width: 100%; color: var(--ink); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .calc-fixed { font: 700 15px var(--mono); color: var(--ink); padding: 5px 0; }
-.calc .result { background: var(--felt-deep); border-radius: 8px; padding: 10px; display: grid; gap: 2px; }
-.calc .result b { font: 700 28px/1 var(--mono); color: var(--amber); font-variant-numeric: tabular-nums; }
+.calc .result { background: var(--felt-deep); border-radius: 8px; padding: 7px 10px; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; font-size: 13px; line-height: 1.3; }
+.calc .result b { font: 700 26px/1 var(--mono); color: var(--amber); font-variant-numeric: tabular-nums; grid-row: span 2; }
 .calc .result small { color: var(--muted); font: 500 12px var(--mono); }
 
 .log { max-height: 170px; overflow-y: auto; margin: 0; padding: 0; list-style: none; font-size: 12.5px; display: grid; gap: 3px; -webkit-user-select: text; user-select: text; }
@@ -344,7 +369,7 @@ body.stage-open { padding-bottom: calc(50vh + 16px); }
 .heal-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .heal-hint { flex-basis: 100%; font-size: 12px; color: var(--muted); }
 .heal-row input { width: 90px; background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; color: var(--ink); font-family: var(--mono); }
-.calc-hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+.calc-hint { margin: 0; font-size: 12px; color: var(--muted); }
 .calc input:disabled { opacity: .55; }
 .text-in { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; color: var(--ink); width: 100%; font: 14px var(--body); -webkit-user-select: text; user-select: text; }
 .row-2 { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
@@ -437,7 +462,7 @@ body.hub-open { overflow: hidden; }
   .piles { grid-template-columns: repeat(3, minmax(0, 1fr)); order: -1; }
   .pile { min-width: 0; }
   .prizes { --cw: calc((100vw - 140px) / 6); }
-  .prizes .grid { grid-template-columns: repeat(6, var(--cw)); }
+  .prizes .grid { grid-template-columns: repeat(6, var(--cw)); grid-template-rows: none; flex: none; }
   .front { grid-template-columns: auto 1fr; }
   .front .spacer { display: none; }
   .front .stadium { justify-self: start; order: 2; }
@@ -559,12 +584,12 @@ body.hub-open { overflow: hidden; }
 
     <section class="panel calc" aria-label="Damage this turn">
       <h2>Damage this turn</h2>
-      <p class="calc-hint" id="calcHint">Enter what each player's attack did to the boss this turn.</p>
+      <p class="calc-hint" id="calcHint">What each player's attack did to the boss.</p>
       <div class="row2" id="calcDamage"></div>
       <div class="result"><b id="calcOut">0</b><span id="calcLabel">boss cards go to the Lost Zone at the end of its turn</span><small id="calcMath"></small></div>
     </section>
 
-    <section class="panel">
+    <section class="panel log-panel">
       <h2>Game log</h2>
       <ul class="log" id="log"></ul>
     </section>
@@ -1659,11 +1684,21 @@ function renderInspector() {
     box.append(el("div", "acts-label", "Move"));
     const mv = el("div", "acts");
     mv.append(btn("Knocked Out → discard", () => { move(s, { zone: "discard" }); toast("Take your Prize card(s) from the left"); }));
-    for (const n of slotNames()) if (n !== s.slot) { const o = slotGet(n); mv.append(btn(o ? `Switch with ${slotLabel(n)}` : `Move to ${slotLabel(n)}`, () => { move(s, { zone: "slot", slot: n }); selected = { zone: "slot", slot: n }; render(); })); }
     mv.append(btn("Return to hand", () => move(s, { zone: "hand" })));
     mv.append(btn("Lost Zone", () => move(s, { zone: "lost" })));
     if (sl.stack.length > 1) mv.append(btn("Devolve (top card to hand)", () => act(`Devolved ${d.name}`, () => { S.hand.push(sl.stack.pop()); }, { keepSel: true })));
     box.append(mv);
+    // Short spot names keep this to one row: an empty spot is a move, a filled one a switch.
+    box.append(el("div", "acts-label", "Switch with"));
+    const sw = el("div", "acts");
+    for (const n of slotNames()) if (n !== s.slot) {
+      const o = slotGet(n);
+      const b = btn(slotLabel(n), () => { move(s, { zone: "slot", slot: n }); selected = { zone: "slot", slot: n }; render(); });
+      b.title = o ? `Switch with ${D(slotTop(o)).name} (${slotLabel(n)})` : `Move to ${slotLabel(n)} (empty)`;
+      if (!o) b.classList.add("to-empty");
+      sw.append(b);
+    }
+    box.append(sw);
     if (sl.att.length) {
       box.append(el("div", "acts-label", "Attached"));
       const at = el("div", "acts");
@@ -2336,7 +2371,8 @@ function renderCalcInputs() {
   for (let i = 0; i < n; i++) {
     const seat = MP ? seatList().find(x => x.order === i) : null;
     const mine = !MP || (seat && seat.id === MP.seat);
-    const lab = el("label", null, MP ? (seat ? (mine ? `${seat.name} (you)` : seat.name) : `Player ${i + 1}`) : (i === 0 ? "You (Player 1)" : `Player ${i + 1}`)); lab.htmlFor = "calcP" + i;
+    const lab = el("label", null, MP ? (seat ? (mine ? `${seat.name} (you)` : seat.name) : `Player ${i + 1}`) : (i === 0 ? "You" : `Player ${i + 1}`)); lab.htmlFor = "calcP" + i;
+    lab.title = lab.textContent;   // the label can be cut short when four players share the row
     const inp = el("input"); inp.type = "number"; inp.min = "0"; inp.step = "10"; inp.inputMode = "numeric"; inp.id = "calcP" + i; inp.value = S.dmg[i] || 0;
     inp.dataset.mine = mine ? "1" : "";
     inp.addEventListener("input", () => {
@@ -2356,7 +2392,7 @@ function calc() {
   const healed = locked ? S.bt.healed : 0;
   const out = Math.floor(Math.max(0, pending - healed) / (10 * div));
   $("calcOut").textContent = out;
-  $("calcHint").textContent = locked ? "Locked during the boss turn. Healing is entered in the boss turn panel." : "Enter what each player's attack did to the boss this turn.";
+  $("calcHint").textContent = locked ? "Locked for the boss turn. Healing goes in its panel." : "What each player's attack did to the boss.";
   const bonus = locked ? S.bt.bonus : bossBonus(), dmg = locked ? S.bt.playerDmg : damageTotal();
   $("calcMath").textContent = `(${dmg}${bonus ? " + " + bonus : ""}${healed ? " " + healText(healed) : ""}) ÷ (10 × ${div}) = ${(Math.max(0, pending - healed) / (10 * div)).toFixed(2).replace(/\.00$/, "")} → ${out}`;
 }
