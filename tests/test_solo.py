@@ -13,10 +13,10 @@ def test_solo_boss_round():
         pg.goto(APP.as_uri())
         pg.wait_for_timeout(1500)
 
-        # A first visit loads the first sample deck and the first boss on its own.
+        # A first visit loads the first sample deck and the first boss on its own, then draws for turn 1.
         assert pg.evaluate("allUids().length") == 60
         assert pg.evaluate("hasBoss() && S.bdeck.length") == 60
-        assert pg.evaluate("S.hand.length") == 7 and pg.evaluate("S.prizes.length") == 6
+        assert pg.evaluate("S.hand.length") == 8 and pg.evaluate("S.prizes.length") == 6
 
         # Damage this turn: (120 + 200 + 90) / (10 x 3 players) = 13 cards.
         pg.evaluate("(() => { const u = S.hand.find(x => isBasic(x)); move({ zone: 'hand', uid: u }, { zone: 'slot', slot: 'active' }); })()")

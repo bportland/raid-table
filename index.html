@@ -247,6 +247,13 @@ body.custom-back .card.back { background: var(--back-img) center / cover no-repe
 
 /* Drag ghost + toast */
 .ghost { position: fixed; z-index: 100; pointer-events: none; opacity: .92; transform: translate(-50%, -50%) rotate(-3deg); filter: drop-shadow(0 10px 18px rgba(0,0,0,.5)); }
+.slot.can-go, .frame.can-go { border-color: var(--amber); border-style: solid; box-shadow: 0 0 0 2px rgba(240,164,60,.35) inset; }
+.slot.no-go, .frame.no-go { opacity: .45; }
+#btnRules[aria-pressed="true"] { border-color: var(--amber); }
+.rule-note { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 121; width: max-content; max-width: calc(100vw - 32px); display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; background: var(--panel); color: var(--ink); border: 2px solid var(--amber); border-radius: 10px; padding: 10px 12px; box-shadow: 0 10px 28px rgba(0,0,0,.5); font-size: 14px; }
+.rule-note[hidden] { display: none; }
+.rule-note p { margin: 0; flex: 1 1 220px; }
+.rule-note .rule-acts { display: flex; gap: 8px; margin-left: auto; }
 .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 120; background: var(--ink); color: var(--felt-deep); padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 13.5px; box-shadow: 0 6px 18px rgba(0,0,0,.4); max-width: calc(100vw - 32px); }
 
 /* Raid boss zone */
@@ -431,6 +438,7 @@ body.hub-open { overflow: hidden; }
     <button id="btnNew">New game</button>
     <button id="btnRoom">Multiplayer</button>
     <button id="btnGuide" title="What you can do on your turn (?)">Turn guide</button>
+    <button id="btnRules" aria-pressed="true" title="Check each move against the game rules, and show where a card can go when you pick it">Rule help: on</button>
     <button id="btnBack">Card back</button>
     <button id="btnImport" class="primary">Import deck</button>
   </div>
@@ -604,7 +612,7 @@ body.hub-open { overflow: hidden; }
         <h3>Your turn</h3>
         <p class="guide-note">All players take their turns at the same time, then the boss goes.</p>
         <ol class="steps">
-          <li><div><b>Draw a card</b> <span class="tag must">Must</span></div><p>If your deck is empty you keep playing and just skip the draw.</p></li>
+          <li><div><b>Draw a card</b> <span class="tag must">Must</span></div><p>If your deck is empty you keep playing and just skip the draw. With Rule help on, the app draws it for you.</p></li>
           <li><div><b>Do any of these, in any order</b></div>
             <ul class="acts-list">
               <li><span class="tag any">Any</span> Put Basic Pokémon on your Bench, up to 5.</li>
@@ -617,7 +625,7 @@ body.hub-open { overflow: hidden; }
               <li><span class="tag any">Any</span> Use Abilities, following each card's own limits.</li>
             </ul>
           </li>
-          <li><div><b>Attack</b> <span class="tag once">Once</span></div><p>Optional, and allowed on your first turn. Attacking ends your turn. Add your damage to the Raid damage panel.</p></li>
+          <li><div><b>Attack</b> <span class="tag once">Once</span></div><p>Optional, and allowed on your first turn. Attacking ends your turn. Click your Active Pokémon and pick an attack: its damage goes into the Raid damage panel, and with Rule help on your turn ends.</p></li>
         </ol>
         <div class="callout"><b>Check with your team first</b> before playing a card that affects "each player", like Iono. It happens to everyone at the same time.</div>
       </section>
@@ -757,6 +765,10 @@ body.hub-open { overflow: hidden; }
 </section>
 
 <div class="toast" id="toast" hidden></div>
+<div class="rule-note" id="ruleNote" role="alert" hidden>
+  <p id="ruleMsg"></p>
+  <div class="rule-acts"><button id="ruleOverride">Do it anyway</button><button class="primary" id="ruleOk">OK</button></div>
+</div>
 
 <script>
 "use strict";
@@ -903,8 +915,9 @@ function emptyState() {
     bkeys: {}, bossCfg: null, bdeck: [], bdiscard: [], blost: [], benergy: [], btool: null, bstatus: [], bt: null, result: null,
     // multiplayer: ids of other players' cards in shared spots, Ready flags, raid number, revision, cards to hand back
     skeys: {}, ready: {}, raidId: 1, rev: 0, returns: [],
-    // per player: boss hits already applied, which raid this board belongs to
-    seenHits: [], myRaidId: 1 };
+    // per player: boss hits already applied, which raid this board belongs to, and the turn you last
+    // attached Energy from your hand, drew for your turn, and attacked
+    seenHits: [], myRaidId: 1, energyTurn: 0, drewTurn: 0, attackTurn: 0 };
 }
 
 /* ---------- deck list parsing ---------- */
@@ -1029,6 +1042,165 @@ function slotTop(sl) { return sl.stack[sl.stack.length - 1]; }
 function slotCards(sl) { return [...sl.stack, ...sl.att]; }
 const ZONE_LABEL = { bdeck: "the top of the boss's deck", hand: "hand", deck: "top of deck", deckBottom: "bottom of deck", discard: "discard", lost: "Lost Zone", prizes: "prizes", stadium: "Stadium", bdiscard: "the boss's discard", blost: "the boss's Lost Zone", benergy: "the boss" };
 
+/* ---------- rule checks ---------- */
+// Game rules that apply to every card (not card-specific effects). With "Rule help" on, a move that breaks
+// one is stopped with the reason and a "Do it anyway" button, and picking a card shows where it can go.
+const STORE_RULES = "raidtable.rules.v1";
+let rulesOn = (() => { try { return localStorage.getItem(STORE_RULES) !== "off"; } catch { return true; } })();
+// Why moving src to dst breaks a rule, or null when it's fine. Only checks your own cards going into play.
+function ruleProblem(src, dst, opts = {}) {
+  const uid = src.uid;
+  if (!uid || src.zone === "slot" || /^b/.test(src.zone)) return null;   // moving a Pokémon around, or the boss's cards
+  const d = D(uid);
+  if (!d.supertype) return null;   // card details haven't loaded
+  if (S.attackTurn === S.turn && src.zone === "hand" && (dst.zone === "slot" || dst.zone === "stadium" || (dst.zone === "discard" && !opts.noCount && (isItem(uid) || isSupporter(uid)))))
+    return "You've attacked this turn, and attacking ends your turn.";
+  if (dst.zone === "stadium") {
+    if (!isStadium(uid)) return "Only a Stadium card goes in the Stadium spot.";
+    if (S.stadium && S.stadium !== uid && D(S.stadium).name === d.name) return `${d.name} is already in play. A Stadium can't replace one with the same name.`;
+    return null;
+  }
+  if (dst.zone === "discard" && src.zone === "hand" && isSupporter(uid) && !opts.noCount && S.supportersUsed >= S.players)
+    return `Your team has played ${S.supportersUsed} Supporter${S.supportersUsed === 1 ? "" : "s"} this turn. With ${S.players} player${S.players === 1 ? "" : "s"}, that's the limit.`;
+  if (dst.zone !== "slot") return null;
+  const cur = slotGet(dst.slot);
+  const top = cur ? D(slotTop(cur)).name : null;
+  if (isPokemon(uid)) {
+    if (d.evolvesFrom) {
+      if (!cur) return `${d.name} evolves from ${d.evolvesFrom}. Play it on top of ${d.evolvesFrom}.`;
+      if (top !== d.evolvesFrom) return `${d.name} evolves from ${d.evolvesFrom}, not ${top}.`;
+      if (S.turn === 1) return "Pokémon can't evolve on the first turn.";
+      if (cur.inTurn === S.turn) return `${top} came into play or evolved this turn. It can evolve next turn.`;
+      return null;
+    }
+    if (cur && isBasic(uid)) return `${d.name} is a Basic Pokémon. It goes in an empty spot, not on top of another Pokémon.`;
+    return null;
+  }
+  if (d.supertype === "Energy" || isTool(uid)) {
+    if (!cur) return `${d.name} attaches to a Pokémon. Put a Pokémon in this spot first.`;
+    if (isTool(uid) && cur.att.some(u => u !== uid && isTool(u))) return `${top} already has a Pokémon Tool. Each Pokémon can have only one.`;
+    if (d.supertype === "Energy" && src.zone === "hand" && S.energyTurn === S.turn) return "You've already attached an Energy from your hand this turn.";
+    return null;
+  }
+  if (isSupporter(uid)) return `${d.name} is a Supporter, so it doesn't go on a Pokémon. Use Play Supporter in the card panel.`;
+  if (isStadium(uid)) return `${d.name} is a Stadium, so it doesn't go on a Pokémon. Put it in the Stadium spot.`;
+  if (isItem(uid)) return `${d.name} is an Item, so it doesn't go on a Pokémon. Use Play Item in the card panel.`;
+  return null;
+}
+// When a card can't go anywhere on your board right now, the best single reason why.
+function whyNowhere(src) {
+  const d = D(src.uid);
+  const filled = slotNames().filter(n => slotGet(n));
+  if (d.evolvesFrom) {
+    const m = filled.find(n => D(slotTop(slotGet(n))).name === d.evolvesFrom);
+    return m ? ruleProblem(src, { zone: "slot", slot: m }) : `${d.name} evolves from ${d.evolvesFrom}, and you don't have one in play.`;
+  }
+  if (isPokemon(src.uid)) return "Your Active spot and Bench are full.";
+  if (!filled.length) return "Put a Pokémon in play first.";
+  return ruleProblem(src, { zone: "slot", slot: filled[0] }) || "";
+}
+// The card whose legal spots to show: the one being dragged, or else the one picked.
+function hintSource() {
+  const s = drag && drag.started ? drag.src : selected;
+  if (!rulesOn || !s || !s.uid || s.zone === "slot" || s.zone === "stadium" || /^b/.test(s.zone)) return null;
+  return s;
+}
+// Glow the spots a card can go to and dim the ones it can't.
+function markTargets() {
+  const s = hintSource();
+  document.querySelectorAll('[data-dropzone="slot"], [data-dropzone="stadium"]').forEach(n => {
+    n.classList.remove("can-go", "no-go");
+    if (!s) return;
+    const dst = { zone: n.dataset.dropzone, slot: n.dataset.dropslot };
+    if (dst.zone === "stadium" && !isStadium(s.uid)) return;   // the Stadium spot only matters for Stadiums
+    n.classList.add(ruleProblem(s, dst) ? "no-go" : "can-go");
+  });
+}
+let ruleTimer;
+function ruleBlock(msg, override) {
+  $("ruleMsg").textContent = msg;
+  $("ruleOverride").onclick = () => { hideRuleNote(); override(); };
+  $("ruleNote").hidden = false; $("toast").hidden = true;
+  clearTimeout(ruleTimer); ruleTimer = setTimeout(hideRuleNote, 9000);
+}
+function hideRuleNote() { clearTimeout(ruleTimer); $("ruleNote").hidden = true; }
+// With Rule help on, you draw a card as each of your turns starts (turn 1 too, after the opening hand).
+// It runs after every redraw, so it also catches a new turn that a teammate started in a room.
+let drawQueued = false;
+function queueTurnDraw() { if (drawQueued) return; drawQueued = true; queueMicrotask(() => { drawQueued = false; turnDraw(); }); }
+function turnDraw() {
+  if (!rulesOn || !S || !S.started || S.bt || S.result || S.drewTurn === S.turn) return;
+  if (MP && S.myRaidId !== S.raidId) return;   // waiting for this raid's fresh board
+  if (!S.prizes.length) return;   // out of the raid
+  const turn = S.turn, empty = !S.deck.length;
+  // No log line: the log is shared, and every player drawing at once shouldn't all sync it.
+  act(null, () => {
+    if (S.drewTurn === turn || S.turn !== turn) return false;
+    S.drewTurn = turn;
+    if (S.deck.length) S.hand.push(S.deck.shift());
+  }, { noUndo: true, keepSel: true });
+  toast(empty ? `Turn ${turn}: your deck is empty, so you skip your draw.` : `Turn ${turn}: you drew a card.`);
+}
+
+// Attacks: your Active Pokémon's attacks, from its card data. With Rule help on, attacking ends your turn.
+function costMet(cost, att) {
+  const pool = att.filter(u => D(u).supertype === "Energy").map(u => energyType(u) || "Any");   // Special Energy counts as any one type
+  for (const t of cost.filter(c => c !== "Colorless")) {
+    let k = pool.indexOf(t); if (k < 0) k = pool.indexOf("Any");
+    if (k < 0) return false;
+    pool.splice(k, 1);
+  }
+  return pool.length >= cost.filter(c => c === "Colorless").length;
+}
+function costText(cost) {
+  const n = {}; for (const c of cost) n[c] = (n[c] || 0) + 1;
+  return Object.entries(n).map(([t, k]) => `${k} ${t}`).join(" and ") + " Energy";
+}
+function attackProblem(sl, a) {
+  const name = D(slotTop(sl)).name;
+  if (S.bt) return "It's the boss's turn. Attack on your own turn.";
+  if (S.attackTurn === S.turn) return "You've already attacked this turn.";
+  const st = sl.status.find(x => x === "Asleep" || x === "Paralyzed");
+  if (st) return `${name} is ${st}, so it can't attack.`;
+  if (!costMet(a.cost || [], sl.att)) return `${name} doesn't have the Energy for ${a.name}. It needs ${costText(a.cost)}.`;
+  return null;
+}
+function myDamageIndex() {
+  if (!MP) return 0;
+  const me = seatList().find(x => x.id === MP.seat);
+  return me ? me.order : -1;
+}
+function attackWith(i, force) {
+  const sl = S.active; if (!sl) return;
+  const d = D(slotTop(sl)), a = (d.attacks || [])[i]; if (!a) return;
+  const why = rulesOn ? attackProblem(sl, a) : null;
+  if (why && !force) return ruleBlock(why, () => attackWith(i, true));
+  hideRuleNote();
+  const dmg = attackDamage(a), idx = myDamageIndex();
+  act(`${d.name} used ${a.name}${dmg ? ` for ${dmg} damage` : ""}${why ? " (rules overridden)" : ""}`, () => {
+    S.attackTurn = S.turn;
+    if (dmg && idx >= 0) { S.dmg = [...(S.dmg || [])]; S.dmg[idx] = (+S.dmg[idx] || 0) + dmg; }
+  });
+  const notes = [];
+  if (dmg) notes.push(`Added ${dmg} to your damage this turn.` + (/[+×x]/i.test(String(a.damage)) ? " If its effect adds more, change your number in Damage this turn." : ""));
+  if (rulesOn) {
+    if (MP) { if (hasBoss() && !(S.ready || {})[MP.seat]) { toggleReady(); notes.push("Your turn is over, so you're marked Ready."); } }
+    else if (S.players === 1) { notes.push("Your turn is over."); toast(notes.join(" ")); return endTurn(); }
+    else notes.push("Your turn is over. Add your teammates' damage, then press End turn.");
+  }
+  if (notes.length) toast(notes.join(" "));
+}
+
+function setRules(on) {
+  rulesOn = on;
+  try { localStorage.setItem(STORE_RULES, on ? "on" : "off"); } catch {}
+  if (on && S && S.drewTurn !== S.turn) act(null, () => { S.drewTurn = S.turn; }, { noUndo: true, keepSel: true });   // you've drawn by hand this turn
+  $("btnRules").textContent = on ? "Rule help: on" : "Rule help: off";
+  $("btnRules").setAttribute("aria-pressed", String(on));
+  if (!on) hideRuleNote();
+  render();
+}
+
 /* ---------- actions ---------- */
 // Fields every player at the table shares. Everything else is one player's own board.
 const SHARED_FIELDS = ["players", "turn", "supportersUsed", "stadium", "stadiumOwner", "skeys", "dmg", "log",
@@ -1086,8 +1258,8 @@ function place(item, dst) {
       const cur = slotGet(dst.slot);
       if (item.slotObj) { slotSet(dst.slot, item.slotObj); return cur; }
       const u = uids[0];
-      if (!cur) slotSet(dst.slot, { stack: [u], att: [], dmg: 0, status: [] });
-      else if (isPokemon(u)) { cur.stack.push(u); cur.status = []; }
+      if (!cur) slotSet(dst.slot, { stack: [u], att: [], dmg: 0, status: [], inTurn: S.turn });   // inTurn: when it came into play or last evolved
+      else if (isPokemon(u)) { cur.stack.push(u); cur.status = []; cur.inTurn = S.turn; }
       else cur.att.push(u);
       return null;
     }
@@ -1126,6 +1298,11 @@ function move(src, dst, opts = {}) {
     return act(`Discarded ${describe(src)}, back to ${seatName(S.stadiumOwner)}'s discard pile`, () => { const o = S.stadiumOwner; S.stadium = null; S.stadiumOwner = null; discardStadium(src.uid, o); });
   }
   if (src.zone === "slot" && dst.zone === "slot" && dst.slot === src.slot) return;
+  if (rulesOn && !opts.force) {
+    const why = ruleProblem(src, dst, opts);
+    if (why) return ruleBlock(why, () => move(src, dst, { ...opts, force: true }));
+  }
+  hideRuleNote();
   const name = describe(src);
   let label;
   if (dst.zone === "slot") {
@@ -1137,11 +1314,14 @@ function move(src, dst, opts = {}) {
   else if (opts.label) label = opts.label;
   else if (playsSupporter) label = `Played ${name} (Supporter ${S.supportersUsed + 1} of ${S.players})`;
   else label = `${name} → ${ZONE_LABEL[dst.zone] || dst.zone}`;
+  if (opts.force && rulesOn && ruleProblem(src, dst, opts)) label += " (rules overridden)";
+  const attachesEnergy = src.zone === "hand" && dst.zone === "slot" && D(src.uid).supertype === "Energy";
   act(label, () => {
     const item = pull(src);
     const displaced = place(item, dst);
     if (displaced) slotSet(src.slot, displaced);
     if (playsSupporter) S.supportersUsed++;
+    if (attachesEnergy) S.energyTurn = S.turn;   // one Energy from your hand per turn
   });
   if (playsSupporter) {
     if (S.supportersUsed > S.players) toast(`That's ${S.supportersUsed} Supporters this turn. Your team's limit is ${S.players}.`);
@@ -1176,7 +1356,7 @@ function setupMyBoard() {
     mulligans++; S.deck = shuffle([...S.deck, ...S.hand]);
   }
   S.prizes = S.deck.splice(0, 6);
-  S.started = true; S.seenHits = []; S.myRaidId = S.raidId;
+  S.started = true; S.seenHits = []; S.myRaidId = S.raidId; S.energyTurn = 0; S.drewTurn = 0; S.attackTurn = 0;
   return mulligans;
 }
 const mulliganNote = n => `Mulliganed ${n}×: no Basic Pokémon in the opening hand (the boss draws nothing extra)`;
@@ -1389,6 +1569,8 @@ function render() {
 
   renderInspector();
   if (viewerZone) renderViewer();
+  markTargets();
+  queueTurnDraw();
 }
 
 /* ---------- inspector ---------- */
@@ -1429,6 +1611,12 @@ function renderInspector() {
   box.append(top);
 
   if (isSlot) {
+    if (s.slot === "active" && (d.attacks || []).length) {
+      box.append(el("div", "acts-label", rulesOn ? "Attack (ends your turn)" : "Attack"));
+      const ak = el("div", "acts");
+      d.attacks.forEach((a, i) => { const b = btn(`${a.name}${a.damage ? " · " + a.damage : ""}`, () => attackWith(i)); b.title = (a.cost || []).length ? `Costs ${costText(a.cost)}` : "No Energy needed"; ak.append(b); });
+      box.append(ak);
+    }
     box.append(el("div", "acts-label", "Damage"));
     const dm = el("div", "acts");
     [[-10, "−10"], [10, "+10"], [30, "+30"], [50, "+50"], [100, "+100"]].forEach(([v, l]) => dm.append(btn(l, () => act(null, () => { sl.dmg = Math.max(0, sl.dmg + v); }, { keepSel: true }))));
@@ -1464,18 +1652,19 @@ function renderInspector() {
 
   const pl = el("div", "acts");
   const canAttach = !(isItem(uid) || isSupporter(uid) || isStadium(uid));   // Pokémon evolve; Energy and Tools attach
+  const allowed = n => !rulesOn || !ruleProblem(s, { zone: "slot", slot: n });   // with Rule help on, only offer legal spots
   for (const n of slotNames()) {
     const o = slotGet(n);
-    if (o && canAttach) pl.append(btn(`${isPokemon(uid) ? "Evolve" : "Attach to"} ${D(slotTop(o)).name} (${slotLabel(n)})`, () => move(s, { zone: "slot", slot: n })));
+    if (o && canAttach && allowed(n)) pl.append(btn(`${isPokemon(uid) ? "Evolve" : "Attach to"} ${D(slotTop(o)).name} (${slotLabel(n)})`, () => move(s, { zone: "slot", slot: n })));
   }
   if (isPokemon(uid)) {
-    if (!S.active) pl.append(btn("Active", () => move(s, { zone: "slot", slot: "active" })));
+    if (!S.active && allowed("active")) pl.append(btn("Active", () => move(s, { zone: "slot", slot: "active" })));
     const free = S.bench.findIndex(x => !x);
-    if (free >= 0) pl.append(btn("Bench", () => move(s, { zone: "slot", slot: "bench" + free })));
+    if (free >= 0 && allowed("bench" + free)) pl.append(btn("Bench", () => move(s, { zone: "slot", slot: "bench" + free })));
   }
   // Items, Supporters and Stadiums are played above, so they only show this section when it has something
   const playedCard = isItem(uid) || isSupporter(uid) || isStadium(uid);
-  if (!pl.childNodes.length && !playedCard) pl.append(el("span", "insp-sub", "Put a Pokémon in play first."));
+  if (!pl.childNodes.length && !playedCard) pl.append(el("span", "insp-sub", rulesOn ? whyNowhere(s) : "Put a Pokémon in play first."));
   if (pl.childNodes.length) { box.append(el("div", "acts-label", isPokemon(uid) ? "Put in play" : "Attach")); box.append(pl); }
   box.append(el("div", "acts-label", "Move to"));
   const mv = el("div", "acts");
@@ -1568,6 +1757,7 @@ document.addEventListener("pointermove", e => {
     shown.classList.remove("selected"); shown.style.width = r.width + "px"; shown.style.height = r.height + "px";
     drag.ghost.append(shown); document.body.append(drag.ghost);
     document.body.classList.add("dragging");
+    markTargets();
   }
   e.preventDefault();
   drag.ghost.style.left = e.clientX + "px"; drag.ghost.style.top = e.clientY + "px";
@@ -1581,6 +1771,7 @@ function endDrag(e, cancelled) {
   document.body.classList.remove("dragging");
   if (d.over) d.over.classList.remove("over");
   if (d.ghost) d.ghost.remove();
+  if (d.started) markTargets();   // back to the picked card's spots, if any
   if (cancelled) return;
   if (d.started) {
     const hit = dropFromPoint(e.clientX, e.clientY);
@@ -2779,6 +2970,7 @@ document.addEventListener("keydown", e => {
 });
 
 if (S && S.keys) {   // fill in fields added since this game was saved
+  if (S.drewTurn === undefined) S.drewTurn = S.turn;   // a game saved mid-turn has already had its draw
   const base = emptyState();
   for (const k in base) if (S[k] === undefined) S[k] = base[k];
   if (!S.players) S.players = 3;
@@ -2824,6 +3016,9 @@ $("hubClose").onclick = closeHub;
 claimTab().then(resumeRoom).then(() => { if (!MP && /[?&]room=[A-Za-z]{5}/.test(location.search)) openRoomDialog(); });
 try { applyBack(localStorage.getItem(STORE_BACK) || ""); } catch {}
 $("btnBack").onclick = openBack;
+$("btnRules").onclick = () => setRules(!rulesOn);
+$("ruleOk").onclick = hideRuleNote;
+if (!rulesOn) setRules(false);
 function openGuide() { $("guideBack").hidden = false; $("guideClose").focus(); }
 function closeGuide() { $("guideBack").hidden = true; }
 $("btnGuide").onclick = openGuide;

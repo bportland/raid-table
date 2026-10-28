@@ -76,6 +76,10 @@ def _four_player_round(firebase_like):
         for pg in pages:
             pg.wait_for_function("S.blost.length === 12 && S.turn === 2", timeout=5000)
         assert ash.evaluate("S.supportersUsed") == 0 and ash.evaluate("S.ready") == {}
+        # Everyone draws once for turn 2 on their own screen, including the three who didn't end the boss turn.
+        for pg in pages:
+            pg.wait_for_function("S.drewTurn === 2", timeout=5000)
+        assert ash.evaluate("S.log.filter(e => /drew/i.test(e.msg) && e.t === 2).length") == 0   # the draws stay out of the shared log
         b.close()
     assert not errors, errors
 
