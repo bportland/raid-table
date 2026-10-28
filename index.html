@@ -8,8 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: a printed playmat. Prizes left, Active + Bench centre, Deck / Discard / Lost Zone right,
-   hand along the bottom edge, an inspector + Raid tools column on the right. One deliberate dark felt look. */
+/* Layout: a printed playmat. Prizes beside Active + Bench, the hand across the bottom under both, Deck / Discard /
+   a one-line Lost Zone down the right, an inspector + Raid tools column on the right. On laptops and desktops it all fits the window without
+   scrolling (card size follows the window height). One deliberate dark felt look. */
 :root {
   color-scheme: dark;
   --felt: #17363b;
@@ -30,7 +31,10 @@
   --display: "Chakra Petch", "Trebuchet MS", system-ui, sans-serif;
   --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --cw: clamp(56px, 6.1vw, 104px);
+  /* Card width. It follows the window's height as well as its width, so the boss, Active, Bench and hand
+     fit on a laptop screen without scrolling. --cw0 is the base the boss card, Active and Prizes scale from. */
+  --cw0: clamp(48px, min(6.1vw, calc((100vh - 375px) / 4.4)), 120px);
+  --cw: var(--cw0);
   --ch: calc(var(--cw) * 1.397);
   --r: calc(var(--cw) * .055);
 }
@@ -43,7 +47,7 @@ body {
   font: 15px/1.45 var(--body);
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+  padding-block: max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-bottom, 0px));
   -webkit-user-select: none; user-select: none;
 }
 [hidden] { display: none !important; }
@@ -58,7 +62,8 @@ button.primary { background: var(--amber); color: var(--amber-ink); border-color
 button:disabled { opacity: .45; cursor: default; }
 
 /* Header */
-header.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
+header.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 10px; }
+header.bar button { padding: 4px 8px; font-size: 13.5px; }
 .brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }
 .brand h1 { font: 700 22px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; margin: 0; }
 .brand span { color: var(--muted); font-size: 13px; }
@@ -75,33 +80,46 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .sup.over b#supUsed { color: var(--dmg); }
 
 /* App frame */
-.app { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
-.table-col { min-width: 0; display: grid; gap: 12px; }
+.app { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 14px; align-items: start; }
+.table-col { min-width: 0; display: grid; gap: 10px; }
 
 /* Mat */
 .mat {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px;
-  border: 1.5px solid var(--line); border-radius: 18px; padding: 14px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px;
+  border: 1.5px solid var(--line); border-radius: 18px; padding: 10px;
   background: linear-gradient(transparent, rgba(0,0,0,.08));
 }
 .zone-label { font: 600 10.5px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .frame { border: 1px solid var(--line); border-radius: calc(var(--r) * 2.2); padding: 7px; display: grid; gap: 6px; align-content: start; justify-items: center; position: relative; }
 .frame.over, .hand.over, .slot.over { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(240,164,60,.35) inset; }
 
-.prizes .grid { display: grid; grid-template-columns: repeat(2, var(--cw)); gap: 6px; min-height: calc(calc(var(--cw) * 1.397) * .6); }
+/* Prizes fill the space beside the Active and Bench: 2 across, 3 down. The bottom row gets a whole card;
+   the two above share what's left, so each card overlaps the one below it like a stacked pile. */
+.prizes { --cw: var(--cw0); display: flex; flex-direction: column; }
+.prizes .grid { flex: 1; display: grid; grid-template-columns: repeat(2, var(--cw)); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 6px; align-items: start; min-height: calc(calc(var(--cw) * 1.397) * .6); }
 .prizes .count { font: 700 12px var(--mono); }
 
-.field { display: grid; gap: 14px; align-content: start; min-width: 0; }
-.front { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 14px; }
+.field { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.front { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 10px; }
 .front .stadium { justify-self: end; }
 .bench { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .bench .slot { justify-self: stretch; }
-.piles { display: grid; gap: 10px; align-content: start; }
+.piles { display: grid; gap: 8px; align-content: start; }
+/* Two rows: Prizes beside the Active and Bench, then the hand across the whole width under both.
+   Deck, Discard and Lost Zone run down the right side of both rows. */
+.mat > .hand { grid-column: 1 / 3; grid-row: 2; }
+/* The Prizes take their height from the Active and Bench beside them (contain: size stops the cards
+   making the row taller), so the three rows of cards overlap to fit. */
+.mat > .prizes { contain: size; width: calc(var(--cw) * 2 + 22px); }
+.mat > .piles { grid-column: 3; grid-row: 1 / 3; }
+.lost-mini { grid-template-columns: auto auto; align-items: center; justify-content: space-between; padding: 5px 8px; }
+.lost-mini .stack { display: none; }
+.lost-mini .meta { gap: 6px; }
 
 /* Slots */
-.slot { border: 1px dashed var(--line); border-radius: calc(var(--r) * 2.2); padding: 6px; display: grid; gap: 5px; justify-items: center; align-content: start; min-height: calc(calc(var(--cw) * 1.397) + 30px); min-width: calc(var(--cw) + 14px); position: relative; }
+.slot { border: 1px dashed var(--line); border-radius: calc(var(--r) * 2.2); padding: 4px 6px 5px; display: grid; gap: 4px; justify-items: center; align-content: start; min-height: calc(calc(var(--cw) * 1.397) + 25px); min-width: calc(var(--cw) + 14px); position: relative; }
 .slot.filled { border-style: solid; }
-.slot.active { --cw: clamp(68px, 7.6vw, 128px); }
+.slot.active { --cw: calc(var(--cw0) * 1.12); }
 .slot .zone-label { justify-self: start; }
 .pkm { position: relative; touch-action: none; cursor: grab; }
 .pkm .under { position: absolute; left: 4px; top: -5px; width: 100%; height: 100%; border-radius: var(--r); background: rgba(0,0,0,.35); border: 1px solid var(--line); z-index: -1; }
@@ -109,8 +127,18 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .hpline { font: 500 11px/1.2 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .hpline.low { color: var(--dmg); }
 .chips { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; max-width: 100%; min-width: 0; }
+.pkm .hpline { position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%); white-space: nowrap; padding: 1px 5px; border-radius: 4px; background: rgba(9, 24, 27, .88); color: var(--ink); font-size: 10.5px; }
+.pkm .hpline.low { color: #ff8a7f; }
+.pkm .chips { position: absolute; left: 3px; right: 3px; bottom: 3px; flex-wrap: wrap-reverse; }
+.pkm .hpline + .chips { bottom: 21px; }   /* sit above the HP line when there is one */
+.pkm .chip { background: rgba(9, 24, 27, .9); }
 .chip { font: 600 10px/1 var(--body); padding: 3px 5px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; touch-action: none; cursor: grab; }
 .chip i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: 0; background: var(--muted); }
+/* The name gets cut short before the ×2 does. */
+.chip { display: inline-flex; align-items: center; }
+.chip i { flex: none; }
+.chip .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.chip .mult { flex: none; margin-left: 3px; font: 700 10px/1 var(--mono); color: var(--amber); }
 .status { font: 700 9.5px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; background: var(--amber); color: var(--amber-ink); }
 
 /* Cards */
@@ -129,26 +157,60 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .pile { display: grid; gap: 5px; justify-items: center; }
 .pile .stack { position: relative; touch-action: none; }
 .pile .stack .card + .card { position: absolute; inset: 0; }
-.pile .meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; align-items: center; max-width: calc(var(--cw) + 44px); }
+.pile .meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; align-items: center; max-width: calc(var(--cw) + 90px); }
 .count { font: 700 13px var(--mono); font-variant-numeric: tabular-nums; }
 .mini { padding: 3px 7px; font-size: 12px; }
 
 /* Hand */
-.hand { border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px 12px; display: grid; gap: 8px; background: rgba(0,0,0,.12); min-width: 0; }
-.hand .row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; min-height: calc(calc(var(--cw) * 1.397) + 10px); scrollbar-color: var(--line) transparent; }
+/* The hand sits on the playmat, under the Bench. */
+.hand { border: 1.5px solid var(--line); border-radius: 12px; padding: 6px 10px 4px; display: grid; gap: 4px; background: rgba(0,0,0,.12); min-width: 0; }
+.hand .row { display: flex; gap: 6px; overflow-x: auto; padding: 5px 2px 6px; min-height: calc(calc(var(--cw) * 1.397) + 11px); scrollbar-color: var(--line) transparent; }
 .hand .row .card { touch-action: pan-x; transition: transform .12s ease; }
 .hand .row .card:hover { transform: translateY(-4px); }
-.hand .head { display: flex; align-items: center; gap: 10px; }
-.hand .hint { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+.hand .head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.hand .head .zone-label { white-space: nowrap; flex: none; }
+.hand .deck-name { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.hand .hint { color: var(--muted); font-size: 12.5px; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
 /* Side column */
 .side { display: grid; gap: 12px; position: sticky; top: 12px; min-width: 0; max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain; scrollbar-color: var(--line) transparent; }
+/* Laptop and desktop: the page fills the window exactly. The table and side columns each scroll inside
+   themselves if they ever need to, so the page itself never does. */
+@media (min-width: 1181px) {
+  body { height: 100vh; display: flex; flex-direction: column; }
+  .app { flex: 1; min-height: 0; align-items: stretch; }
+  .table-col { min-height: 0; overflow-y: auto; align-content: start; scrollbar-color: var(--line) transparent; }
+  /* The side column fits too: the card panel takes what it needs (scrolling inside itself only if a card
+     has a very long list of actions), damage stays compact, and the game log fills the rest. */
+  .side { position: static; max-height: none; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  .side > .panel { flex: none; }
+  .side > #inspector { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: var(--line) transparent; }
+  .side > .log-panel { flex: 1 1 0; min-height: 56px; display: flex; flex-direction: column; }
+  .log-panel .log { flex: 1; min-height: 0; max-height: none; align-content: start; }
+  #inspector.has-sel > :first-child { display: none !important; }   /* the "Card" heading (styled inline); its Close button is only for small screens */
+}
+/* Short laptop screens (like 1366x768): squeeze the side column a little more so even a busy Active fits.
+   ("body" makes these win over the normal rules further down.) */
+@media (min-width: 1181px) and (max-height: 700px) {
+  .calc-hint, #calcMath { display: none; }
+  body .side { gap: 8px; }
+  body .side .panel { padding: 8px 10px; gap: 5px; }
+  body .insp-top { grid-template-columns: minmax(0, 60px) minmax(0, 1fr); }
+  body .acts button { padding: 3px 6px; }
+  body #inspector.has-sel { gap: 3px; }
+  body .calc input { padding: 3px 6px; }
+  body .calc .result { padding: 5px 10px; }
+  body .side > .log-panel { min-height: 34px; }
+}
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 10px; min-width: 0; }
 .panel h2 { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; margin: 0; color: var(--muted); }
-.insp-top { display: grid; gap: 10px; }
-.insp-art { display: block; padding: 0; border: 0; background: none; border-radius: 12px; cursor: zoom-in; justify-self: center; width: 100%; max-width: 340px; }
+.side .panel { padding: 10px 12px; gap: 7px; }
+/* A small picture beside the card's details: clicking it shows the card full screen. */
+.insp-top { display: grid; grid-template-columns: minmax(0, 76px) minmax(0, 1fr); gap: 12px; align-items: start; }
+#inspector.has-sel { gap: 5px; }
+.insp-art { display: block; padding: 0; border: 0; background: none; border-radius: 12px; cursor: zoom-in; justify-self: start; width: 100%; }
 .insp-art .card { width: 100%; height: auto; aspect-ratio: 63 / 88; border-radius: 4.5% / 3.3%; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
-.insp-art .card.noimg .cap { font-size: 18px; }
+.insp-art .card.noimg .cap { font-size: 14px; }
 .insp-art:hover .card { box-shadow: 0 0 0 2px var(--amber), 0 6px 18px rgba(0,0,0,.45); }
 
 .zoom { position: fixed; inset: 0; z-index: 90; background: rgba(5,15,17,.86); display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 10px; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); cursor: zoom-out; }
@@ -160,22 +222,24 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .zoom-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
 .zoom-hint { font-size: 12.5px; color: var(--muted); }
 .zoom-card .zoom-text { --cw: min(420px, 80vw); }
-.insp-name { font: 700 17px/1.2 var(--display); margin: 0 0 2px; overflow-wrap: anywhere; }
-.insp-sub { color: var(--muted); font-size: 13px; }
-.acts { display: flex; flex-wrap: wrap; gap: 5px; }
-.acts-label { font: 600 10.5px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
-.acts button { font-size: 12.5px; padding: 5px 8px; }
+.insp-name { font: 700 16px/1.2 var(--display); margin: 0 0 2px; overflow-wrap: anywhere; }
+.insp-sub { color: var(--muted); font-size: 12.5px; }
+.acts { display: flex; flex-wrap: wrap; gap: 4px; }
+.acts-label { font: 600 10.5px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 1px; }
+.acts button { font-size: 12px; padding: 4px 7px; }
 .acts button.on { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); }
+.acts button.to-empty { border-style: dashed; color: var(--muted); }
 .insp-warn { margin-top: 6px; font-size: 12.5px; color: var(--amber); }
 .empty-note { color: var(--muted); font-size: 13.5px; margin: 0; }
 .insp-close { display: none; }
 
-.calc label { display: grid; gap: 3px; font-size: 12.5px; color: var(--muted); }
-.calc .row2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+/* One row of damage boxes (up to 4 players), and the result on one compact line. */
+.calc label { display: grid; gap: 2px; font-size: 11.5px; color: var(--muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.calc .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: 6px; }
 .calc input, .calc select { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; width: 100%; color: var(--ink); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .calc-fixed { font: 700 15px var(--mono); color: var(--ink); padding: 5px 0; }
-.calc .result { background: var(--felt-deep); border-radius: 8px; padding: 10px; display: grid; gap: 2px; }
-.calc .result b { font: 700 28px/1 var(--mono); color: var(--amber); font-variant-numeric: tabular-nums; }
+.calc .result { background: var(--felt-deep); border-radius: 8px; padding: 7px 10px; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; font-size: 13px; line-height: 1.3; }
+.calc .result b { font: 700 26px/1 var(--mono); color: var(--amber); font-variant-numeric: tabular-nums; grid-row: span 2; }
 .calc .result small { color: var(--muted); font: 500 12px var(--mono); }
 
 .log { max-height: 170px; overflow-y: auto; margin: 0; padding: 0; list-style: none; font-size: 12.5px; display: grid; gap: 3px; -webkit-user-select: text; user-select: text; }
@@ -257,24 +321,26 @@ body.custom-back .card.back { background: var(--back-img) center / cover no-repe
 .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 120; background: var(--ink); color: var(--felt-deep); padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 13.5px; box-shadow: 0 6px 18px rgba(0,0,0,.4); max-width: calc(100vw - 32px); }
 
 /* Raid boss zone */
-.boss { border: 1.5px solid var(--line); border-radius: 18px; padding: 14px; background: linear-gradient(180deg, rgba(240,164,60,.07), rgba(0,0,0,.12)); display: grid; gap: 10px; }
+.boss { border: 1.5px solid var(--line); border-radius: 18px; padding: 10px 12px; background: linear-gradient(180deg, rgba(240,164,60,.07), rgba(0,0,0,.12)); display: grid; gap: 8px; }
 .boss-empty { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .boss-empty p { margin: 4px 0 0; color: var(--muted); }
-.boss-main { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: start; }
+.boss-main { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: start; }
 .boss-card { padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: 10px; }
-.boss-card .card { --cw: clamp(110px, 11vw, 168px); }
+.boss-card .card { --cw: clamp(84px, 14vh, 140px); }
 .boss-card.over .card, .boss-card:hover .card { box-shadow: 0 0 0 2px var(--amber), 0 6px 18px rgba(0,0,0,.45); }
-.boss-body { display: grid; gap: 8px; min-width: 0; }
+.boss-body { display: grid; gap: 6px; min-width: 0; }
 .boss-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .boss-title .mini { margin-left: auto; }
-.boss-name { font: 700 clamp(20px, 2.2vw, 28px)/1.05 var(--display); margin: 0; letter-spacing: .01em; overflow-wrap: anywhere; }
+.boss-name { font: 700 clamp(19px, 1.8vw, 26px)/1.05 var(--display); margin: 0; letter-spacing: .01em; overflow-wrap: anywhere; }
 .pill { font: 700 10.5px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; padding: 4px 7px; border-radius: 999px; background: var(--amber); color: var(--amber-ink); }
-.track { display: grid; gap: 4px; }
-.track-bar { height: 10px; border-radius: 999px; background: var(--felt-deep); border: 1px solid var(--line); overflow: hidden; }
+.track { display: flex; align-items: center; gap: 10px; }
+.track-bar { flex: 1; height: 10px; border-radius: 999px; background: var(--felt-deep); border: 1px solid var(--line); overflow: hidden; }
 .track-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--dmg), var(--amber)); border-radius: inherit; transition: width .35s ease; }
 .track-label { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
-.boss-attacks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.boss-attacks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; column-gap: 8px; padding: 6px 8px; border-radius: 8px; background: rgba(0,0,0,.18); border: 1px solid transparent; }
+/* Attacks side by side when there's room; long effect text is cut to two lines (the card shows it all). */
+.boss-attacks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 6px; }
+.boss-attacks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; align-content: start; column-gap: 8px; padding: 5px 8px; border-radius: 8px; background: rgba(0,0,0,.18); border: 1px solid transparent; }
+.boss-attacks li p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .boss-attacks li.ready { border-color: rgba(240,164,60,.55); }
 .boss-attacks li p, .atk-card p { grid-column: 1 / -1; margin: 3px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
 .boss-attacks b, .atk-card b { font-family: var(--display); font-size: 15px; }
@@ -288,9 +354,8 @@ body.custom-back .card.back { background: var(--back-img) center / cover no-repe
 .boss-att .chips { justify-content: flex-start; }
 .muted { color: var(--muted); font-size: 12.5px; }
 .acts .mini.on, .boss-row .mini.on { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); }
-.boss-piles { display: grid; gap: 8px; min-width: 110px; }
-.bpile { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; justify-items: start; }
-.bpile .mini { grid-column: 1 / -1; justify-self: stretch; }
+.boss-piles { display: grid; gap: 6px; min-width: 150px; align-content: start; }
+.bpile { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 4px 8px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 10px; justify-items: start; }
 .banner { padding: 10px 14px; border-radius: 10px; font-weight: 700; }
 .banner.win { background: var(--ok); color: #0b2a14; }
 .banner.out { background: rgba(224,87,75,.18); border: 1px solid var(--dmg); }
@@ -317,7 +382,7 @@ body.stage-open { padding-bottom: calc(50vh + 16px); }
 .heal-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .heal-hint { flex-basis: 100%; font-size: 12px; color: var(--muted); }
 .heal-row input { width: 90px; background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; color: var(--ink); font-family: var(--mono); }
-.calc-hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+.calc-hint { margin: 0; font-size: 12px; color: var(--muted); }
 .calc input:disabled { opacity: .55; }
 .text-in { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; color: var(--ink); width: 100%; font: 14px var(--body); -webkit-user-select: text; user-select: text; }
 .row-2 { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
@@ -326,7 +391,11 @@ body.stage-open { padding-bottom: calc(50vh + 16px); }
   .boss { padding: 10px; }
   .boss-main { grid-template-columns: auto minmax(0, 1fr); }
   .boss-card .card { --cw: 96px; }
-  .boss-piles { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .boss-piles { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); min-width: 0; }
+  .bpile { grid-template-columns: 1fr auto; }
+  .bpile .mini { grid-column: 1 / -1; justify-self: stretch; }
+  .track { flex-wrap: wrap; gap: 4px; }
+  .track-bar { flex-basis: 100%; }
   .stage { grid-template-columns: minmax(0, 1fr); max-height: 58vh; }
   body.stage-open { padding-bottom: calc(58vh + 16px); }
   .stage-card { position: static; justify-self: center; }
@@ -395,7 +464,6 @@ body.hub-open { overflow: hidden; }
 @media (max-width: 1180px) {
   .app { grid-template-columns: minmax(0, 1fr); }
   .side { position: static; max-height: none; overflow: visible; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-  .insp-art { max-width: min(100%, 300px, 30vh); }
   #inspector:not(.has-sel) { display: none; }
   #inspector.has-sel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; border-radius: 14px 14px 0 0; max-height: 62vh; overflow-y: auto; box-shadow: 0 -10px 30px rgba(0,0,0,.5); padding-bottom: max(14px, env(safe-area-inset-bottom, 0px)); padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); }
   .insp-close { display: inline-block; justify-self: end; }
@@ -405,9 +473,13 @@ body.hub-open { overflow: hidden; }
   .slot.active { --cw: calc((100vw - 120px) / 4); }
   .mat { grid-template-columns: minmax(0, 1fr); padding: 10px; gap: 10px; }
   .piles { grid-template-columns: repeat(3, minmax(0, 1fr)); order: -1; }
+  .mat > .hand, .mat > .piles { grid-column: auto; grid-row: auto; }
+  .mat > .prizes { contain: none; width: auto; }
+  .pkm .hpline { font-size: 9px; padding: 1px 3px; }
+  .hp-unit { display: none; }
   .pile { min-width: 0; }
   .prizes { --cw: calc((100vw - 140px) / 6); }
-  .prizes .grid { grid-template-columns: repeat(6, var(--cw)); }
+  .prizes .grid { grid-template-columns: repeat(6, var(--cw)); grid-template-rows: none; flex: none; }
   .front { grid-template-columns: auto 1fr; }
   .front .spacer { display: none; }
   .front .stadium { justify-self: start; order: 2; }
@@ -421,7 +493,7 @@ body.hub-open { overflow: hidden; }
 </head>
 <body>
 <header class="bar">
-  <div class="brand"><h1 id="brandTitle">Raid Table</h1><span id="deckName">No deck loaded</span></div>
+  <div class="brand"><h1 id="brandTitle">Raid Table</h1></div>
   <div class="tools">
     <label class="turn" for="players">Players
       <select id="players" class="pick"><option>1</option><option>2</option><option>3</option><option>4</option></select>
@@ -455,11 +527,10 @@ body.hub-open { overflow: hidden; }
         <button type="button" class="boss-card" id="bossCard" data-dropzone="benergy" aria-label="Show the boss card full size"></button>
         <div class="boss-body">
           <div class="boss-title">
-            <span class="zone-label">Raid boss</span>
+            <h2 class="boss-name" id="bossName"></h2>
             <span class="pill" id="bossDiff">Medium</span>
             <button class="mini" id="btnBossSetup">Boss setup</button>
           </div>
-          <h2 class="boss-name" id="bossName"></h2>
           <div class="track" aria-label="Boss cards left">
             <div class="track-bar"><i id="bossBar"></i></div>
             <span class="track-label" id="bossLeft"></span>
@@ -468,8 +539,8 @@ body.hub-open { overflow: hidden; }
           <div class="boss-row">
             <div class="boss-att"><span class="zone-label">Energy <span class="count" id="bossEnergyCount">0</span></span><div class="chips" id="bossEnergy"></div></div>
             <div class="boss-att"><span class="zone-label">Tool</span><div class="chips" id="bossTool"></div></div>
+            <div class="boss-att"><span class="zone-label">Conditions</span><div class="acts" id="bossStatus"></div></div>
           </div>
-          <div class="boss-row"><span class="zone-label">Conditions</span><div class="acts" id="bossStatus"></div></div>
         </div>
         <div class="boss-piles">
           <div class="bpile frame" data-dropzone="bdeck"><span class="zone-label">Deck</span><span class="count" id="bDeckCount">0</span><button class="mini" data-view="bdeck">View</button></div>
@@ -498,6 +569,11 @@ body.hub-open { overflow: hidden; }
         <div class="bench" id="bench"></div>
       </div>
 
+      <section class="hand" data-dropzone="hand" aria-label="Hand">
+        <div class="head"><span class="zone-label">Hand <span class="count" id="handCount">0</span></span><span class="deck-name" id="deckName">No deck loaded</span><span class="hint">Drag cards onto the mat · drop on a Pokémon to attach or evolve · click any card for actions</span><button class="mini" id="btnSort" title="Pokémon by evolution line, then Items, Tools, Stadiums, Supporters, then Energy">Sort</button></div>
+        <div class="row" id="hand"></div>
+      </section>
+
       <div class="piles">
         <div class="frame pile" data-dropzone="deck">
           <span class="zone-label">Deck</span>
@@ -509,17 +585,13 @@ body.hub-open { overflow: hidden; }
           <div class="stack" id="discardPile"></div>
           <div class="meta"><span class="count" id="discardCount">0</span><button class="mini" data-view="discard">View</button></div>
         </div>
-        <div class="frame pile" data-dropzone="lost">
+        <!-- The Lost Zone is rarely looked at, so it's a one-line spot: drop cards on it, View to see them. -->
+        <div class="frame pile lost-mini" data-dropzone="lost">
           <span class="zone-label">Lost Zone</span>
           <div class="stack" id="lostPile"></div>
           <div class="meta"><span class="count" id="lostCount">0</span><button class="mini" data-view="lost">View</button></div>
         </div>
       </div>
-    </section>
-
-    <section class="hand" data-dropzone="hand" aria-label="Hand">
-      <div class="head"><span class="zone-label">Hand <span class="count" id="handCount">0</span></span><span class="hint">Drag cards onto the mat · drop on a Pokémon to attach or evolve · click any card for actions</span><button class="mini" id="btnSort" title="Pokémon by evolution line, then Items, Tools, Stadiums, Supporters, then Energy">Sort</button></div>
-      <div class="row" id="hand"></div>
     </section>
 
     <section class="team" id="team" hidden aria-label="Teammates"></section>
@@ -530,12 +602,12 @@ body.hub-open { overflow: hidden; }
 
     <section class="panel calc" aria-label="Damage this turn">
       <h2>Damage this turn</h2>
-      <p class="calc-hint" id="calcHint">Enter what each player's attack did to the boss this turn.</p>
+      <p class="calc-hint" id="calcHint">What each player's attack did to the boss.</p>
       <div class="row2" id="calcDamage"></div>
       <div class="result"><b id="calcOut">0</b><span id="calcLabel">boss cards go to the Lost Zone at the end of its turn</span><small id="calcMath"></small></div>
     </section>
 
-    <section class="panel">
+    <section class="panel log-panel">
       <h2>Game log</h2>
       <ul class="log" id="log"></ul>
     </section>
@@ -1481,6 +1553,22 @@ const backEl = () => el("div", "card back");
 function dragAttrs(node, src) { node.dataset.drag = "1"; for (const k in src) node.dataset[k === "zone" ? "zone" : k] = src[k]; return node; }
 function isSel(src) { return selected && selected.zone === src.zone && selected.uid === src.uid && selected.slot === src.slot; }
 
+// Attached cards with the same name, grouped, in the order they were first attached.
+function groupByName(uids) {
+  const groups = new Map();
+  for (const u of uids) { const n = D(u).name; if (!groups.has(n)) groups.set(n, []); groups.get(n).push(u); }
+  return [...groups.values()];
+}
+// One chip for a group of identical attached cards, e.g. "Grass Energy ×2". Dragging or clicking it
+// takes one copy (src names the first), just as a single chip would.
+function attachChip(g, src) {
+  const u = g[0], ch = dragAttrs(el("span", "chip"), src);
+  const t = energyType(u); const dot = el("i"); dot.style.background = t ? (ENERGY_COLORS[t] || "") : "var(--amber)";
+  ch.append(dot, el("span", "nm", D(u).name.replace(/^Basic /, "")));
+  if (g.length > 1) ch.append(el("b", "mult", `×${g.length}`));
+  ch.title = g.length > 1 ? `${g.length} × ${D(u).name}` : D(u).name;
+  return ch;
+}
 function renderSlot(name, host) {
   const sl = slotGet(name);
   const box = el("div", "slot" + (name === "active" ? " active" : "") + (sl ? " filled" : ""));
@@ -1494,19 +1582,23 @@ function renderSlot(name, host) {
     p.append(cardEl(top));
     if (sl.dmg) p.append(el("span", "badge", sl.dmg));
     box.append(p);
+    // HP (once damaged), attached cards and Special Conditions sit over the bottom of the card, so a spot never grows taller.
     const hp = D(top).hp;
-    if (hp) { const left = hp - sl.dmg; box.append(el("span", "hpline" + (left <= 0 ? " low" : ""), left <= 0 ? `KO · ${hp} HP` : `${left} / ${hp} HP`)); }
+    if (hp && sl.dmg > 0) {   // only once it's taken damage; full HP needs no reminder
+      const left = hp - sl.dmg;
+      const line = el("span", "hpline" + (left <= 0 ? " low" : ""), left <= 0 ? `KO · ${hp}` : `${left} / ${hp}`);
+      line.append(el("span", "hp-unit", " HP"));   // dropped on phones, where cards are narrow
+      p.append(line);
+    }
     if (sl.status.length || sl.att.length) {
       const chips = el("div", "chips");
       for (const s of sl.status) chips.append(el("span", "status", s));
-      for (const u of sl.att) {
-        const ch = dragAttrs(el("span", "chip"), { zone: "att", slot: name, uid: u });
-        const t = energyType(u); const dot = el("i"); if (t) dot.style.background = ENERGY_COLORS[t] || ""; else dot.style.background = "var(--amber)";
-        ch.append(dot, D(u).name.replace(/^Basic /, "")); ch.title = D(u).name;
-        if (isSel({ zone: "att", slot: name, uid: u })) ch.style.borderColor = "var(--amber)";
+      for (const g of groupByName(sl.att)) {
+        const ch = attachChip(g, { zone: "att", slot: name, uid: g[0] });
+        if (g.some(u => isSel({ zone: "att", slot: name, uid: u }))) ch.style.borderColor = "var(--amber)";
         chips.append(ch);
       }
-      box.append(chips);
+      p.append(chips);
     }
   } else {
     const ph = el("div", "card empty"); box.append(ph);
@@ -1629,15 +1721,26 @@ function renderInspector() {
     box.append(el("div", "acts-label", "Move"));
     const mv = el("div", "acts");
     mv.append(btn("Knocked Out → discard", () => { move(s, { zone: "discard" }); toast("Take your Prize card(s) from the left"); }));
-    for (const n of slotNames()) if (n !== s.slot) { const o = slotGet(n); mv.append(btn(o ? `Switch with ${slotLabel(n)}` : `Move to ${slotLabel(n)}`, () => { move(s, { zone: "slot", slot: n }); selected = { zone: "slot", slot: n }; render(); })); }
     mv.append(btn("Return to hand", () => move(s, { zone: "hand" })));
     mv.append(btn("Lost Zone", () => move(s, { zone: "lost" })));
     if (sl.stack.length > 1) mv.append(btn("Devolve (top card to hand)", () => act(`Devolved ${d.name}`, () => { S.hand.push(sl.stack.pop()); }, { keepSel: true })));
     box.append(mv);
+    // Short spot names keep this to one row: an empty spot is a move, a filled one a switch.
+    box.append(el("div", "acts-label", "Switch with"));
+    const sw = el("div", "acts");
+    for (const n of slotNames()) if (n !== s.slot) {
+      const o = slotGet(n);
+      const b = btn(slotLabel(n), () => { move(s, { zone: "slot", slot: n }); selected = { zone: "slot", slot: n }; render(); });
+      b.title = o ? `Switch with ${D(slotTop(o)).name} (${slotLabel(n)})` : `Move to ${slotLabel(n)} (empty)`;
+      if (!o) b.classList.add("to-empty");
+      sw.append(b);
+    }
+    box.append(sw);
     if (sl.att.length) {
       box.append(el("div", "acts-label", "Attached"));
       const at = el("div", "acts");
-      sl.att.forEach(u => at.append(btn(`Discard ${D(u).name.replace(/^Basic /, "")}`, () => { move({ zone: "att", slot: s.slot, uid: u }, { zone: "discard" }); selected = { zone: "slot", slot: s.slot }; render(); })));
+      // One button per kind of card; with copies it discards one at a time.
+      groupByName(sl.att).forEach(g => { const u = g[g.length - 1]; at.append(btn(`Discard ${D(u).name.replace(/^Basic /, "")}${g.length > 1 ? ` (1 of ${g.length})` : ""}`, () => { move({ zone: "att", slot: s.slot, uid: u }, { zone: "discard" }); selected = { zone: "slot", slot: s.slot }; render(); })); });
       box.append(at);
     }
     return;
@@ -2149,7 +2252,7 @@ function renderBoss() {
 
   const en = $("bossEnergy"); en.replaceChildren();
   if (!S.benergy.length) en.append(el("span", "muted", "None"));
-  S.benergy.forEach(u => { const ch = dragAttrs(el("span", "chip"), { zone: "benergy", uid: u }); const t = energyType(u); const dot = el("i"); dot.style.background = t ? (ENERGY_COLORS[t] || "") : "var(--amber)"; ch.append(dot, D(u).name.replace(/^Basic /, "")); en.append(ch); });
+  groupByName(S.benergy).forEach(g => en.append(attachChip(g, { zone: "benergy", uid: g[0] })));
   $("bossEnergyCount").textContent = S.benergy.length;
   const tl = $("bossTool"); tl.replaceChildren();
   if (S.btool) { const ch = dragAttrs(el("span", "chip"), { zone: "btool", uid: S.btool }); ch.append(D(S.btool).name); tl.append(ch); } else tl.append(el("span", "muted", "None"));
@@ -2306,7 +2409,8 @@ function renderCalcInputs() {
   for (let i = 0; i < n; i++) {
     const seat = MP ? seatList().find(x => x.order === i) : null;
     const mine = !MP || (seat && seat.id === MP.seat);
-    const lab = el("label", null, MP ? (seat ? (mine ? `${seat.name} (you)` : seat.name) : `Player ${i + 1}`) : (i === 0 ? "You (Player 1)" : `Player ${i + 1}`)); lab.htmlFor = "calcP" + i;
+    const lab = el("label", null, MP ? (seat ? (mine ? `${seat.name} (you)` : seat.name) : `Player ${i + 1}`) : (i === 0 ? "You" : `Player ${i + 1}`)); lab.htmlFor = "calcP" + i;
+    lab.title = lab.textContent;   // the label can be cut short when four players share the row
     const inp = el("input"); inp.type = "number"; inp.min = "0"; inp.step = "10"; inp.inputMode = "numeric"; inp.id = "calcP" + i; inp.value = S.dmg[i] || 0;
     inp.dataset.mine = mine ? "1" : "";
     inp.addEventListener("input", () => {
@@ -2326,7 +2430,7 @@ function calc() {
   const healed = locked ? S.bt.healed : 0;
   const out = Math.floor(Math.max(0, pending - healed) / (10 * div));
   $("calcOut").textContent = out;
-  $("calcHint").textContent = locked ? "Locked during the boss turn. Healing is entered in the boss turn panel." : "Enter what each player's attack did to the boss this turn.";
+  $("calcHint").textContent = locked ? "Locked for the boss turn. Healing goes in its panel." : "What each player's attack did to the boss.";
   const bonus = locked ? S.bt.bonus : bossBonus(), dmg = locked ? S.bt.playerDmg : damageTotal();
   $("calcMath").textContent = `(${dmg}${bonus ? " + " + bonus : ""}${healed ? " " + healText(healed) : ""}) ÷ (10 × ${div}) = ${(Math.max(0, pending - healed) / (10 * div)).toFixed(2).replace(/\.00$/, "")} → ${out}`;
 }
@@ -2704,7 +2808,7 @@ function renderTeam() {
       w.append(c);
       if (sl.dmg) w.append(el("span", "badge", sl.dmg));
       const hp = (CARDS[k] || {}).hp;
-      if (big && hp) w.append(el("span", "hpline" + (hp - sl.dmg <= 0 ? " low" : ""), `${Math.max(0, hp - sl.dmg)}/${hp}`));
+      if (big && hp && sl.dmg > 0) w.append(el("span", "hpline" + (hp - sl.dmg <= 0 ? " low" : ""), `${Math.max(0, hp - sl.dmg)}/${hp}`));
       if (big && (sl.att || []).length) w.append(el("span", "hpline", `${sl.att.length} attached`));
       return w;
     };
