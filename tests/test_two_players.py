@@ -19,8 +19,8 @@ def test_two_player_round():
         # Both put a Basic Pokémon in the Active spot; each sees the other's.
         for pg in (a, m):
             pg.evaluate("(() => { const u = S.hand.find(x => isBasic(x)); move({ zone: 'hand', uid: u }, { zone: 'slot', slot: 'active' }); })()")
-        a.wait_for_timeout(600)
-        assert a.evaluate("!!seatList().find(s => s.name === 'Misty').board.active")
+        # Wait for the sync rather than a fixed time: it sometimes takes longer than 600 ms.
+        a.wait_for_function("!!seatList().find(s => s.name === 'Misty').board.active", timeout=5000)
 
         # The Supporter counter is shared, and Undo after a teammate's move still takes yours back.
         for pg in (m, a):

@@ -187,6 +187,27 @@ def two_players(ctx, url):
     return a, b
 
 
+def room_of(ctx, url, names):
+    """Opens one tab per name in same-computer mode: the first creates a room, the rest join it one by one."""
+    pages = [ctx.new_page() for _ in names]
+    for pg in pages:
+        pg.goto(url + "?local=1")
+    host = pages[0]
+    host.wait_for_timeout(1500)
+    host.click("#btnRoom"); host.fill("#roomName", names[0]); host.click("#roomCreate"); host.wait_for_timeout(800); host.click("#roomClose")
+    code = host.evaluate("MP.code")
+    for i, (pg, name) in enumerate(zip(pages[1:], names[1:]), start=2):
+        pg.click("#btnRoom"); pg.fill("#roomName", name); pg.fill("#roomCode", code); pg.click("#roomJoin")
+        pg.wait_for_timeout(1500); pg.click("#roomClose")
+        host.wait_for_function(f"S.players === {i}", timeout=10000)
+    # Wait until every tab sees everyone and each joiner's fresh board is dealt.
+    for pg in pages:
+        pg.wait_for_function(f"MP && seatList().length === {len(names)}", timeout=10000)
+    for pg in pages[1:]:
+        pg.wait_for_function("S.myRaidId === S.raidId && S.hand.length === 7", timeout=10000)
+    return pages
+
+
 def step_boss_draws(page, limit=15):
     """Presses the boss panel's main button until the boss has finished drawing."""
     for _ in range(limit):
