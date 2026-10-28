@@ -364,10 +364,19 @@ body.custom-back .card.back { background: var(--back-img) center / cover no-repe
 
 /* Boss turn stage */
 .stage { position: fixed; left: 0; right: 0; bottom: 0; z-index: 35; background: var(--panel); border-top: 2px solid var(--amber); box-shadow: 0 -12px 34px rgba(0,0,0,.5); max-height: 50vh; overflow-y: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: start; padding: 14px max(16px, env(safe-area-inset-right, 0px)) max(14px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
-body.stage-open { padding-bottom: calc(50vh + 16px); }
+/* The page leaves room for exactly the panel's height (--stage-h, measured as it changes), so there's no
+   blank band above it, and the board's cards shrink to fit what's left. */
+body.stage-open { padding-bottom: calc(var(--stage-h, 50vh) + 10px);
+  /* Cards sized for the room above the panel (the extra 50px is for parts of the board that don't shrink). */
+  --cw0: clamp(48px, min(6.1vw, calc((100vh - var(--stage-h, 0px) - 425px) / 4.4)), 120px); --cw: var(--cw0); }
 .stage-card { padding: 0; border: 0; background: none; cursor: zoom-in; position: sticky; top: 0; }
-.stage-card .card { --cw: clamp(130px, 14vw, 210px); }
+.stage-card .card { --cw: clamp(90px, 15vh, 170px); }
 .stage-body { display: grid; gap: 9px; min-width: 0; max-width: 760px; }
+.stage-col { display: grid; gap: 9px; align-content: start; min-width: 0; }
+/* Laptops and desktops: the two columns side by side, so the panel is short and the board keeps its room. */
+@media (min-width: 1181px) {
+  .stage-body { max-width: 1180px; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 24px; align-items: start; }
+}
 .stage-head h3 { font: 700 21px/1.1 var(--display); margin: 3px 0 0; }
 .stage-note { margin: 0; font-weight: 700; }
 .stage-note.auto { color: var(--ok); }
@@ -399,7 +408,6 @@ body.stage-open { padding-bottom: calc(50vh + 16px); }
   .track { flex-wrap: wrap; gap: 4px; }
   .track-bar { flex-basis: 100%; }
   .stage { grid-template-columns: minmax(0, 1fr); max-height: 58vh; }
-  body.stage-open { padding-bottom: calc(58vh + 16px); }
   .stage-card { position: static; justify-self: center; }
   .stage-card .card { --cw: 120px; }
   .row-2 { grid-template-columns: minmax(0, 1fr); }
@@ -2014,7 +2022,7 @@ const DIFFICULTIES = { easy: "Easy", medium: "Medium", hard: "Hard", extreme: "E
 // How to resolve a choice on a boss Trainer, per difficulty (raidformat.com/difficulty)
 const DIFF_GUIDE = {
   easy: "Players make any choices on this card, reading it as generously to the players as possible.",
-  medium: "Make any choices on this card at random. The buttons below flip coins, roll a die and pick at random for you.",
+  medium: "Make any choices on this card at random. The coin, die and random-pick buttons do it for you.",
   hard: "The boss player makes the choices on this card, reading it in the boss's favor. For Boss's Orders, the team decides whether it hits one player or all of them.",
   extreme: "The boss player makes every choice on this card, reading it as strictly in the boss's favor as possible."
 };
@@ -2267,7 +2275,17 @@ function renderBoss() {
 }
 
 let stageSig = null;
+// The boss turn panel in two columns: what the card says, then the dice, healing and next-step buttons.
+// (On laptops and desktops they sit side by side; on phones one under the other.)
 function renderStage() {
+  renderStageParts();
+  const body = $("bossStage").querySelector(".stage-body");
+  if (!body || body.querySelector(":scope > .stage-col")) return;   // closed, or left as it was while you type
+  const main = el("div", "stage-col"), side = el("div", "stage-col stage-side");
+  for (const c of [...body.children]) (c.matches(".acts, .rolls, .heal-wrap") ? side : main).append(c);
+  body.append(main, side);
+}
+function renderStageParts() {
   const box = $("bossStage"); const bt = S.bt;
   box.hidden = !bt; document.body.classList.toggle("stage-open", !!bt);
   if (!bt) { stageSig = null; return; }
@@ -3124,6 +3142,8 @@ $("hubClose").onclick = closeHub;
 claimTab().then(resumeRoom).then(() => { if (!MP && /[?&]room=[A-Za-z]{5}/.test(location.search)) openRoomDialog(); });
 try { applyBack(localStorage.getItem(STORE_BACK) || ""); } catch {}
 $("btnBack").onclick = openBack;
+// The boss turn panel's real height, for the CSS: the page leaves exactly that much room and the cards shrink to fit.
+new ResizeObserver(() => { const st = $("bossStage"); document.documentElement.style.setProperty("--stage-h", (st.hidden ? 0 : st.offsetHeight) + "px"); }).observe($("bossStage"));
 $("btnRules").onclick = () => setRules(!rulesOn);
 $("ruleOk").onclick = hideRuleNote;
 if (!rulesOn) setRules(false);
