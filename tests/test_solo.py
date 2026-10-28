@@ -95,6 +95,26 @@ def test_new_game_asks_for_boss_and_deck():
     assert not errors, errors
 
 
+def test_basic_energy_art_without_card_databases():
+    errors = []
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        ctx = offline_context(b)
+        # TCGdex knows the card but has no picture for it, like the real modern basic Energy; pokemontcg.io is down.
+        ctx.route("https://api.tcgdex.net/**", lambda r: r.fulfill(json=[{"id": "mee-004", "localId": "004", "name": "Lightning Energy"}]
+                                                              if "?name=" in r.request.url else {"category": "Energy", "name": "Lightning Energy"}))
+        pg = ctx.new_page()
+        watch_errors(pg, "energy art", errors)
+        open_app(pg)
+        for line, n in (("Lightning Energy MEE 12", 4), ("Basic {D} Energy SVE 7", 7), ("Basic Grass Energy", 1)):
+            d = pg.evaluate("async l => { const e = parseDeck('1 ' + l)[0]; e.section = 'Energy'; return await lookupCard(e); }", line)
+            assert d["img"] == f"https://images.pokemontcg.io/sve/{n}.png", (line, d)
+            assert d["types"] and d["supertype"] == "Energy"
+        b.close()
+    assert not errors, errors
+
+
 if __name__ == "__main__":
+    test_basic_energy_art_without_card_databases(); print("energy art: PASS")
     test_solo_boss_round(); print("solo: PASS")
     test_new_game_asks_for_boss_and_deck(); print("new game: PASS")

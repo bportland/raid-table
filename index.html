@@ -1168,14 +1168,26 @@ async function ptcgFirst(q) {
   return fromPtcg(c);
 }
 const quoteName = n => `name:"${n.replace(/"/g, "")}"`;
+// Scarlet & Violet basic Energy art (SVE 1–8), straight from the image server. Used when the card
+// databases are down or only have the card without a picture (TCGdex has no art for modern basic Energy).
+const BASIC_ENERGY_ART = { Grass: 1, Fire: 2, Water: 3, Lightning: 4, Psychic: 5, Fighting: 6, Darkness: 7, Metal: 8 };
+function basicEnergyCard(name) {
+  const m = name.match(/^(?:basic )?(\w+) energy$/i);
+  const t = m && Object.keys(BASIC_ENERGY_ART).find(k => k.toLowerCase() === m[1].toLowerCase());
+  if (!t) return null;
+  const img = `https://images.pokemontcg.io/sve/${BASIC_ENERGY_ART[t]}.png`;
+  return { name: `Basic ${t} Energy`, supertype: "Energy", subtypes: ["Basic"], hp: null, types: [t], evolvesFrom: null, img, imgLg: img.replace(".png", "_hires.png"), print: `SVE ${BASIC_ENERGY_ART[t]}`, attacks: [], abilities: [], text: "", src: "pokemontcg.io" };
+}
 // Tries the exact print first (set code + number) across both databases, then any print
 // with the same name and number. Only if all of that fails does it settle for another
 // print of the same name, and it marks the card so the app can say so.
+// A match without a picture only counts when nothing else has one.
 async function lookupCard(e) {
   const plain = e.name.replace(/\s*\([^)]*\)\s*$/, "");
   const names = plain !== e.name ? [e.name, plain] : [e.name];
   if (/^basic .+ energy$/i.test(plain)) names.push(plain.replace(/^basic /i, ""));
-  const attempt = async fn => { try { return await fn(); } catch { return null; } };
+  let noArt = null;
+  const attempt = async fn => { try { const c = await fn(); if (c && !c.img) { noArt = noArt || c; return null; } return c; } catch { return null; } };
   let r = null;
   if (e.set && e.num) {
     r = await attempt(() => ptcgFirst(`set.ptcgoCode:${e.set} number:${e.num}`));
@@ -1183,8 +1195,12 @@ async function lookupCard(e) {
     for (const n of names) { if (r) break; r = await attempt(() => lookupTcgdex(n, e.num)); }
     if (r) return Object.assign(r, { exact: true });
   }
+  // Basic Energy all look the same, so the built-in art beats searching for another print.
+  const basic = basicEnergyCard(plain);
+  if (basic) return Object.assign(basic, { exact: true });
   for (const n of names) { if (r) break; r = await attempt(() => ptcgFirst(quoteName(n))); }
   for (const n of names) { if (r) break; r = await attempt(() => lookupTcgdex(n)); }
+  r = r || noArt;
   if (r) r.exact = !(e.set && e.num);
   return r;
 }
@@ -3276,8 +3292,8 @@ if (!S || !S.keys || !Object.keys(S.keys).length) {
   setupJoinRoom = roomLink; openSetup();
 } else {
   render();
-  // a saved game whose card data is from an older version: refetch its cards
-  const missing = Object.values(S.keys).some(k => !CARDS[k]);
+  // a saved game whose card data is from an older version, or has cards that came back without art: refetch them
+  const missing = Object.values(S.keys).some(k => !CARDS[k] || !CARDS[k].img);
   if (missing && S.list) {
     toast("Updating card art to match your deck list…");
     resolveEntries(parseDeck(S.list), () => {}).then(() => { render(); toast("Card art updated"); }).then(refreshBoss);
