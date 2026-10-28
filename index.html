@@ -1711,15 +1711,16 @@ function renderInspector() {
       d.attacks.forEach((a, i) => { const b = btn(`${a.name}${a.damage ? " · " + a.damage : ""}`, () => attackWith(i)); b.title = (a.cost || []).length ? `Costs ${costText(a.cost)}` : "No Energy needed"; ak.append(b); });
       info.append(ak);
     }
-    box.append(el("div", "acts-label", "Damage"));
+    // Damage and Special Conditions also sit beside the picture.
+    info.append(el("div", "acts-label insp-side-label", "Damage"));
     const dm = el("div", "acts");
     [[-10, "−10"], [10, "+10"], [30, "+30"], [50, "+50"], [100, "+100"]].forEach(([v, l]) => dm.append(btn(l, () => act(null, () => { sl.dmg = Math.max(0, sl.dmg + v); }, { keepSel: true }))));
     dm.append(btn("Clear", () => act(`Healed ${d.name}`, () => { sl.dmg = 0; }, { keepSel: true })));
-    box.append(dm);
-    box.append(el("div", "acts-label", "Special Conditions"));
+    info.append(dm);
+    info.append(el("div", "acts-label insp-side-label", "Special Conditions"));
     const stt = el("div", "acts");
     STATUSES.forEach(st => { const on = sl.status.includes(st); stt.append(btn(st, () => act(`${d.name} ${on ? "is no longer" : "is now"} ${st}`, () => { sl.status = on ? sl.status.filter(x => x !== st) : [...sl.status.filter(x => !(["Asleep", "Confused", "Paralyzed"].includes(st) && ["Asleep", "Confused", "Paralyzed"].includes(x))), st]; }, { keepSel: true }), on ? "on" : "")); });
-    box.append(stt);
+    info.append(stt);
     box.append(el("div", "acts-label", "Move"));
     const mv = el("div", "acts");
     mv.append(btn("Knocked Out → discard", () => { move(s, { zone: "discard" }); toast("Take your Prize card(s) from the left"); }));
