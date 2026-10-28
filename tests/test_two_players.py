@@ -63,11 +63,12 @@ def test_two_player_round():
         a.evaluate("toggleBossStatus('Poisoned')"); m.evaluate("toggleBossStatus('Burned')"); a.wait_for_timeout(900)
         assert sorted(a.evaluate("S.bstatus")) == ["Burned", "Poisoned"] == sorted(m.evaluate("S.bstatus"))
 
-        # A replaced Stadium goes back to its owner's discard pile.
+        # A replaced Stadium goes back to its owner's discard pile. Both players have the same deck, so this
+        # is the same Stadium twice, which Rule help stops; force: true is its "Do it anyway".
         for pg in (a, m):
             pg.evaluate("""(() => { const u = S.deck.find(x => isStadium(x)) || S.hand.find(x => isStadium(x));
               act(null, () => { S.deck = S.deck.filter(y => y !== u); if (!S.hand.includes(u)) S.hand.push(u); }, { noUndo: true });
-              move({ zone: 'hand', uid: u }, { zone: 'stadium' }); })()""")
+              move({ zone: 'hand', uid: u }, { zone: 'stadium' }, { force: true }); })()""")
             pg.wait_for_timeout(700)
         assert a.evaluate("S.discard.some(u => isStadium(u))")
         assert a.evaluate("S.returns") == []
