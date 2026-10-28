@@ -134,6 +134,11 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .pkm .chip { background: rgba(9, 24, 27, .9); }
 .chip { font: 600 10px/1 var(--body); padding: 3px 5px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; touch-action: none; cursor: grab; }
 .chip i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: 0; background: var(--muted); }
+/* The name gets cut short before the ×2 does. */
+.chip { display: inline-flex; align-items: center; }
+.chip i { flex: none; }
+.chip .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.chip .mult { flex: none; margin-left: 3px; font: 700 10px/1 var(--mono); color: var(--amber); }
 .status { font: 700 9.5px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; background: var(--amber); color: var(--amber-ink); }
 
 /* Cards */
@@ -1548,6 +1553,22 @@ const backEl = () => el("div", "card back");
 function dragAttrs(node, src) { node.dataset.drag = "1"; for (const k in src) node.dataset[k === "zone" ? "zone" : k] = src[k]; return node; }
 function isSel(src) { return selected && selected.zone === src.zone && selected.uid === src.uid && selected.slot === src.slot; }
 
+// Attached cards with the same name, grouped, in the order they were first attached.
+function groupByName(uids) {
+  const groups = new Map();
+  for (const u of uids) { const n = D(u).name; if (!groups.has(n)) groups.set(n, []); groups.get(n).push(u); }
+  return [...groups.values()];
+}
+// One chip for a group of identical attached cards, e.g. "Grass Energy ×2". Dragging or clicking it
+// takes one copy (src names the first), just as a single chip would.
+function attachChip(g, src) {
+  const u = g[0], ch = dragAttrs(el("span", "chip"), src);
+  const t = energyType(u); const dot = el("i"); dot.style.background = t ? (ENERGY_COLORS[t] || "") : "var(--amber)";
+  ch.append(dot, el("span", "nm", D(u).name.replace(/^Basic /, "")));
+  if (g.length > 1) ch.append(el("b", "mult", `×${g.length}`));
+  ch.title = g.length > 1 ? `${g.length} × ${D(u).name}` : D(u).name;
+  return ch;
+}
 function renderSlot(name, host) {
   const sl = slotGet(name);
   const box = el("div", "slot" + (name === "active" ? " active" : "") + (sl ? " filled" : ""));
@@ -1572,11 +1593,9 @@ function renderSlot(name, host) {
     if (sl.status.length || sl.att.length) {
       const chips = el("div", "chips");
       for (const s of sl.status) chips.append(el("span", "status", s));
-      for (const u of sl.att) {
-        const ch = dragAttrs(el("span", "chip"), { zone: "att", slot: name, uid: u });
-        const t = energyType(u); const dot = el("i"); if (t) dot.style.background = ENERGY_COLORS[t] || ""; else dot.style.background = "var(--amber)";
-        ch.append(dot, D(u).name.replace(/^Basic /, "")); ch.title = D(u).name;
-        if (isSel({ zone: "att", slot: name, uid: u })) ch.style.borderColor = "var(--amber)";
+      for (const g of groupByName(sl.att)) {
+        const ch = attachChip(g, { zone: "att", slot: name, uid: g[0] });
+        if (g.some(u => isSel({ zone: "att", slot: name, uid: u }))) ch.style.borderColor = "var(--amber)";
         chips.append(ch);
       }
       p.append(chips);
@@ -1720,7 +1739,8 @@ function renderInspector() {
     if (sl.att.length) {
       box.append(el("div", "acts-label", "Attached"));
       const at = el("div", "acts");
-      sl.att.forEach(u => at.append(btn(`Discard ${D(u).name.replace(/^Basic /, "")}`, () => { move({ zone: "att", slot: s.slot, uid: u }, { zone: "discard" }); selected = { zone: "slot", slot: s.slot }; render(); })));
+      // One button per kind of card; with copies it discards one at a time.
+      groupByName(sl.att).forEach(g => { const u = g[g.length - 1]; at.append(btn(`Discard ${D(u).name.replace(/^Basic /, "")}${g.length > 1 ? ` (1 of ${g.length})` : ""}`, () => { move({ zone: "att", slot: s.slot, uid: u }, { zone: "discard" }); selected = { zone: "slot", slot: s.slot }; render(); })); });
       box.append(at);
     }
     return;
@@ -2232,7 +2252,7 @@ function renderBoss() {
 
   const en = $("bossEnergy"); en.replaceChildren();
   if (!S.benergy.length) en.append(el("span", "muted", "None"));
-  S.benergy.forEach(u => { const ch = dragAttrs(el("span", "chip"), { zone: "benergy", uid: u }); const t = energyType(u); const dot = el("i"); dot.style.background = t ? (ENERGY_COLORS[t] || "") : "var(--amber)"; ch.append(dot, D(u).name.replace(/^Basic /, "")); en.append(ch); });
+  groupByName(S.benergy).forEach(g => en.append(attachChip(g, { zone: "benergy", uid: g[0] })));
   $("bossEnergyCount").textContent = S.benergy.length;
   const tl = $("bossTool"); tl.replaceChildren();
   if (S.btool) { const ch = dragAttrs(el("span", "chip"), { zone: "btool", uid: S.btool }); ch.append(D(S.btool).name); tl.append(ch); } else tl.append(el("span", "muted", "None"));
