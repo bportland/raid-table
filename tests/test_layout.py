@@ -6,7 +6,7 @@ a hand of 10 and a card picked so the card panel is open.
 """
 from playwright.sync_api import sync_playwright
 
-from helpers import APP, offline_context, watch_errors
+from helpers import offline_context, open_app, watch_errors
 
 BUSY_BOARD = """() => {
   const basics = S.hand.filter(u => isBasic(u)).concat(S.deck.filter(u => isBasic(u))).slice(0, 4);
@@ -25,7 +25,7 @@ BUSY_BOARD = """() => {
 def _page(b, w, h, errors):
     pg = offline_context(b, viewport={"width": w, "height": h}).new_page()
     watch_errors(pg, f"{w}x{h}", errors)
-    pg.goto(APP.as_uri()); pg.wait_for_timeout(1500)
+    open_app(pg)
     pg.evaluate(BUSY_BOARD); pg.wait_for_timeout(200)
     return pg
 

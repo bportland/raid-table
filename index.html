@@ -397,6 +397,9 @@ body.stage-open { padding-bottom: calc(var(--stage-h, 50vh) + 10px);
 .calc input:disabled { opacity: .55; }
 .text-in { background: var(--felt-deep); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; color: var(--ink); width: 100%; font: 14px var(--body); -webkit-user-select: text; user-select: text; }
 .row-2 { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+.setup-part { display: grid; gap: 10px; }
+.setup-part[hidden] { display: none; }
+.modal.setup textarea { min-height: 150px; }
 .check { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); padding-bottom: 8px; }
 @media (max-width: 720px) {
   .boss { padding: 10px; }
@@ -645,7 +648,6 @@ body.hub-open { overflow: hidden; }
       <label class="sample-pick" for="importSampleSel">Sample deck
         <select id="importSampleSel"></select>
       </label>
-      <button id="importSample">Use this sample</button>
       <button id="importCancel">Cancel</button>
       <button id="importGo" class="primary">Load deck</button>
     </div>
@@ -824,6 +826,47 @@ body.hub-open { overflow: hidden; }
   </div>
 </div>
 
+<div class="modal-back" id="setupBack" hidden>
+  <div class="modal setup" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+    <h2 id="setupTitle">New raid</h2>
+    <p>Choose the raid boss and your deck. You can change either later with Boss setup and Import deck.</p>
+    <div id="setupBoss" class="setup-part">
+      <div class="row-2">
+        <label class="field-label" for="setupBossSel">Boss Pokémon
+          <select id="setupBossSel" class="text-in"></select>
+        </label>
+        <label class="field-label" for="setupPlayers">Players
+          <select id="setupPlayers" class="text-in"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+        </label>
+      </div>
+      <div class="row-2">
+        <label class="field-label" for="setupDiff">Difficulty
+          <select id="setupDiff" class="text-in">
+            <option value="easy">Easy: random attacks, players make card choices</option>
+            <option value="medium">Medium: random attacks, card choices made at random</option>
+            <option value="hard">Hard: random attacks, a boss player makes card choices</option>
+            <option value="extreme">Extremely Hard: a boss player makes every choice</option>
+          </select>
+        </label>
+        <label class="check" for="setupHarsh"><input type="checkbox" id="setupHarsh"> Harsher damage</label>
+      </div>
+      <label class="field-label" for="setupBossDeck">Boss deck
+        <select id="setupBossDeck" class="text-in"></select>
+      </label>
+    </div>
+    <p id="setupRoomNote" hidden>You're joining a room, so the boss comes from the room. Just choose your deck.</p>
+    <label class="field-label" for="setupDeckSel">Your deck
+      <select id="setupDeckSel" class="text-in"></select>
+    </label>
+    <textarea id="setupDeckText" spellcheck="false" aria-label="Your deck list"></textarea>
+    <div class="foot">
+      <span class="progress" id="setupProgress"></span>
+      <button id="setupCancel">Cancel</button>
+      <button id="setupGo" class="primary">Start raid</button>
+    </div>
+  </div>
+</div>
+
 <section class="hub" id="hub" hidden aria-label="Raid Camp">
   <div class="hub-inner">
     <header class="hub-head">
@@ -893,7 +936,7 @@ Energy - 12
 12 Basic Fighting Energy SVE 6
 
 Total Cards - 60`;
-// Sample decks offered in Import deck. The first one loads automatically on a first visit.
+// Sample decks offered in New raid and Import deck. The first one is picked by default.
 const SAMPLE_DECKS = [
   { name: "Mega Lucario ex", list: SAMPLE_DECK },
   { name: "Wailord ex", list: `Pokémon: 15
@@ -974,7 +1017,36 @@ Trainer: 33
 Energy: 16
 9 Psychic Energy MEE 5
 4 Telepathic Psychic Energy POR 88
-3 Ignition Energy WHT 86` }
+3 Ignition Energy WHT 86` },
+  { name: "Mega Manectric ex", list: `Pokémon: 15
+2 Tynamo BLK 30
+2 Eelektrik BLK 31
+2 Electrike MEG 49
+2 Mega Manectric ex MEG 50
+2 Miraidon ex SVI 81
+2 Iron Hands ex PAR 70
+1 Squawkabilly ex PAL 169
+1 Zekrom ex BLK 34
+1 Mew ex MEW 151
+
+Trainer: 31
+4 Boss's Orders MEG 114
+4 Arven OBF 186
+2 Lillie's Determination MEG 119
+1 Iono PAL 185
+4 Ultra Ball MEG 131
+4 Electric Generator SVI 170
+3 Nest Ball SVI 181
+1 Super Rod PAL 188
+1 Secret Box TWM 163
+1 Switch MEG 130
+2 Air Balloon BLK 79
+1 Bravery Charm PAL 173
+1 Future Booster Energy Capsule TEF 149
+2 Academy at Night SFA 54
+
+Energy: 14
+14 Lightning Energy MEE 12` }
 ];
 
 // In same-computer test mode (?local=1) every tab is its own player, so each tab keeps its own save.
@@ -1934,14 +2006,13 @@ document.addEventListener("pointercancel", e => endDrag(e, true));
 document.addEventListener("dragstart", e => e.preventDefault());
 
 /* ---------- import ---------- */
-function openImport() { $("importText").value = S.list || SAMPLE_DECK; $("importProgress").textContent = ""; $("importBack").hidden = false; $("importText").focus(); }
+function openImport() { $("importText").value = S.list || SAMPLE_DECK; syncSamplePick($("importSampleSel"), $("importText").value); $("importProgress").textContent = ""; $("importBack").hidden = false; $("importText").focus(); }
 function closeImport() { $("importBack").hidden = true; }
-async function loadDeck(text, name) {
+async function loadDeck(text, name, prog = $("importProgress")) {
   const entries = parseDeck(text);
   const total = entries.reduce((n, e) => n + e.count, 0);
-  if (!entries.length) { $("importProgress").textContent = "No cards found. Use lines like “4 Arven SVI 166”."; return false; }
+  if (!entries.length) { prog.textContent = "No cards found. Use lines like “4 Arven SVI 166”."; return false; }
   $("importGo").disabled = true;
-  const prog = $("importProgress");
   prog.textContent = `Looking up ${entries.length} cards…`;
   let missing = 0;
   await resolveEntries(entries, (done, of, n, ok) => { if (!ok) missing++; prog.textContent = `Looking up cards ${done}/${of}: ${n}`; });
@@ -1983,11 +2054,13 @@ function guessDeckName(entries) {
 
 /* ---------- Raid boss ---------- */
 const DEFAULT_BOSS = "Roaring Moon ex PAR 124";
-// Bosses offered in Boss setup. The first is loaded automatically for a new raid.
+// Bosses offered in New raid and Boss setup. The first is picked by default.
 const BOSS_CHOICES = [
   { name: "Roaring Moon ex", line: "Roaring Moon ex PAR 124" },
   { name: "Mewtwo ex", line: "Mewtwo ex 30C 151" },
   { name: "Team Rocket's Nidoking ex", line: "Team Rocket's Nidoking ex DRI 119" },
+  // Fear and Panic scales with the players' Pokémon V; G-Max Swallow Up hits for 250 but can't be used twice in a row.
+  { name: "Gengar VMAX", line: "Gengar VMAX FST 157" },
   // A gentle boss for new players: two plain damage attacks (20 and 30), no effects.
   { name: "Ponyta (beginner)", line: "Ponyta BS 60" },
   // The next step up: 40 and 70 damage. Earthquake's damage to "your own Benched Pokémon" does nothing for a boss.
@@ -2217,8 +2290,59 @@ function syncBossPick() {
   $("bossPick").value = i >= 0 ? String(i) : "custom";
 }
 function closeBossSetup() { $("bossSetupBack").hidden = true; }
-async function loadBoss(line, list, difficulty, harsh) {
-  const prog = $("bossProgress");
+
+/* ---------- new raid setup ---------- */
+// Shown on a first visit and for New game (solo): boss, difficulty, boss deck, players and your deck in one place.
+// The boss pickers list the built-in choices, plus "current" when this game uses its own boss or boss deck.
+let setupJoinRoom = false;   // a first visit from a room link: just a deck, then the room dialog
+function syncSamplePick(sel, text) {
+  const i = SAMPLE_DECKS.findIndex(d => d.list.trim() === text.trim());
+  sel.value = i >= 0 ? String(i) : "custom";
+}
+function fillPick(sel, items, current) {
+  sel.replaceChildren();
+  items.forEach((it, i) => { const o = document.createElement("option"); o.value = String(i); o.textContent = it.name; sel.append(o); });
+  if (current) { const o = document.createElement("option"); o.value = "current"; o.textContent = current; sel.append(o); }
+}
+function openSetup() {
+  const cfg = S.bossCfg || {};
+  const bi = BOSS_CHOICES.findIndex(b => b.line.toLowerCase() === (cfg.line || "").toLowerCase());
+  fillPick($("setupBossSel"), BOSS_CHOICES, cfg.line && bi < 0 ? `Current boss (${cfg.line})` : null);
+  $("setupBossSel").value = bi >= 0 ? String(bi) : cfg.line ? "current" : "0";
+  const di = BOSS_DECKS.findIndex(d => d.list.trim() === (cfg.list || "").trim());
+  fillPick($("setupBossDeck"), BOSS_DECKS, cfg.list && di < 0 ? "Current boss deck (your own list)" : null);
+  $("setupBossDeck").value = di >= 0 ? String(di) : cfg.list ? "current" : "0";
+  $("setupDiff").value = cfg.difficulty || "medium";
+  $("setupHarsh").checked = !!cfg.harsh;
+  $("setupPlayers").value = String(S.players || 3);
+  $("setupDeckText").value = S.list || SAMPLE_DECKS[0].list;
+  syncSamplePick($("setupDeckSel"), $("setupDeckText").value);
+  $("setupBoss").hidden = setupJoinRoom; $("setupRoomNote").hidden = !setupJoinRoom;
+  $("setupCancel").hidden = !allUids().length;   // nothing to go back to on a first visit
+  $("setupProgress").textContent = "";
+  $("setupBack").hidden = false; $("setupGo").focus();
+}
+function closeSetup() { if (allUids().length) $("setupBack").hidden = true; }
+async function startRaid() {
+  const text = $("setupDeckText").value, prog = $("setupProgress"), cfg = S.bossCfg || {};
+  if (!parseDeck(text).length) { prog.textContent = "Choose a deck, or paste a list like “4 Arven SVI 166”."; return; }
+  const bv = $("setupBossSel").value, dv = $("setupBossDeck").value;
+  const line = bv === "current" ? cfg.line : BOSS_CHOICES[+bv].line;
+  const list = dv === "current" ? cfg.list : BOSS_DECKS[+dv].list;
+  const sample = SAMPLE_DECKS.find(d => d.list.trim() === text.trim());
+  $("setupGo").disabled = true;
+  try {
+    // loadDeck starts a fresh game from this state, keeping its player count and boss
+    if (!setupJoinRoom) S.players = +$("setupPlayers").value;
+    if (!await loadDeck(text, sample ? `${sample.name} sample` : undefined, prog)) return;
+    $("setupCancel").hidden = false;
+    if (!setupJoinRoom && !await loadBoss(line, list, $("setupDiff").value, $("setupHarsh").checked, prog)) return;
+    undoStack = [];
+  } finally { $("setupGo").disabled = false; }
+  $("setupBack").hidden = true;
+  if (setupJoinRoom) { setupJoinRoom = false; openRoomDialog(); }
+}
+async function loadBoss(line, list, difficulty, harsh, prog = $("bossProgress")) {
   const be = parseDeck("1 " + line.trim().replace(/^\d+\s+/, ""))[0];
   if (!be) { prog.textContent = "Enter the boss as a card name with its set code and number."; return false; }
   be.section = "Pokémon";
@@ -3063,7 +3187,7 @@ function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = fals
 /* ---------- wiring ---------- */
 $("btnDraw").onclick = () => draw();
 $("btnUndo").onclick = undo;
-$("btnNew").onclick = newGame;
+$("btnNew").onclick = () => (MP ? newGame() : openSetup());
 $("btnEndTurn").onclick = () => (MP && hasBoss() ? toggleReady() : endTurn());
 $("btnImport").onclick = openImport;
 $("btnShuffle").onclick = shuffleDeck;
@@ -3074,8 +3198,16 @@ $("drawerShuffle").onclick = () => { if (viewerZone === "bdeck") act("Shuffled t
 $("drawerTop").addEventListener("input", e => { const n = Math.floor(+e.target.value); if (n >= 1) { viewerTop = n; renderViewer(); } });
 $("drawerAll").onclick = () => { viewerTop = 0; renderViewer(); };
 $("importCancel").onclick = closeImport;
-SAMPLE_DECKS.forEach((d, i) => { const o = document.createElement("option"); o.value = i; o.textContent = d.name; $("importSampleSel").append(o); });
-$("importSample").onclick = () => { $("importText").value = SAMPLE_DECKS[+$("importSampleSel").value].list; };
+// Picking a sample deck fills the list box; typing your own switches the picker to "Your own list".
+for (const [sel, box] of [["importSampleSel", "importText"], ["setupDeckSel", "setupDeckText"]]) {
+  SAMPLE_DECKS.forEach((d, i) => { const o = document.createElement("option"); o.value = String(i); o.textContent = d.name; $(sel).append(o); });
+  const o = document.createElement("option"); o.value = "custom"; o.textContent = "Your own list (paste it below)"; $(sel).append(o);
+  $(sel).onchange = e => { if (e.target.value === "custom") $(box).focus(); else $(box).value = SAMPLE_DECKS[+e.target.value].list; };
+  $(box).addEventListener("input", () => syncSamplePick($(sel), $(box).value));
+}
+$("setupGo").onclick = startRaid;
+$("setupCancel").onclick = closeSetup;
+$("setupBack").addEventListener("click", e => { if (e.target === $("setupBack")) closeSetup(); });
 // A sample deck loads under its own name; anything else is named after its biggest Pokémon.
 $("importGo").onclick = async () => {
   const text = $("importText").value;
@@ -3122,7 +3254,7 @@ document.addEventListener("keydown", e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
   else if (e.key === "d" || e.key === "D") draw();
   else if (e.key === "?") openGuide();
-  else if (e.key === "Escape") { if (!$("zoom").hidden) closeZoom(); else if (!$("hub").hidden) closeHub(); else if (!$("guideBack").hidden) closeGuide(); else if (!$("backBack").hidden) closeBack(); else if (!$("importBack").hidden) closeImport(); else if (!$("bossSetupBack").hidden) closeBossSetup(); else if (!$("roomBack").hidden) closeRoomDialog(); else if (viewerZone) closeViewer(); else select(null); }
+  else if (e.key === "Escape") { if (!$("zoom").hidden) closeZoom(); else if (!$("hub").hidden) closeHub(); else if (!$("guideBack").hidden) closeGuide(); else if (!$("backBack").hidden) closeBack(); else if (!$("importBack").hidden) closeImport(); else if (!$("setupBack").hidden) closeSetup(); else if (!$("bossSetupBack").hidden) closeBossSetup(); else if (!$("roomBack").hidden) closeRoomDialog(); else if (viewerZone) closeViewer(); else select(null); }
 });
 
 if (S && S.keys) {   // fill in fields added since this game was saved
@@ -3137,12 +3269,11 @@ async function ensureBoss() {
   const ok = await loadBoss(DEFAULT_BOSS, DEFAULT_BOSS_DECK, "medium", false);
   if (ok) undoStack = [];
 }
-if (!S || !S.keys) {
+const roomLink = /[?&]room=[A-Za-z]{5}/.test(location.search);
+if (!S || !S.keys || !Object.keys(S.keys).length) {
+  // a first visit: choose the boss and a deck before anything is dealt
   S = emptyState(); render();
-  // open in a working state: load the sample deck straight away
-  $("importText").value = SAMPLE_DECK;
-  $("importBack").hidden = false;
-  loadDeck(SAMPLE_DECKS[0].list, `${SAMPLE_DECKS[0].name} sample`).then(ok => { if (ok) closeImport(); return ensureBoss(); });
+  setupJoinRoom = roomLink; openSetup();
 } else {
   render();
   // a saved game whose card data is from an older version: refetch its cards
@@ -3169,7 +3300,7 @@ $("zoom").addEventListener("click", e => {
 });
 $("brandTitle").addEventListener("click", brandClick);
 $("hubClose").onclick = closeHub;
-claimTab().then(resumeRoom).then(() => { if (!MP && /[?&]room=[A-Za-z]{5}/.test(location.search)) openRoomDialog(); });
+claimTab().then(resumeRoom).then(() => { if (!MP && roomLink && !setupJoinRoom) openRoomDialog(); });
 try { applyBack(localStorage.getItem(STORE_BACK) || ""); } catch {}
 $("btnBack").onclick = openBack;
 // The boss turn panel's real height, for the CSS: the page leaves exactly that much room and the cards shrink to fit.

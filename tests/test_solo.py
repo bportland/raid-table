@@ -1,7 +1,7 @@
 """Solo play: the boss loads, damage math, a full boss turn, and Undo."""
 from playwright.sync_api import sync_playwright
 
-from helpers import APP, give_boss_energy, offline_context, step_boss_draws, watch_errors
+from helpers import APP, give_boss_energy, offline_context, open_app, start_raid, step_boss_draws, watch_errors
 
 
 def test_solo_boss_round():
@@ -11,9 +11,21 @@ def test_solo_boss_round():
         pg = offline_context(b).new_page()
         watch_errors(pg, "solo", errors)
         pg.goto(APP.as_uri())
-        pg.wait_for_timeout(1500)
 
-        # A first visit loads the first sample deck and the first boss on its own, then draws for turn 1.
+        # A first visit asks for the boss and deck before dealing anything, with no way to skip it.
+        pg.wait_for_selector("#setupBack:not([hidden])")
+        assert pg.evaluate("allUids().length") == 0 and not pg.is_visible("#setupCancel")
+        # Picking a sample deck fills the list box; typing your own switches the picker to "Your own list".
+        pg.select_option("#setupDeckSel", label="Mega Manectric ex")
+        assert "Mega Manectric ex MEG 50" in pg.input_value("#setupDeckText")
+        pg.fill("#setupDeckText", pg.input_value("#setupDeckText") + "\n1 Switch MEG 130")
+        assert pg.input_value("#setupDeckSel") == "custom"
+        pg.select_option("#setupDeckSel", index=0)
+        # Gengar VMAX is one of the bosses; start with the defaults (first deck, first boss, 3 players).
+        assert "Gengar VMAX" in pg.inner_text("#setupBossSel")
+        start_raid(pg)
+
+        # The first sample deck and the first boss are loaded, and turn 1's draw is done.
         assert pg.evaluate("allUids().length") == 60
         assert pg.evaluate("hasBoss() && S.bdeck.length") == 60
         assert pg.evaluate("S.hand.length") == 8 and pg.evaluate("S.prizes.length") == 6
@@ -52,6 +64,37 @@ def test_solo_boss_round():
     assert not errors, errors
 
 
+def test_new_game_asks_for_boss_and_deck():
+    errors = []
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        pg = offline_context(b).new_page()
+        watch_errors(pg, "new game", errors)
+        open_app(pg)
+        # New game opens the dialog with this game's choices, and it can be cancelled now.
+        pg.click("#btnNew")
+        assert pg.is_visible("#setupBack") and pg.is_visible("#setupCancel")
+        assert pg.input_value("#setupDeckSel") == "0" and pg.input_value("#setupBossSel") == "0"
+        pg.click("#setupCancel")
+        assert not pg.is_visible("#setupBack")
+        # A different boss, boss deck, difficulty, player count and deck.
+        pg.click("#btnNew")
+        pg.select_option("#setupBossSel", label="Gengar VMAX")
+        pg.select_option("#setupBossDeck", label="Gentle (beginner)")
+        pg.select_option("#setupDiff", "easy")
+        pg.select_option("#setupPlayers", "2")
+        pg.select_option("#setupDeckSel", label="Mega Manectric ex")
+        pg.click("#setupGo")
+        pg.wait_for_function("document.getElementById('setupBack').hidden", timeout=10000)
+        assert pg.evaluate("bossName()") == "Gengar VMAX"
+        assert pg.evaluate("[S.bossCfg.difficulty, S.players, S.deckName, S.bdeck.length, S.hand.length]") == ["easy", 2, "Mega Manectric ex sample", 60, 8]
+        assert pg.evaluate("allUids().length") == 60
+        # Nothing to undo: the new raid is the starting point.
+        assert pg.evaluate("undoStack.length") == 0
+        b.close()
+    assert not errors, errors
+
+
 if __name__ == "__main__":
-    test_solo_boss_round()
-    print("solo: PASS")
+    test_solo_boss_round(); print("solo: PASS")
+    test_new_game_asks_for_boss_and_deck(); print("new game: PASS")

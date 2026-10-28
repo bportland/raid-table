@@ -17,7 +17,7 @@ Search for the `/* ---------- name ---------- */` comment to find each section.
 
 | Section | What's there |
 | - | - |
-| top of script | `SAMPLE_DECK`, `SAMPLE_DECKS` (sample decks in Import deck), energy names and colors, `TAB` (per-tab saves in test mode), `claimTab()` |
+| top of script | `SAMPLE_DECK`, `SAMPLE_DECKS` (sample decks in New raid and Import deck), energy names and colors, `TAB` (per-tab saves in test mode), `claimTab()` |
 | storage | `STORE_GAME`, `STORE_CARDS` (`raidtable.cards.v6`), `S` (game state), `CARDS` (card data cache), `emptyState()` |
 | deck list parsing | `cleanName()`, `parseDeck()` (PTCGL/Limitless format, headings like `Pokémon: 15` / `Trainer Cards - 30`, set codes like `SVI`, `PR-SV`, `30C`), `entryKey()` |
 | card lookup | `lookupCard()` (exact print first, then name + number, then name only, flagged `exact: false`), `lookupTcgdex()`, `resolveEntries()` (looks up 4 at a time and caches in `CARDS`) |
@@ -28,6 +28,7 @@ Search for the `/* ---------- name ---------- */` comment to find each section.
 | rendering / inspector | `render()`, `cardEl()`, `renderSlot()`, `renderInspector()` (the card panel's buttons: Play Item/Supporter/Stadium, attach, damage, conditions) |
 | zoom / viewer / drag & drop | `openZoom()`, `setMagnified()`, `openViewer()` / `renderViewer()` (discard, Lost Zone, deck search, boss deck top-N), pointer-event drag and drop |
 | import | `openImport()`, `loadDeck()` (in a room only your own board changes) |
+| New raid dialog | `openSetup()`, `startRaid()` (loads the deck, then the boss), `syncSamplePick()`. Opens on a first visit and for New game when solo; in a room New game restarts directly. A first visit from a room link asks only for a deck |
 | Raid boss | `DEFAULT_BOSS_DECK`, `GENTLE_BOSS_DECK`, `BOSS_DECKS`, `DEFAULT_BOSS`, `BOSS_CHOICES`, `DIFF_GUIDE`, `startBossTurn()`, `bossReveal()`, `enterBossAttack()`, `bossAttack()`, `bossEndTurn()`, `millFor()` |
 | boss setup / rendering | `openBossSetup()`, `loadBoss()`, `renderBoss()`, `renderStage()` (the boss turn panel), `healRow()`, `updateEndNumbers()` |
 | damage this turn | `queueDamage()`, `renderCalcInputs()` + `calcSignature()`, `calc()` |
