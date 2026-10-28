@@ -80,7 +80,7 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .sup.over b#supUsed { color: var(--dmg); }
 
 /* App frame */
-.app { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 14px; align-items: start; }
+.app { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 14px; align-items: start; }
 .table-col { min-width: 0; display: grid; gap: 10px; }
 
 /* Mat */
@@ -185,7 +185,8 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
   .side { position: static; max-height: none; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
   .side > .panel { flex: none; }
   .side > #inspector { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: var(--line) transparent; }
-  .side > .log-panel { flex: 1 1 0; min-height: 56px; display: flex; flex-direction: column; }
+  /* The log gives way first: with a busy card picked on a short screen it can shrink to nothing. */
+  .side > .log-panel { flex: 1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
   .log-panel .log { flex: 1; min-height: 0; max-height: none; align-content: start; }
   #inspector.has-sel > :first-child { display: none !important; }   /* the "Card" heading (styled inline); its Close button is only for small screens */
 }
@@ -195,18 +196,18 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
   .calc-hint, #calcMath { display: none; }
   body .side { gap: 8px; }
   body .side .panel { padding: 8px 10px; gap: 5px; }
-  body .insp-top { grid-template-columns: minmax(0, 60px) minmax(0, 1fr); }
   body .acts button { padding: 3px 6px; }
   body #inspector.has-sel { gap: 3px; }
   body .calc input { padding: 3px 6px; }
   body .calc .result { padding: 5px 10px; }
-  body .side > .log-panel { min-height: 34px; }
 }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 10px; min-width: 0; }
 .panel h2 { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; margin: 0; color: var(--muted); }
 .side .panel { padding: 10px 12px; gap: 7px; }
 /* A small picture beside the card's details: clicking it shows the card full screen. */
-.insp-top { display: grid; grid-template-columns: minmax(0, 76px) minmax(0, 1fr); gap: 12px; align-items: start; }
+/* The picture grows with the window's height: big enough to read, small enough that the panel still fits. */
+.insp-top { display: grid; grid-template-columns: minmax(0, clamp(110px, 22vh, 220px)) minmax(0, 1fr); gap: 12px; align-items: start; }
+.insp-side-label { margin: 10px 0 4px; }   /* Attack / Play, in the space beside the picture */
 #inspector.has-sel { gap: 5px; }
 .insp-art { display: block; padding: 0; border: 0; background: none; border-radius: 12px; cursor: zoom-in; justify-self: start; width: 100%; }
 .insp-art .card { width: 100%; height: auto; aspect-ratio: 63 / 88; border-radius: 4.5% / 3.3%; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
@@ -338,7 +339,7 @@ body.custom-back .card.back { background: var(--back-img) center / cover no-repe
 .track-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--dmg), var(--amber)); border-radius: inherit; transition: width .35s ease; }
 .track-label { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 /* Attacks side by side when there's room; long effect text is cut to two lines (the card shows it all). */
-.boss-attacks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 6px; }
+.boss-attacks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 6px; }
 .boss-attacks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; align-content: start; column-gap: 8px; padding: 5px 8px; border-radius: 8px; background: rgba(0,0,0,.18); border: 1px solid transparent; }
 .boss-attacks li p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .boss-attacks li.ready { border-color: rgba(240,164,60,.55); }
@@ -349,7 +350,8 @@ body.custom-back .card.back { background: var(--back-img) center / cover no-repe
 .pips { display: inline-flex; gap: 3px; align-items: center; }
 .pips i { width: 12px; height: 12px; border-radius: 50%; background: var(--ink); box-shadow: inset 0 0 0 2px rgba(0,0,0,.25); }
 .pips em { font: 600 10px var(--display); color: var(--muted); font-style: normal; text-transform: uppercase; letter-spacing: .08em; }
-.boss-row { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.boss-row { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.boss-row .acts button { padding: 3px 6px; }
 .boss-att { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
 .boss-att .chips { justify-content: flex-start; }
 .muted { color: var(--muted); font-size: 12.5px; }
@@ -1703,21 +1705,22 @@ function renderInspector() {
   box.append(top);
 
   if (isSlot) {
-    if (s.slot === "active" && (d.attacks || []).length) {
-      box.append(el("div", "acts-label", rulesOn ? "Attack (ends your turn)" : "Attack"));
+    if (s.slot === "active" && (d.attacks || []).length) {   // beside the picture, under the card's details
+      info.append(el("div", "acts-label insp-side-label", rulesOn ? "Attack (ends your turn)" : "Attack"));
       const ak = el("div", "acts");
       d.attacks.forEach((a, i) => { const b = btn(`${a.name}${a.damage ? " · " + a.damage : ""}`, () => attackWith(i)); b.title = (a.cost || []).length ? `Costs ${costText(a.cost)}` : "No Energy needed"; ak.append(b); });
-      box.append(ak);
+      info.append(ak);
     }
-    box.append(el("div", "acts-label", "Damage"));
+    // Damage and Special Conditions also sit beside the picture.
+    info.append(el("div", "acts-label insp-side-label", "Damage"));
     const dm = el("div", "acts");
     [[-10, "−10"], [10, "+10"], [30, "+30"], [50, "+50"], [100, "+100"]].forEach(([v, l]) => dm.append(btn(l, () => act(null, () => { sl.dmg = Math.max(0, sl.dmg + v); }, { keepSel: true }))));
     dm.append(btn("Clear", () => act(`Healed ${d.name}`, () => { sl.dmg = 0; }, { keepSel: true })));
-    box.append(dm);
-    box.append(el("div", "acts-label", "Special Conditions"));
+    info.append(dm);
+    info.append(el("div", "acts-label insp-side-label", "Special Conditions"));
     const stt = el("div", "acts");
     STATUSES.forEach(st => { const on = sl.status.includes(st); stt.append(btn(st, () => act(`${d.name} ${on ? "is no longer" : "is now"} ${st}`, () => { sl.status = on ? sl.status.filter(x => x !== st) : [...sl.status.filter(x => !(["Asleep", "Confused", "Paralyzed"].includes(st) && ["Asleep", "Confused", "Paralyzed"].includes(x))), st]; }, { keepSel: true }), on ? "on" : "")); });
-    box.append(stt);
+    info.append(stt);
     box.append(el("div", "acts-label", "Move"));
     const mv = el("div", "acts");
     mv.append(btn("Knocked Out → discard", () => { move(s, { zone: "discard" }); toast("Take your Prize card(s) from the left"); }));
@@ -1751,7 +1754,7 @@ function renderInspector() {
   if (isSupporter(uid) && s.zone === "hand") plays.append(btn(`Play Supporter (${S.supportersUsed} of ${S.players} used)`, () => move(s, { zone: "discard" }), S.supportersUsed >= S.players ? "" : "primary"));
   if (isItem(uid) && s.zone === "hand") plays.append(btn("Play Item", () => move(s, { zone: "discard" }, { label: `Played ${d.name} (Item)` }), "primary"));
   if (isStadium(uid) && s.zone !== "stadium") plays.append(btn("Play Stadium", () => move(s, { zone: "stadium" }), s.zone === "hand" ? "primary" : ""));
-  if (plays.childNodes.length) { box.append(el("div", "acts-label", "Play")); box.append(plays); }
+  if (plays.childNodes.length) { info.append(el("div", "acts-label insp-side-label", "Play")); info.append(plays); }   // beside the picture
 
   const pl = el("div", "acts");
   const canAttach = !(isItem(uid) || isSupporter(uid) || isStadium(uid));   // Pokémon evolve; Energy and Tools attach
