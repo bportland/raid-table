@@ -92,6 +92,7 @@ The tests play the real `index.html` in headless Chromium with the internet bloc
 ## Style and legal
 
 - Visual design: a dark teal felt playmat with amber accents (CSS tokens on `:root`), Chakra Petch for display text. Keep new UI consistent and readable on phones.
+- On laptops and desktops (wider than 1180px) the whole table fits the window without scrolling: the body is exactly the window's height, the table and side columns scroll inside themselves only if they must, and card width (`--cw0`) follows the window's height as well as its width. The hand sits on the playmat under the Bench, the Lost Zone is a one-line spot, and a Pokémon's HP, attachments and conditions sit over its card so spots never grow. Anything new on the table has to fit that height budget; `tests/test_layout.py` checks it at 1366×657, 1440×789 and 1920×961.
 - Write UI text plainly and from the player's side ("Send 11 to the Lost Zone", not "Commit mill").
 - Fan project disclaimer: not affiliated with The Pokémon Company or Nintendo. Don't reproduce official artwork or logos in the app's own code (the official card back was declined; players may choose their own image). Card images come from the card databases at runtime.
 - The README credits raidformat.com and discloses that the app was built with Claude.
