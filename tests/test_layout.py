@@ -54,6 +54,9 @@ def test_fits_laptop_and_desktop_without_scrolling():
                 # The right column fits too, card panel and all; only the game log may scroll inside itself.
                 assert pg.evaluate(f"{SCROLLS}('.side')") <= 1, f"the side column doesn't fit {where}"
                 assert pg.evaluate(f"{SCROLLS}('#inspector')") <= 1, f"the card panel doesn't fit {where}"
+            # HP shows only on a damaged Pokémon: the Active (30 damage) has it, the undamaged Bench doesn't.
+            assert pg.evaluate("!!document.querySelector('#activeSlot .hpline')")
+            assert pg.evaluate("document.querySelectorAll('#bench .hpline').length") == 0
             # The hand is on the playmat, inside the window, running under the Prizes as well as the Bench.
             assert pg.evaluate("!!document.querySelector('.mat section.hand')")
             assert pg.evaluate("document.querySelector('section.hand').getBoundingClientRect().bottom") <= h

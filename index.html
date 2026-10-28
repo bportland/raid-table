@@ -129,7 +129,8 @@ label.turn { display: inline-flex; align-items: center; gap: 6px; }
 .chips { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; max-width: 100%; min-width: 0; }
 .pkm .hpline { position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%); white-space: nowrap; padding: 1px 5px; border-radius: 4px; background: rgba(9, 24, 27, .88); color: var(--ink); font-size: 10.5px; }
 .pkm .hpline.low { color: #ff8a7f; }
-.pkm .chips { position: absolute; left: 3px; right: 3px; bottom: 21px; flex-wrap: wrap-reverse; }
+.pkm .chips { position: absolute; left: 3px; right: 3px; bottom: 3px; flex-wrap: wrap-reverse; }
+.pkm .hpline + .chips { bottom: 21px; }   /* sit above the HP line when there is one */
 .pkm .chip { background: rgba(9, 24, 27, .9); }
 .chip { font: 600 10px/1 var(--body); padding: 3px 5px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; touch-action: none; cursor: grab; }
 .chip i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: 0; background: var(--muted); }
@@ -1560,9 +1561,9 @@ function renderSlot(name, host) {
     p.append(cardEl(top));
     if (sl.dmg) p.append(el("span", "badge", sl.dmg));
     box.append(p);
-    // HP, attached cards and Special Conditions sit over the bottom of the card, so a spot never grows taller.
+    // HP (once damaged), attached cards and Special Conditions sit over the bottom of the card, so a spot never grows taller.
     const hp = D(top).hp;
-    if (hp) {
+    if (hp && sl.dmg > 0) {   // only once it's taken damage; full HP needs no reminder
       const left = hp - sl.dmg;
       const line = el("span", "hpline" + (left <= 0 ? " low" : ""), left <= 0 ? `KO · ${hp}` : `${left} / ${hp}`);
       line.append(el("span", "hp-unit", " HP"));   // dropped on phones, where cards are narrow
@@ -2787,7 +2788,7 @@ function renderTeam() {
       w.append(c);
       if (sl.dmg) w.append(el("span", "badge", sl.dmg));
       const hp = (CARDS[k] || {}).hp;
-      if (big && hp) w.append(el("span", "hpline" + (hp - sl.dmg <= 0 ? " low" : ""), `${Math.max(0, hp - sl.dmg)}/${hp}`));
+      if (big && hp && sl.dmg > 0) w.append(el("span", "hpline" + (hp - sl.dmg <= 0 ? " low" : ""), `${Math.max(0, hp - sl.dmg)}/${hp}`));
       if (big && (sl.att || []).length) w.append(el("span", "hpline", `${sl.att.length} attached`));
       return w;
     };
