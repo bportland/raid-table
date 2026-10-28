@@ -23,9 +23,10 @@ APP = REPO / "index.html"
 SUPPORTERS = {"Avery", "Boss's Orders", "Boss's Orders (Ghetsis)", "Bug Catcher", "Cook", "Doctor", "Flannery",
               "Gordie", "Leon", "Schoolboy", "Schoolgirl", "Sidney", "Team Yell Grunt", "Lillie's Determination",
               "Iris's Fighting Spirit", "Surfer", "Iono", "Arven", "Professor's Research", "Misty's Vitality",
-              "Ciphermaniac's Codebreaking", "Hilda"}
+              "Ciphermaniac's Codebreaking", "Hilda", "Team Rocket's Petrel", "Judge", "Gwynn",
+              "Wally's Compassion", "Carmine", "Urbain"}
 STADIUMS = {"Collapsed Stadium", "Galar Mine", "Old Cemetery", "Path to the Peak", "Spikemuth",
-            "Gravity Mountain", "Surfing Beach"}
+            "Gravity Mountain", "Surfing Beach", "Prism Tower"}
 TOOLS = {"Rocky Helmet", "Lucky Helmet", "Spirit Mask", "Air Balloon", "Defiance Band", "Heavy Baton",
          "Forest Seal Stone"}
 
