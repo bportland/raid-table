@@ -72,6 +72,29 @@ def test_fits_laptop_and_desktop_without_scrolling():
     assert not errors, errors
 
 
+def test_boss_turn_panel_leaves_no_gap():
+    errors = []
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        for w, h in ((1440, 789), (1920, 961)):
+            pg = _page(b, w, h, errors)
+            pg.evaluate("select(null)")
+            # An Item first, so the panel shows everything: dice, healing and Done.
+            pg.evaluate("act(null, () => { const u = S.bdeck.find(x => isItem(x)); S.bdeck = [u, ...S.bdeck.filter(x => x !== u)]; }, { noUndo: true })")
+            pg.click("#btnEndTurn"); pg.wait_for_timeout(400)
+            where = f"at {w}x{h} during the boss turn"
+            gap = pg.evaluate("document.getElementById('bossStage').getBoundingClientRect().top - document.querySelector('.app').getBoundingClientRect().bottom")
+            assert 0 <= gap <= 12, f"{gap:.0f}px between the board and the boss turn panel {where}"
+            assert pg.evaluate("document.documentElement.scrollHeight") <= h, f"the page scrolls {where}"
+            assert pg.evaluate(f"{SCROLLS}('.table-col')") <= 1, f"the board doesn't fit above the panel {where}"
+            # What the card says on the left; dice, healing and Done on the right.
+            assert pg.evaluate("document.querySelectorAll('#bossStage .stage-col').length") == 2
+            assert pg.evaluate("!!document.querySelector('#bossStage .stage-side #stageHeal')")
+            pg.close()
+        b.close()
+    assert not errors, errors
+
+
 def test_grouped_attachments_move_one_copy_at_a_time():
     errors = []
     with sync_playwright() as p:
@@ -111,5 +134,6 @@ def test_phone_never_scrolls_sideways():
 
 if __name__ == "__main__":
     test_fits_laptop_and_desktop_without_scrolling(); print("laptop and desktop fit: PASS")
+    test_boss_turn_panel_leaves_no_gap(); print("boss turn panel: PASS")
     test_grouped_attachments_move_one_copy_at_a_time(); print("grouped attachments: PASS")
     test_phone_never_scrolls_sideways(); print("phone: PASS")
