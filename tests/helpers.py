@@ -24,11 +24,11 @@ SUPPORTERS = {"Avery", "Boss's Orders", "Boss's Orders (Ghetsis)", "Bug Catcher"
               "Gordie", "Leon", "Schoolboy", "Schoolgirl", "Sidney", "Team Yell Grunt", "Lillie's Determination",
               "Iris's Fighting Spirit", "Surfer", "Iono", "Arven", "Professor's Research", "Misty's Vitality",
               "Ciphermaniac's Codebreaking", "Hilda", "Team Rocket's Petrel", "Judge", "Gwynn",
-              "Wally's Compassion", "Carmine", "Urbain"}
+              "Wally's Compassion", "Carmine", "Urbain", "Nemona"}
 STADIUMS = {"Collapsed Stadium", "Galar Mine", "Old Cemetery", "Path to the Peak", "Spikemuth",
             "Gravity Mountain", "Surfing Beach", "Prism Tower", "Academy at Night"}
 TOOLS = {"Rocky Helmet", "Lucky Helmet", "Spirit Mask", "Air Balloon", "Defiance Band", "Heavy Baton",
-         "Forest Seal Stone", "Bravery Charm", "Future Booster Energy Capsule"}
+         "Forest Seal Stone", "Bravery Charm", "Future Booster Energy Capsule", "Vitality Band"}
 
 
 def _img(name, color):
